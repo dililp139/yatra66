@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import './App.css';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import yatraApi from './services/yatraService';
 
 const CITIES_DATA = [
   { id: 1, name: 'Jaipur', country: 'India', state: 'Rajasthan', region: 'North India', latitude: 26.9124, longitude: 75.7873, rating: 4.8, popularityScore: 96, themes: ['heritage', 'forts', 'culture', 'shopping'], estimatedDailyBudget: 4200, bestSeason: 'October to March' },
@@ -283,28 +282,23 @@ function App() {
     };
   }, [currency, currencyData]);
 
-  // Initial load - Fetch live locations directly from server
+  // Initial load - Fetch live locations and currency from in-browser engine
   useEffect(() => {
     async function initPlatform() {
       try {
-        const [citiesRes, currRes] = await Promise.all([
-          fetch(`${API_BASE}/api/cities`),
-          fetch(`${API_BASE}/api/currency/rates`),
+        const [serverCities, currData] = await Promise.all([
+          yatraApi.getCities(),
+          yatraApi.getCurrencyRates(),
         ]);
-        if (citiesRes.ok) {
-          const serverCities = await citiesRes.json();
-          if (serverCities?.length) {
-            setCities(serverCities);
-            setApiStatus('Live');
-          }
-        } else {
-          setApiStatus('Live');
+        if (serverCities?.length) {
+          setCities(serverCities);
         }
-        if (currRes.ok) {
-          setCurrencyData(await currRes.json());
+        if (currData) {
+          setCurrencyData(currData);
         }
+        setApiStatus('Live');
       } catch {
-        setApiStatus('Direct API Mode');
+        setApiStatus('Direct JS Mode');
       }
     }
     initPlatform();
@@ -315,17 +309,17 @@ function App() {
     async function loadDetails() {
       if (!selectedMarker) return;
       try {
-        const [cityRes, fareRes] = await Promise.all([
-          fetch(`${API_BASE}/api/cities/${selectedMarker.id}`),
-          fetch(`${API_BASE}/api/cities/${selectedMarker.id}/cab-fares`),
+        const [cityData, faresData] = await Promise.all([
+          yatraApi.getCityDetails(selectedMarker.id),
+          yatraApi.getCityCabFares(selectedMarker.id),
         ]);
-        if (cityRes.ok) {
-          setDetails(await cityRes.json());
+        if (cityData) {
+          setDetails(cityData);
         } else {
           setDetails(createDefaultDetails(selectedMarker));
         }
-        if (fareRes.ok) {
-          setCabFares(await fareRes.json());
+        if (faresData) {
+          setCabFares(faresData);
         }
       } catch {
         const fallback = createDefaultDetails(selectedMarker);
@@ -340,8 +334,8 @@ function App() {
   useEffect(() => {
     async function loadBookings() {
       try {
-        const res = await fetch(`${API_BASE}/api/bookings`);
-        if (res.ok) setBookings(await res.json());
+        const data = await yatraApi.getBookings();
+        if (data) setBookings(data);
       } catch {
         // use fallback initial bookings
       }
@@ -360,13 +354,8 @@ function App() {
     };
 
     try {
-      const response = await fetch(`${API_BASE}/api/trip-plans`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request),
-      });
-      if (!response.ok) throw new Error();
-      setTripPlan(await response.json());
+      const plan = await yatraApi.planTrip(request);
+      setTripPlan(plan);
     } catch {
       const daily = details?.city?.estimatedDailyBudget || 4500;
       setTripPlan({
@@ -402,39 +391,15 @@ function App() {
 
   async function handleConfirmBooking(bookingData) {
     try {
-      const res = await fetch(`${API_BASE}/api/bookings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...bookingData,
-          bookingType: bookingModal.type,
-          cityId: bookingModal.cityId,
-          cityName: bookingModal.cityName,
-          itemName: bookingModal.itemName,
-          totalAmountInr: bookingModal.amount,
-        }),
+      const created = await yatraApi.createBooking({
+        ...bookingData,
+        bookingType: bookingModal.type,
+        cityId: bookingModal.cityId,
+        cityName: bookingModal.cityName,
+        itemName: bookingModal.itemName,
+        totalAmountInr: bookingModal.amount,
       });
 
-      let created;
-      if (res.ok) {
-        created = await res.json();
-      } else {
-        created = {
-          bookingId: `YTR-${Math.floor(100000 + Math.random() * 900000)}`,
-          status: 'CONFIRMED',
-          customerName: bookingData.customerName,
-          customerEmail: bookingData.customerEmail,
-          bookingType: bookingModal.type,
-          cityId: bookingModal.cityId,
-          cityName: bookingModal.cityName,
-          itemName: bookingModal.itemName,
-          checkInDate: bookingData.checkInDate,
-          checkOutDate: bookingData.checkOutDate,
-          travelers: bookingData.travelers,
-          rooms: bookingData.rooms || 1,
-          totalAmountInr: bookingModal.amount,
-        };
-      }
       setBookings((prev) => [created, ...prev]);
       setBookingNotice(`Booking Confirmed! Reference: ${created.bookingId}`);
       setBookingModal({ ...bookingModal, isOpen: false });
@@ -448,7 +413,7 @@ function App() {
 
   async function handleCancelBooking(bookingId) {
     try {
-      await fetch(`${API_BASE}/api/bookings/${bookingId}`, { method: 'DELETE' });
+      await yatraApi.cancelBooking(bookingId);
     } catch {
       // ignore
     }
@@ -459,15 +424,8 @@ function App() {
 
   async function handleAddReview(reviewData) {
     try {
-      const res = await fetch(`${API_BASE}/api/reviews`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reviewData),
-      });
-      if (res.ok) {
-        const saved = await res.json();
-        setDetails((prev) => prev ? { ...prev, reviews: [saved, ...(prev.reviews || [])] } : prev);
-      }
+      const saved = await yatraApi.addReview(reviewData);
+      setDetails((prev) => prev ? { ...prev, reviews: [saved, ...(prev.reviews || [])] } : prev);
     } catch {
       const mock = {
         id: Date.now(),
@@ -1438,16 +1396,13 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
     async function loadWeather() {
       setLoading(true);
 
-      // Strategy 1: Attempt backend proxy
+      // Strategy 1: Attempt in-browser weather service
       try {
-        const res = await fetch(`${API_BASE}/api/weather/${city.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (!isCancelled) {
-            setWeather(data);
-            setLoading(false);
-            return;
-          }
+        const data = await yatraApi.getWeather(city.id);
+        if (data && !isCancelled) {
+          setWeather(data);
+          setLoading(false);
+          return;
         }
       } catch {
         // proceed to direct satellite fetch
@@ -1676,16 +1631,13 @@ function WikiExplorePage({ cities, selectedId, setSelectedId }) {
     async function loadWiki(query) {
       setLoading(true);
 
-      // Strategy 1: Attempt Spring Boot backend proxy
+      // Strategy 1: Attempt Wiki service
       try {
-        const res = await fetch(`${API_BASE}/api/wiki?query=${encodeURIComponent(query)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (!isCancelled && data.extract) {
-            setWikiData(data);
-            setLoading(false);
-            return;
-          }
+        const data = await yatraApi.getWikiSummary(query);
+        if (data && !isCancelled && data.extract) {
+          setWikiData(data);
+          setLoading(false);
+          return;
         }
       } catch {
         // proceed to direct fallback
@@ -1906,11 +1858,14 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
     setCompareModal(hotel);
     setLoadingCompare(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/hotels/compare?hotelName=${encodeURIComponent(hotel.name)}&cityName=${encodeURIComponent(selectedMarker.name)}&basePrice=${hotel.pricePerNight}&rating=${hotel.rating}`
+      const data = await yatraApi.compareHotelPrices(
+        hotel.name,
+        selectedMarker.name,
+        hotel.pricePerNight,
+        hotel.rating
       );
-      if (res.ok) {
-        setCompareData(await res.json());
+      if (data) {
+        setCompareData(data);
         setLoadingCompare(false);
         return;
       }
@@ -2018,11 +1973,16 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
     setLiveCabData(clientFareData);
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/cabs/live?pickupName=${encodeURIComponent(pLoc.name)}&pickupLat=${pLoc.lat}&pickupLng=${pLoc.lng}&dropName=${encodeURIComponent(dLoc.name)}&dropLat=${dLoc.lat}&dropLng=${dLoc.lng}`
+      const liveData = await yatraApi.getLiveCabEstimates(
+        pLoc.name,
+        pLoc.lat,
+        pLoc.lng,
+        dLoc.name,
+        dLoc.lat,
+        dLoc.lng
       );
-      if (res.ok) {
-        setLiveCabData(await res.json());
+      if (liveData) {
+        setLiveCabData(liveData);
       }
     } catch {
       // clientFareData is set
@@ -2444,9 +2404,9 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
       if (originId === destId) return;
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/routes?fromCityId=${originId}&toCityId=${destId}`);
-        if (res.ok) {
-          setRouteData(await res.json());
+        const data = await yatraApi.getTransitRoutes(originId, destId);
+        if (data) {
+          setRouteData(data);
           setLoading(false);
           return;
         }
@@ -2557,9 +2517,9 @@ function FestivalsPage({ cities, setPage, setSelectedId }) {
     async function loadFestivals() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/festivals?year=2026`);
-        if (res.ok) {
-          setFestivals(await res.json());
+        const data = await yatraApi.getFestivals(2026);
+        if (data) {
+          setFestivals(data);
           setLoading(false);
           return;
         }

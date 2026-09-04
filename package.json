@@ -1,0 +1,13 @@
+{
+  "name": "yatra-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yatra - 100% Pure JavaScript React Travel Platform",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "preview": "npm --prefix frontend run preview",
+    "start": "npm --prefix frontend run dev"
+  }
+}
