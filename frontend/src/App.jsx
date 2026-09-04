@@ -599,7 +599,10 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
     <header className="topbar">
       <button className="brand" type="button" onClick={() => setPage('home')} aria-label="Yatra home">
         <span className="brand-mark">Y</span>
-        <span>Yatra</span>
+        <div className="brand-title-wrap">
+          <span>Yatra</span>
+          <span className="brand-india-tag">India</span>
+        </div>
       </button>
 
       <nav className="nav-links" aria-label="Primary">
@@ -980,32 +983,112 @@ function HotelLocationSidebarMap({ cityName, cityCoords, hotel }) {
 }
 
 function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = [], onHideCity, onUnhideAllCities, setPage, setSelectedId }) {
+  const [dockQuery, setDockQuery] = useState('');
+  const [dockSeason, setDockSeason] = useState('all');
+  const [dockTheme, setDockTheme] = useState('all');
+
   const visibleDestinations = useMemo(() => {
     return cities.filter((c) => !hiddenCityIds.includes(c.id));
   }, [cities, hiddenCityIds]);
+
+  const handleDockSearch = () => {
+    if (dockQuery.trim()) {
+      const match = cities.find((c) => c.name.toLowerCase().includes(dockQuery.trim().toLowerCase()));
+      if (match) {
+        setSelectedId(match.id);
+        setPage('destinations');
+        return;
+      }
+    }
+    setPage('destinations');
+  };
 
   return (
     <section className="page hero-page-container">
       <div className="hero-page">
         <div className="hero-copy">
-          <p className="eyebrow">✨ India Tourism & Travel Companion</p>
-          <h1>Discover Incredible India</h1>
+          <p className="eyebrow">✨ All-India Premier Travel Platform</p>
+          <h1>Experience the Soul of Incredible India</h1>
           <p className="hero-text">
-            Plan unforgettable journeys across India with real-time weather forecasts, curated heritage guides,
-            interactive maps, train & flight routes, live Ola & Uber fares, and instant hotel comparisons.
+            Discover royal desert fortresses, misty Himalayan summits, tranquil Kerala backwaters, and sacred Ganges riverfronts. Featuring live satellite weather, verified heritage stays, instant Ola & Uber GPS fare calculations, and AI trip planning.
           </p>
-          <div className="hero-actions">
-            <button className="primary-action" type="button" onClick={() => setPage('map')}>Explore Interactive Map</button>
-            <button className="secondary-action" type="button" onClick={() => setPage('weather')}>Live Weather</button>
-            <button className="secondary-action" type="button" onClick={() => setPage('hotels')}>Hotels & Cabs</button>
+
+          {/* UNIVERSAL TRAVEL SEARCH DOCK */}
+          <div className="universal-search-dock">
+            <div className="search-dock-col">
+              <span className="search-dock-label">📍 Destination</span>
+              <input
+                className="search-dock-input"
+                placeholder="Where in India do you want to explore?"
+                value={dockQuery}
+                onChange={(e) => setDockQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleDockSearch()}
+              />
+            </div>
+            <div className="search-dock-col">
+              <span className="search-dock-label">🗓️ Best Season</span>
+              <select
+                className="search-dock-select"
+                value={dockSeason}
+                onChange={(e) => setDockSeason(e.target.value)}
+              >
+                <option value="all">Any Travel Season</option>
+                <option value="winter">Winter (Oct to Mar)</option>
+                <option value="summer">Summer (Apr to Jun)</option>
+                <option value="monsoon">Monsoon (Jul to Sep)</option>
+              </select>
+            </div>
+            <div className="search-dock-col">
+              <span className="search-dock-label">🧭 Experience Vibe</span>
+              <select
+                className="search-dock-select"
+                value={dockTheme}
+                onChange={(e) => setDockTheme(e.target.value)}
+              >
+                <option value="all">All Experiences</option>
+                <option value="heritage">Royal Palaces & Forts</option>
+                <option value="beaches">Beaches & Coastal</option>
+                <option value="mountains">Himalayan Peaks</option>
+                <option value="spiritual">Ghats & Sacred Temples</option>
+                <option value="lakes">Lakes & Backwaters</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              className="search-dock-btn"
+              onClick={handleDockSearch}
+              aria-label="Search Destinations"
+            >
+              <span>Explore</span>
+              <span>➔</span>
+            </button>
           </div>
-          <div className="external-sources-badge">
-            <span>Everything You Need For Your Yatra:</span>
-            <span className="source-tag">🌤️ Real-Time Weather</span>
-            <span className="source-tag">🏛️ Heritage Guides</span>
-            <span className="source-tag">🗺️ Interactive Maps</span>
-            <span className="source-tag">🚗 Ola & Uber Rides</span>
-            <span className="source-tag">🏨 Best Hotel Deals</span>
+
+          {/* QUICK EXPLORE PILLS */}
+          <div className="quick-explore-pills">
+            <span className="quick-pills-label">Trending Now:</span>
+            {['Jaipur', 'Goa', 'Leh Ladakh', 'Varanasi', 'Kochi', 'Manali', 'Udaipur', 'Darjeeling', 'Amritsar', 'Hampi'].map((q) => (
+              <button
+                key={q}
+                type="button"
+                className="quick-pill-tag"
+                onClick={() => {
+                  const found = cities.find((c) => c.name.toLowerCase() === q.toLowerCase());
+                  if (found) {
+                    setSelectedId(found.id);
+                    setPage('destinations');
+                  }
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          <div className="hero-actions">
+            <button className="primary-action" type="button" onClick={() => setPage('destinations')}>Browse 24 Cities</button>
+            <button className="secondary-action" type="button" onClick={() => setPage('map')}>Interactive Map</button>
+            <button className="secondary-action" type="button" onClick={() => setPage('hotels')}>Hotels & Cabs</button>
           </div>
         </div>
 
@@ -1027,9 +1110,41 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </div>
             <div className="stat-card">
               <strong>100%</strong>
-              <span>Live Server Sync</span>
+              <span>Instant Engine</span>
             </div>
           </article>
+        </div>
+      </div>
+
+      {/* HERO LIVE STATS STRIP */}
+      <div className="hero-stats-strip">
+        <div className="hero-stat-box">
+          <span className="hero-stat-icon">🏛️</span>
+          <div>
+            <div className="hero-stat-number">{cities.length}</div>
+            <div className="hero-stat-label">Curated Indian Destinations</div>
+          </div>
+        </div>
+        <div className="hero-stat-box">
+          <span className="hero-stat-icon">🏨</span>
+          <div>
+            <div className="hero-stat-number">50+</div>
+            <div className="hero-stat-label">Verified Stays & Hostels</div>
+          </div>
+        </div>
+        <div className="hero-stat-box">
+          <span className="hero-stat-icon">🚖</span>
+          <div>
+            <div className="hero-stat-number">Live GPS</div>
+            <div className="hero-stat-label">Ola & Uber Fare Estimator</div>
+          </div>
+        </div>
+        <div className="hero-stat-box">
+          <span className="hero-stat-icon">⚡</span>
+          <div>
+            <div className="hero-stat-number">100%</div>
+            <div className="hero-stat-label">Zero-Latency Client Engine</div>
+          </div>
         </div>
       </div>
 
@@ -1551,62 +1666,89 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
       {loading ? (
         <BullyLoader message={`Connecting to live weather satellites for ${city.name}...`} />
       ) : weather ? (
-        <div className="weather-layout">
-          <div className="weather-primary-card glass-panel">
-            <div className="weather-header-row">
-              <div>
-                <span className="live-tag">
-                  {weather.isLiveExternalData ? '🟢 Live Weather' : '🟡 Estimated Forecast'}
-                </span>
-                <h2>{weather.cityName}</h2>
-                <p className="coords">Lat: {weather.latitude.toFixed(2)}° • Lon: {weather.longitude.toFixed(2)}° • {weather.timezone}</p>
+        <div className="weather-bento-grid">
+          {/* HERO BENTO CARD */}
+          <div className="weather-hero-card">
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <span className="live-tag">
+                    {weather.isLiveExternalData ? '🟢 Live Satellite Sync' : '🟡 Regional Climate'}
+                  </span>
+                  <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0.4rem 0 0.2rem' }}>{weather.cityName}</h2>
+                  <p className="coords" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Coordinates: {weather.latitude.toFixed(2)}°N, {weather.longitude.toFixed(2)}°E • {weather.timezone}
+                  </p>
+                </div>
+                <div style={{ fontSize: '3.5rem', lineHeight: 1 }}>{weather.weatherIcon}</div>
               </div>
-              <div className="weather-large-icon">{weather.weatherIcon}</div>
-            </div>
 
-            <div className="current-temp-block">
-              <span className="temp-number">{Math.round(weather.currentTemperature)}°C</span>
-              <div className="temp-meta">
-                <strong>{weather.weatherCondition}</strong>
-                <span>Feels like {Math.round(weather.apparentTemperature)}°C</span>
-              </div>
-            </div>
-
-            <div className="weather-metrics-grid">
-              <div className="metric-box">
-                <span className="metric-label">Relative Humidity</span>
-                <span className="metric-val">{weather.relativeHumidity}%</span>
-              </div>
-              <div className="metric-box">
-                <span className="metric-label">Wind Velocity</span>
-                <span className="metric-val">{weather.windSpeed} km/h</span>
-              </div>
-              <div className="metric-box">
-                <span className="metric-label">Atmosphere</span>
-                <span className="metric-val">Optimal</span>
+              <div className="weather-hero-temp-row">
+                <div className="weather-big-temp">{Math.round(weather.currentTemperature)}°</div>
+                <div className="weather-hero-condition">
+                  <span className="weather-condition-badge">{weather.weatherCondition}</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    Feels like {Math.round(weather.apparentTemperature)}°C
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="packing-tip-box">
-              <strong>🧳 Traveler Climate & Packing Advice:</strong>
-              <p>{weather.packingTip}</p>
+            <div className="packing-tip-box" style={{ marginTop: '1.5rem' }}>
+              <strong>🧳 Climate & Packing Advice for {weather.cityName}:</strong>
+              <p style={{ marginTop: '0.35rem', fontSize: '0.9rem', lineHeight: 1.5 }}>{weather.packingTip}</p>
             </div>
           </div>
 
-          <div className="forecast-card glass-panel">
-            <h3>7-Day Weather Outlook</h3>
-            <div className="forecast-grid">
-              {weather.dailyForecasts?.map((day, idx) => (
-                <div key={idx} className="forecast-day-row">
-                  <span className="forecast-date">{day.date.slice(5)}</span>
-                  <span className="forecast-icon">{day.weatherIcon}</span>
-                  <span className="forecast-cond">{day.weatherCondition}</span>
-                  <span className="forecast-temps">
-                    <strong>{Math.round(day.maxTemperature)}°</strong> / {Math.round(day.minTemperature)}°C
-                  </span>
-                  <span className="forecast-sun">🌅 {day.sunrise}</span>
-                </div>
-              ))}
+          {/* 4-TILE METRICS BENTO */}
+          <div className="weather-metrics-2x2">
+            <div className="weather-metric-bento-tile">
+              <span className="metric-bento-header">💧 Relative Humidity</span>
+              <div className="metric-bento-val">{weather.relativeHumidity}%</div>
+              <span className="metric-bento-sub">Comfortable air moisture</span>
+            </div>
+
+            <div className="weather-metric-bento-tile">
+              <span className="metric-bento-header">💨 Wind Velocity</span>
+              <div className="metric-bento-val">{weather.windSpeed} <span style={{ fontSize: '1rem' }}>km/h</span></div>
+              <span className="metric-bento-sub">Calm surface breeze</span>
+            </div>
+
+            <div className="weather-metric-bento-tile">
+              <span className="metric-bento-header">🌅 Solar Timings</span>
+              <div className="metric-bento-val" style={{ fontSize: '1.25rem' }}>
+                {weather.dailyForecasts?.[0]?.sunrise || '06:15'} <span style={{ fontSize: '0.85rem' }}>Sunrise</span>
+              </div>
+              <span className="metric-bento-sub">Sunset ~18:45 IST</span>
+            </div>
+
+            <div className="weather-metric-bento-tile">
+              <span className="metric-bento-header">🧭 Atmosphere</span>
+              <div className="metric-bento-val" style={{ fontSize: '1.25rem', color: 'var(--secondary)' }}>Optimal</div>
+              <span className="metric-bento-sub">Ideal for outdoor sightseeing</span>
+            </div>
+          </div>
+
+          {/* 7-DAY OUTLOOK FULL STRIP */}
+          <div className="forecast-7day-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>📅 7-Day Weather Outlook</h3>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Daily Temperature Trends</span>
+            </div>
+            <div className="forecast-strip-row">
+              {weather.dailyForecasts?.map((day, idx) => {
+                const dayName = idx === 0 ? 'Today' : new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
+                return (
+                  <div key={idx} className="forecast-day-tile">
+                    <span className="forecast-day-name">{dayName}</span>
+                    <span className="forecast-day-icon">{day.weatherIcon}</span>
+                    <span className="forecast-temp-range">
+                      {Math.round(day.maxTemperature)}° <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>/ {Math.round(day.minTemperature)}°</span>
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{day.weatherCondition}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
