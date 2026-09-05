@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { LOCAL_BUSINESSES_DATA, registerLocalBusiness, getCustomLocalBusinesses, getStoredBusinessEnquiries } from '../services/sihData';
 import yatraApi from '../services/yatraService';
+import SihRouteMap from './SihRouteMap';
 
 const POPULAR_CITIES = [
   'Jaipur', 'Agra', 'Varanasi', 'Goa', 'Manali', 'Udaipur', 'Kochi', 'Rishikesh',
@@ -26,7 +27,8 @@ const CATEGORIES = [
 ];
 
 export default function SihMarketplace({ onEnquire }) {
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'register' | 'enquiries'
+  const [activeTab, setActiveTab] = useState('browse');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map' // 'browse' | 'register' | 'enquiries'
   const [activeCategory, setActiveCategory] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,6 +107,39 @@ export default function SihMarketplace({ onEnquire }) {
     handleFetchAiLocals(cleanCity);
   };
 
+  
+  // Local Providers Interactive Map Coordinates
+  const mapWaypoints = useMemo(() => {
+    const cityCenters = {
+      jaipur: { lat: 26.9124, lng: 75.7873 },
+      agra: { lat: 27.1767, lng: 78.0081 },
+      delhi: { lat: 28.6139, lng: 77.2090 },
+      mumbai: { lat: 18.9220, lng: 72.8347 },
+      goa: { lat: 15.4989, lng: 73.8278 },
+      varanasi: { lat: 25.3176, lng: 82.9739 },
+      manali: { lat: 32.2396, lng: 77.1887 },
+      udaipur: { lat: 24.5854, lng: 73.7125 },
+      kochi: { lat: 9.9312, lng: 76.2673 },
+      amritsar: { lat: 31.6340, lng: 74.8723 },
+      rishikesh: { lat: 30.0869, lng: 78.2676 },
+    };
+
+    return (filteredBusinesses || []).map((b, i) => {
+      const cKey = (b.city || 'jaipur').toLowerCase();
+      const center = cityCenters[cKey] || { lat: 26.9124, lng: 75.7873 };
+      const angle = ((i * 47) % 360) * (Math.PI / 180);
+      const rad = 0.008 + (i * 0.003);
+      return {
+        name: b.name,
+        type: b.category,
+        time: b.directRate || '0% Commission',
+        lat: b.latitude || Number((center.lat + rad * Math.cos(angle)).toFixed(6)),
+        lng: b.longitude || Number((center.lng + rad * Math.sin(angle)).toFixed(6)),
+        sequenceOrder: i + 1,
+      };
+    });
+  }, [filteredBusinesses]);
+
   const filteredBusinesses = useMemo(() => {
     return allBusinesses.filter((b) => {
       const matchCat = activeCategory === 'all' || b.category === activeCategory;
@@ -177,19 +212,27 @@ export default function SihMarketplace({ onEnquire }) {
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
             type="button"
-            className={`secondary-action ${activeTab === 'browse' ? 'active' : ''}`}
-            onClick={() => setActiveTab('browse')}
+            className={`secondary-action ${activeTab === 'browse' && viewMode === 'grid' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('browse'); setViewMode('grid'); }}
             style={{ padding: '8px 16px', fontSize: '0.85rem' }}
           >
-            🔍 Browse Marketplace
+            🔍 Browse Market
           </button>
           <button
             type="button"
-            className={`primary-action ${activeTab === 'register' ? 'active' : ''}`}
+            className={`secondary-action ${activeTab === 'browse' && viewMode === 'map' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('browse'); setViewMode('map'); }}
+            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+          >
+            🗺️ Map View
+          </button>
+          <button
+            type="button"
+            className={`secondary-action ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => setActiveTab('register')}
             style={{ padding: '8px 16px', fontSize: '0.85rem' }}
           >
-            🏪 List Local Business (Free)
+            🏪 List Local Business
           </button>
           <button
             type="button"
@@ -303,11 +346,18 @@ export default function SihMarketplace({ onEnquire }) {
               </form>
             </div>
 
-            {/* AI LOADING STATUS BANNER */}
+            {/* ENHANCED ANIMATED AI LOADING BANNER & SKELETON FEEDBACK */}
             {isAiLoading && (
-              <div className="market-loading-banner">
-                <span style={{ animation: 'spin 1s linear infinite' }}>✨</span>
-                Gemini AI is discovering authentic homestays, licensed guides, and artisans for <strong>{aiLoadedCity}</strong>...
+              <div className="market-ai-loading-banner">
+                <div className="ai-loading-spinner-ring" />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--primary, #0f766e)', fontWeight: 800 }}>
+                    ⚡ Gemini AI Live Discovery Active
+                  </h4>
+                  <p style={{ margin: '3px 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                    Searching and verifying authentic family homestays, licensed guides, and local cooperatives in <strong>{aiLoadedCity || filterCity}</strong>...
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -320,8 +370,54 @@ export default function SihMarketplace({ onEnquire }) {
             </span>
           </div>
 
-          {/* LIGHTWEIGHT IMAGE-FREE BUSINESS CARDS GRID */}
-          {filteredBusinesses.length === 0 ? (
+          {/* CONDITIONAL LOADING SKELETON */}
+          {isAiLoading ? (
+            <div>
+              <div style={{ marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                <em>Generating real-time verified local directory...</em>
+              </div>
+              <div className="market-skeleton-grid">
+                {[1, 2, 3, 4, 5, 6].map((idx) => (
+                  <div key={idx} className="market-skeleton-card">
+                    <div className="skeleton-line skeleton-title" />
+                    <div className="skeleton-line skeleton-tag" />
+                    <div className="skeleton-line skeleton-desc" />
+                    <div className="skeleton-line skeleton-desc short" />
+                    <div className="skeleton-footer">
+                      <div className="skeleton-pill" />
+                      <div className="skeleton-btn" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : viewMode === 'map' ? (
+            <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '18px', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>
+                    🗺️ Local Providers Map ({filteredBusinesses.length} Pins)
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Showing verified homestays, licensed tour guides, and artisan workshops plotted across {filterCity === 'all' ? 'India' : filterCity}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={() => setViewMode('grid')}
+                  style={{ padding: '6px 14px', fontSize: '0.825rem' }}
+                >
+                  Switch to Grid View ➔
+                </button>
+              </div>
+              <SihRouteMap
+                waypoints={mapWaypoints}
+                cityName={filterCity === 'all' ? 'Jaipur' : filterCity}
+                height="460px"
+              />
+            </div>
+          ) : filteredBusinesses.length === 0 ? (
             <div className="glass-panel" style={{ textAlign: 'center', padding: '3rem 1rem', borderRadius: '16px' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏡</div>
               <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No Local Providers Found</h3>

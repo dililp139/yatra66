@@ -282,63 +282,68 @@ export default function RentalServices({
           </div>
         </div>
 
-        {/* Filter Controls Bar */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center', marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
-          {/* City Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)' }}>📍 City:</span>
-            <select
-              className="clean-input"
-              value={filterCity}
-              onChange={(e) => setFilterCity(e.target.value)}
-              style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: '10px' }}
-            >
-              {cityList.map((c) => (
-                <option key={c} value={c}>{c === 'All' ? 'All Cities Across India' : c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Service Class Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '0.825rem', fontWeight: 700, color: 'var(--text-main)' }}>🚗 Service:</span>
-            <select
-              className="clean-input"
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: '10px' }}
-            >
-              <option value="All">All Vehicle Types</option>
-              <option value="Self-Drive">Self-Drive Cars</option>
-              <option value="Chauffeur">Chauffeur / Taxi Service</option>
-              <option value="SUV">SUVs & MPVs (Innova/Thar)</option>
-              <option value="Bike">Bikes & Scooters</option>
-              <option value="Airport">Airport Transfers</option>
-            </select>
-          </div>
-
-          {/* Search text */}
-          <div style={{ flex: 1, minWidth: '220px' }}>
+        {/* QUICK CITY CHIPS & VEHICLE CATEGORY BAR */}
+        <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* Quick Search Input */}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <input
               type="text"
-              className="clean-input"
-              placeholder="Search agency name, car model (e.g. Innova, Thar, Swift, Activa)..."
+              className="market-search-input"
+              placeholder="🔍 Search agency, city, or model (e.g. Innova Crysta, Thar 4x4, Swift, Activa, Royal Enfield)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: '100%', padding: '6px 14px', fontSize: '0.85rem', borderRadius: '10px' }}
+              style={{ flex: 1, minWidth: '240px' }}
             />
+            {(filterCity !== 'All' || serviceFilter !== 'All' || searchQuery) && (
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => { setFilterCity('All'); setServiceFilter('All'); setSearchQuery(''); }}
+                style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
 
-          {(filterCity !== 'All' || serviceFilter !== 'All' || searchQuery) && (
-            <button
-              type="button"
-              className="secondary-action"
-              onClick={() => { setFilterCity('All'); setServiceFilter('All'); setSearchQuery(''); }}
-              style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-            >
-              Reset Filters
-            </button>
-          )}
+          {/* City Chips */}
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>📍 City:</span>
+            {['All', 'Jaipur', 'Udaipur', 'Goa', 'Delhi', 'Mumbai', 'Agra', 'Varanasi', 'Manali', 'Shimla', 'Kochi'].map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`quick-pill-tag ${filterCity.toLowerCase() === c.toLowerCase() ? 'active' : ''}`}
+                onClick={() => setFilterCity(c)}
+                style={{ padding: '5px 12px', fontSize: '0.78rem', borderRadius: '18px', cursor: 'pointer' }}
+              >
+                {c === 'All' ? 'All India' : c}
+              </button>
+            ))}
+          </div>
+
+          {/* Vehicle Category Tabs */}
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>🚗 Vehicle Type:</span>
+            {[
+              { id: 'All', label: 'All Fleet Types' },
+              { id: 'Self-Drive', label: '🚗 Self-Drive Cars' },
+              { id: 'Chauffeur', label: '🚕 Chauffeur Cabs' },
+              { id: 'SUV', label: '🚙 4x4 Thar & SUVs' },
+              { id: 'Bike', label: '🛵 Bikes & Scooters' },
+              { id: 'Airport', label: '✈️ Airport Transfers' },
+            ].map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`quick-pill-tag ${serviceFilter === s.id ? 'active' : ''}`}
+                onClick={() => setServiceFilter(s.id)}
+                style={{ padding: '4px 11px', fontSize: '0.75rem', borderRadius: '14px', cursor: 'pointer' }}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -474,9 +479,32 @@ export default function RentalServices({
                           Models: <em>{f.models}</em>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px dashed var(--border)', fontSize: '0.75rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>Security Deposit:</span>
-                        <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{f.deposit} (Refundable)</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontSize: '0.75rem' }}>
+                        <div>
+                          <span style={{ color: 'var(--text-muted)' }}>Deposit: </span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{f.deposit}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="primary-action"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '6px' }}
+                          onClick={() => {
+                            if (onOpenBooking) {
+                              const est = parseInt((f.rateEstimate || '1800').replace(/[^0-9]/g, '')) || 1800;
+                              onOpenBooking(
+                                'rental',
+                                `${op.agencyName} • ${f.category} (${f.models})`,
+                                est,
+                                1,
+                                op.city
+                              );
+                            } else {
+                              handleSendEnquiry(op, f);
+                            }
+                          }}
+                        >
+                          ⚡ Book Voucher
+                        </button>
                       </div>
                     </div>
                   ))}

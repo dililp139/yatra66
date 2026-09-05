@@ -215,7 +215,27 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 9999px;
   box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.16);
-  transition: var(--transition-smooth);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scroll shrink dynamic pop-up animation */
+.topbar.topbar-compact {
+  top: 0.45rem;
+  padding: 0.35rem 1.15rem;
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(32px) saturate(220%);
+  -webkit-backdrop-filter: blur(32px) saturate(220%);
+  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.32);
+  transform: translateY(-2px) scale(0.995);
+}
+
+.topbar.topbar-compact .brand {
+  transform: scale(0.92);
+}
+
+.topbar.topbar-compact .nav-links button {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.825rem;
 }
 
 .brand {
@@ -6758,4 +6778,234 @@ body {
 
 .theme-dark .card-body p {
   color: #94a3b8 !important;
+}
+
+
+/* ============================================================================
+   ACTIVE BUTTON STYLES & HIGHLIGHTS
+   ============================================================================ */
+.secondary-action.active {
+  background: var(--primary, #0f766e) !important;
+  color: #ffffff !important;
+  border-color: var(--primary, #0f766e) !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35) !important;
+  font-weight: 700 !important;
+  transform: translateY(-1px) !important;
+}
+
+.primary-action.active {
+  background: var(--primary-hover, #0d5c56) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px var(--primary-light), 0 4px 14px rgba(15, 118, 110, 0.4) !important;
+  font-weight: 700 !important;
+  transform: translateY(-1px) !important;
+}
+
+.theme-dark .secondary-action.active {
+  background: #2dd4bf !important;
+  color: #060911 !important;
+  border-color: #2dd4bf !important;
+  box-shadow: 0 4px 16px rgba(45, 212, 191, 0.45) !important;
+}
+
+.theme-dark .primary-action.active {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), 0 4px 16px rgba(99, 102, 241, 0.5) !important;
+}
+
+/* ============================================================================
+   SUPPORT LOCAL & HOTELS LOADING ANIMATION & SKELETON CARDS
+   ============================================================================ */
+@keyframes pulseShimmer {
+  0% { opacity: 0.6; transform: scale(0.995); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.6; transform: scale(0.995); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmerGlow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.market-ai-loading-banner {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12) 0%, rgba(99, 102, 241, 0.12) 100%);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.08);
+  animation: pulseShimmer 2s ease-in-out infinite;
+}
+
+.ai-loading-spinner-ring {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(15, 118, 110, 0.2);
+  border-top-color: var(--primary, #0f766e);
+  border-radius: 50%;
+  animation: spinSlow 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+.market-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.market-skeleton-card {
+  background: var(--bg-surface-elevated, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  animation: pulseShimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(203, 213, 225, 0.3) 0%, rgba(203, 213, 225, 0.7) 50%, rgba(203, 213, 225, 0.3) 100%);
+  background-size: 200% 100%;
+  animation: shimmerGlow 1.5s infinite;
+}
+
+.skeleton-title {
+  height: 22px;
+  width: 65%;
+  border-radius: 8px;
+}
+
+.skeleton-tag {
+  height: 16px;
+  width: 35%;
+}
+
+.skeleton-desc {
+  width: 90%;
+}
+
+.skeleton-desc.short {
+  width: 60%;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-color, #e2e8f0);
+}
+
+.skeleton-pill {
+  width: 80px;
+  height: 24px;
+  border-radius: 20px;
+  background: rgba(203, 213, 225, 0.4);
+}
+
+.skeleton-btn {
+  width: 100px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(15, 118, 110, 0.3);
+}
+
+/* ============================================================================
+   ADVANCED TRIP PLANNER SUBTABS & CLEAN CARDS
+   ============================================================================ */
+.planner-subtabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-surface, #ffffff);
+  padding: 0.4rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.planner-subtab-btn {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.planner-subtab-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-surface-elevated, #f8fafc);
+}
+
+.planner-subtab-btn.active {
+  background: var(--primary, #0f766e);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
+}
+
+.theme-dark .planner-subtab-btn.active {
+  background: #6366f1;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
+}
+
+/* Waypoint Compact Card */
+.waypoint-compact-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.waypoint-compact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.waypoint-badge-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0f766e 0%, #10b981 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.theme-dark .waypoint-badge-number {
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
 }

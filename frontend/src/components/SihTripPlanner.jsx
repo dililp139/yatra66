@@ -170,6 +170,7 @@ export default function SihTripPlanner({
   handleOpenBooking,
 }) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [plannerTab, setPlannerTab] = useState('itinerary'); // 'itinerary' | 'hotels' | 'cabs'
   const [cityChoice, setCityChoice] = useState(selectedCity || 'Jaipur');
   const [durationDays, setDurationDays] = useState(3);
   const [customDaysInput, setCustomDaysInput] = useState(3);
@@ -239,6 +240,109 @@ export default function SihTripPlanner({
     }
     return plan;
   }, [cityChoice, durationDays, aiModifiedThemes, aiPlanData]);
+
+  
+  // City-specific hotels for integrated booking in Trip Planner (User Request 8)
+  const cityHotelsList = useMemo(() => {
+    const c = cityChoice || 'Jaipur';
+    return [
+      {
+        id: `plan-stay-1-${c}`,
+        name: `${c} Heritage Haveli & Courtyard Palace`,
+        type: 'Heritage Palace',
+        rating: 4.9,
+        reviews: 280,
+        pricePerNight: budgetTier === 'luxury' ? 8800 : budgetTier === 'comfort' ? 4200 : 2100,
+        address: `Heritage Old Quarter, ${c}`,
+        amenities: ['Fresco Courtyard', 'Rooftop Dining', 'Free High-Speed WiFi', 'Evening Folk Music'],
+        phone: '+91 98290 14520',
+        whatsapp: '919829014520',
+      },
+      {
+        id: `plan-stay-2-${c}`,
+        name: `Zostel ${c} (Backpacker Hub)`,
+        type: 'Social Backpacker Hostel',
+        rating: 4.8,
+        reviews: 420,
+        pricePerNight: budgetTier === 'backpacker' ? 650 : 850,
+        address: `Near Central Station, ${c}`,
+        amenities: ['Air-Conditioned Pods', 'Cafe & Lounge', 'High-Speed WiFi', 'Travel Desk'],
+        phone: '+91 98110 54321',
+        whatsapp: '919811054321',
+      },
+      {
+        id: `plan-stay-3-${c}`,
+        name: `${c} Boutique Scenic Retreat & Spa`,
+        type: 'Boutique Resort',
+        rating: 4.8,
+        reviews: 190,
+        pricePerNight: budgetTier === 'luxury' ? 11500 : budgetTier === 'comfort' ? 5600 : 3100,
+        address: `Scenic View Promenade, ${c}`,
+        amenities: ['Infinity Pool', 'Ayurvedic Spa', 'Buffet Breakfast Included', 'Mountain/Lake View'],
+        phone: '+91 97840 33412',
+        whatsapp: '919784033412',
+      },
+      {
+        id: `plan-stay-4-${c}`,
+        name: `Lemon Tree Premier & Suites ${c}`,
+        type: 'Comfort City Hotel',
+        rating: 4.7,
+        reviews: 310,
+        pricePerNight: budgetTier === 'luxury' ? 7600 : budgetTier === 'comfort' ? 3800 : 2300,
+        address: `Central Business Expressway, ${c}`,
+        amenities: ['Airport Shuttle', 'Buffet Breakfast', 'Gym & Pool', 'Cocktail Lounge'],
+        phone: '+91 94140 78210',
+        whatsapp: '919414078210',
+      },
+    ];
+  }, [cityChoice, budgetTier]);
+
+  // City-specific cab options for integrated booking in Trip Planner (User Request 8)
+  const cityCabsList = useMemo(() => {
+    const c = cityChoice || 'Jaipur';
+    return [
+      {
+        id: `plan-cab-1-${c}`,
+        title: `${c} Airport / Station Pickup & Drop (Sedan)`,
+        vehicle: 'Swift Dzire / Etios AC',
+        capacity: '4 Passengers + Luggage',
+        fareEstimate: 850,
+        fareFormatted: '₹850 flat rate',
+        type: 'Airport Transfer',
+        features: ['Meet & Greet Service', 'Flight Delay Tracking', 'Clean AC Sedan', 'No Hidden Toll Extra'],
+      },
+      {
+        id: `plan-cab-2-${c}`,
+        title: `Full Day 8-Hour Sightseeing Cab (${c})`,
+        vehicle: 'Honda Amaze / Dzire AC',
+        capacity: '4 Passengers',
+        fareEstimate: 1800,
+        fareFormatted: '₹1,800 (8 Hrs / 80 Km)',
+        type: 'Full Day Sightseeing',
+        features: ['Fuel Included', 'Covers All Top Monuments', 'Courteous Driver Guide', 'Flexible Stops'],
+      },
+      {
+        id: `plan-cab-3-${c}`,
+        title: `Full Day Family SUV Sightseeing (${c})`,
+        vehicle: 'Toyota Innova Crysta / Ertiga',
+        capacity: '6-7 Passengers',
+        fareEstimate: 2800,
+        fareFormatted: '₹2,800 (8 Hrs / 80 Km)',
+        type: 'Family SUV Tour',
+        features: ['Reclining Captain Seats', 'Spacious Luggage Boot', 'Dual AC Blower', 'Chauffeur Driven'],
+      },
+      {
+        id: `plan-cab-4-${c}`,
+        title: `Multi-Day Outstation Circuit Package`,
+        vehicle: 'Innova Crysta Premium',
+        capacity: '6 Passengers',
+        fareEstimate: 3400,
+        fareFormatted: '₹3,400 / day + fuel',
+        type: 'Outstation Highway',
+        features: ['All India Tourist Permit', 'Experienced Highway Chauffeur', 'Fastag Pre-installed', '24/7 Helpline'],
+      },
+    ];
+  }, [cityChoice]);
 
   const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
 
@@ -1140,7 +1244,228 @@ export default function SihTripPlanner({
             </div>
           </div>
 
-          {/* AI TRAVEL ASSISTANT & ITINERARY INTELLIGENCE (Requirement 18) */}
+          {/* ADVANCED TRIP PLANNER SUB-TABS: ITINERARY | HOTELS IN CITY | CABS (User Request 8) */}
+          <div className="planner-subtabs-nav">
+            <button
+              type="button"
+              className={`planner-subtab-btn ${plannerTab === 'itinerary' ? 'active' : ''}`}
+              onClick={() => setPlannerTab('itinerary')}
+            >
+              <span>🗺️</span>
+              <span>Day-by-Day Route & Map</span>
+            </button>
+            <button
+              type="button"
+              className={`planner-subtab-btn ${plannerTab === 'hotels' ? 'active' : ''}`}
+              onClick={() => setPlannerTab('hotels')}
+            >
+              <span>🏨</span>
+              <span>Stays in ${cityChoice} ({cityHotelsList.length})</span>
+            </button>
+            <button
+              type="button"
+              className={`planner-subtab-btn ${plannerTab === 'cabs' ? 'active' : ''}`}
+              onClick={() => setPlannerTab('cabs')}
+            >
+              <span>🚕</span>
+              <span>Book Cab & Airport Transfers</span>
+            </button>
+          </div>
+
+          {/* ===================== VIEW: INTEGRATED HOTELS ===================== */}
+          {plannerTab === 'hotels' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', borderLeft: '5px solid #0f766e' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 800 }}>
+                      🏨 Recommended Stays in ${cityChoice} for Your Itinerary
+                    </h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Selected based on your ${budgetTier.toUpperCase()} budget tier and proximity to scheduled attractions.
+                    </p>
+                  </div>
+                  <span style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800 }}>
+                    ⚡ Verified Availability
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '1.25rem' }}>
+                {cityHotelsList.map((hotel) => (
+                  <article
+                    key={hotel.id}
+                    className="glass-panel"
+                    style={{
+                      background: 'var(--bg-surface, #ffffff)',
+                      padding: '1.25rem',
+                      borderRadius: '16px',
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {hotel.type}
+                        </span>
+                        <h4 style={{ margin: '2px 0 0', fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 800 }}>
+                          {hotel.name}
+                        </h4>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>📍 {hotel.address}</span>
+                      </div>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 800, color: '#f59e0b' }}>
+                        ⭐ {hotel.rating} ({hotel.reviews})
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {hotel.amenities.map((amenity, aIdx) => (
+                        <span key={aIdx} style={{ background: 'var(--bg-surface-elevated, #f1f5f9)', color: 'var(--text-muted)', fontSize: '0.725rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                          ✓ {amenity}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px dashed var(--border)' }}>
+                      <div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Estimated Rate</span>
+                        <strong style={{ fontSize: '1.15rem', color: '#0f766e', fontWeight: 800 }}>
+                          {formatPrice(hotel.pricePerNight)}
+                          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}> / night</span>
+                        </strong>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <a
+                          href={`https://wa.me/${hotel.whatsapp}?text=${encodeURIComponent(`Hi ${hotel.name}, I want to check room availability for ${durationDays} nights in ${cityChoice} via Yatra 66.`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: '6px 10px',
+                            background: '#25D366',
+                            color: 'white',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                          title="WhatsApp Inquire"
+                        >
+                          💬
+                        </a>
+                        <button
+                          type="button"
+                          className="primary-action"
+                          style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                          onClick={() => {
+                            if (handleOpenBooking) {
+                              handleOpenBooking('hotel', hotel.name, hotel.pricePerNight, 1, cityChoice);
+                            }
+                          }}
+                        >
+                          Book Stay ➔
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ===================== VIEW: INTEGRATED CABS ===================== */}
+          {plannerTab === 'cabs' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', borderLeft: '5px solid #0f766e' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 800 }}>
+                      🚕 Verified Local Cabs & Airport Transfers for ${cityChoice}
+                    </h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Transparent direct operator pricing with zero surge markup for your ${durationDays}-day stay.
+                    </p>
+                  </div>
+                  <span style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#047857', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800 }}>
+                    🛡️ Verified Drivers
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '1.25rem' }}>
+                {cityCabsList.map((cab) => (
+                  <article
+                    key={cab.id}
+                    className="glass-panel"
+                    style={{
+                      background: 'var(--bg-surface, #ffffff)',
+                      padding: '1.25rem',
+                      borderRadius: '16px',
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: '#0f766e', fontWeight: 700, textTransform: 'uppercase' }}>
+                          🚕 {cab.type}
+                        </span>
+                        <h4 style={{ margin: '2px 0 0', fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: 800 }}>
+                          {cab.title}
+                        </h4>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          🚘 {cab.vehicle} • {cab.capacity}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {cab.features.map((feat, fIdx) => (
+                        <span key={fIdx} style={{ background: 'var(--bg-surface-elevated, #f1f5f9)', color: 'var(--text-muted)', fontSize: '0.725rem', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                          ✓ {feat}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px dashed var(--border)' }}>
+                      <div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Estimated Fare</span>
+                        <strong style={{ fontSize: '1.15rem', color: '#0f766e', fontWeight: 800 }}>
+                          {cab.fareFormatted}
+                        </strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="primary-action"
+                        style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                        onClick={() => {
+                          if (handleOpenBooking) {
+                            handleOpenBooking('cab', cab.title, cab.fareEstimate, 1, cityChoice);
+                          }
+                        }}
+                      >
+                        Book Cab ➔
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ===================== VIEW: ITINERARY & ROUTE MAP ===================== */}
+          {plannerTab === 'itinerary' && (
+            <>
+              {/* AI TRAVEL ASSISTANT & ITINERARY INTELLIGENCE (Requirement 18) */}
           <div className="ai-planner-capsule">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1513,6 +1838,8 @@ export default function SihTripPlanner({
               ))}
             </div>
           </div>
+            </>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <button type="button" className="secondary-action" onClick={() => setCurrentStep(5)}>

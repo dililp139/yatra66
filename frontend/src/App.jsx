@@ -759,8 +759,18 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, page, setCurr
     }, 380);
   };
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 28);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="topbar">
+    <header className={`topbar ${scrolled ? 'topbar-compact' : ''}`}>
       <button className="brand" type="button" onClick={() => setPage('home')} aria-label="Yatra 66 Home">
         <CreativeLogo size={36} />
       </button>
@@ -2811,7 +2821,7 @@ function WikiExplorePage({ cities, selectedId, setSelectedId }) {
 // -------------------------------------------------------------
 // HOTELS & LIVE OLA / UBER CAB FARE ENGINE
 // -------------------------------------------------------------
-function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = [], onHideHotel, onUnhideAllHotels, selectedMarker }) {
+function HotelsPage({ cities = [], details, formatPrice, handleOpenBooking, hiddenHotelIds = [], onHideHotel, onUnhideAllHotels, selectedMarker, setSelectedId }) {
   const [activeSection, setActiveSection] = useState('hotels'); // 'hotels' | 'cabs'
   const [selectedHotelForMap, setSelectedHotelForMap] = useState(null);
 
@@ -3111,6 +3121,88 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
         title="Accommodations & Live Cab Fare Engine"
         text="Book top-rated hotels, boutique havelis, backpacker hostels, and fetch live Ola & Uber fares with instant one-click booking deep-links."
       />
+
+      {/* DESTINATION CITY SELECTOR & GEMINI AI CONNECTION (User Request 4) */}
+      <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', marginBottom: '1.5rem', borderLeft: '5px solid var(--primary, #0f766e)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '1.2rem' }}>📍</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Select Destination:</strong>
+              <span style={{ background: 'var(--primary, #0f766e)', color: 'white', padding: '2px 10px', borderRadius: '14px', fontSize: '0.78rem', fontWeight: 800 }}>
+                {selectedMarker?.name || 'Jaipur'}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>⚡ Gemini AI Connected</span>
+            </div>
+            <p style={{ margin: '3px 0 0', fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+              Choose any city to automatically connect with Gemini AI and load authentic stays, heritage havelis, and backpacker hostels.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-action"
+            onClick={() => {
+              if (selectedMarker?.name) {
+                setLoadingAiHotels(true);
+                yatraApi.getAiHotels(
+                  selectedMarker.name,
+                  selectedMarker.latitude,
+                  selectedMarker.longitude,
+                  selectedMarker.estimatedDailyBudget || 4000
+                ).then((res) => {
+                  if (res && res.length > 0) setAiHotels(res);
+                }).finally(() => setLoadingAiHotels(false));
+              }
+            }}
+            style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+          >
+            🔄 Refresh Gemini Stays
+          </button>
+        </div>
+
+        {/* Quick City Selector Chips */}
+        <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>Popular Hubs:</span>
+          {(cities && cities.length > 0 ? cities.slice(0, 16) : [
+            { id: 1, name: 'Jaipur' }, { id: 2, name: 'Agra' }, { id: 5, name: 'Udaipur' },
+            { id: 7, name: 'Goa' }, { id: 8, name: 'Manali' }, { id: 3, name: 'Varanasi' },
+            { id: 4, name: 'Mumbai' }, { id: 6, name: 'Delhi' }, { id: 9, name: 'Amritsar' },
+            { id: 10, name: 'Kochi' }, { id: 11, name: 'Rishikesh' }, { id: 12, name: 'Shimla' },
+            { id: 13, name: 'Leh Ladakh' }, { id: 14, name: 'Pondicherry' }
+          ]).map((c) => {
+            const isSel = (selectedMarker?.name || '').toLowerCase() === c.name.toLowerCase();
+            return (
+              <button
+                key={c.id}
+                type="button"
+                className={`quick-pill-tag ${isSel ? 'active' : ''}`}
+                onClick={() => {
+                  if (setSelectedId) setSelectedId(c.id);
+                }}
+                style={{ padding: '5px 12px', fontSize: '0.8rem', borderRadius: '18px', cursor: 'pointer' }}
+              >
+                {c.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* GEMINI AI LOADING STATUS BANNER */}
+      {loadingAiHotels && (
+        <div className="market-ai-loading-banner">
+          <div className="ai-loading-spinner-ring" />
+          <div>
+            <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--primary, #0f766e)', fontWeight: 800 }}>
+              ⚡ Gemini AI Live Connection: Discovering Stays in {selectedMarker?.name}...
+            </h4>
+            <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Curating authentic heritage havelis, boutique resorts, and verified hostels with real-time amenities and pricing.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* SEPARATED SUB-TABS FOR HOTELS VS CABS */}
       <div className="section-subtabs-bar">
@@ -4991,10 +5083,16 @@ function GemsPage({ cities, setPage, setSelectedId }) {
   );
 }
 
-function ExperiencesPage({ onOpenEnquiry }) {
+function ExperiencesPage({ formatPrice, handleOpenBooking, onOpenEnquiry, setPage, setSelectedId }) {
   return (
     <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <SihExperiences onEnquire={onOpenEnquiry} />
+      <SihExperiences
+        onEnquire={onOpenEnquiry}
+        onOpenBooking={handleOpenBooking}
+        formatPrice={formatPrice}
+        setPage={setPage}
+        setSelectedId={setSelectedId}
+      />
     </section>
   );
 }
