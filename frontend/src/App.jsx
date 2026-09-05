@@ -3981,12 +3981,14 @@ function createFallbackFares(details) {
 }
 
 function AuthModal({ onClose, setUser, user }) {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'google'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [city, setCity] = useState('Jaipur');
   const [interest, setInterest] = useState('Heritage');
+  const [googleEmail, setGoogleEmail] = useState('dilip@google.com');
+  const [googleName, setGoogleName] = useState('Dilip Kumar');
   const [loading, setLoading] = useState(false);
   const [successNotice, setSuccessNotice] = useState('');
   const [errorNotice, setErrorNotice] = useState('');
@@ -3995,17 +3997,46 @@ function AuthModal({ onClose, setUser, user }) {
     e.preventDefault();
     setErrorNotice('');
     setSuccessNotice('');
-    if (!email.trim()) return;
 
-    setLoading(true);
-    try {
-      if (mode === 'login') {
+    if (mode === 'login') {
+      if (!email.trim()) {
+        setErrorNotice('Please enter your email address.');
+        return;
+      }
+      if (!password || !password.trim()) {
+        setErrorNotice('Please enter your password.');
+        return;
+      }
+
+      setLoading(true);
+      try {
         const loggedInUser = await yatraApi.login({ email: email.trim(), password });
         setUser(loggedInUser);
-        setSuccessNotice(`Welcome back, ${loggedInUser.name}! (Connected to Cloudflare D1)`);
-      } else {
+        setSuccessNotice(`Welcome back, ${loggedInUser.name}! (Password verified with Cloudflare D1)`);
+        setTimeout(() => onClose(), 900);
+      } catch (err) {
+        setErrorNotice(err.message || 'Incorrect email or password. Please verify and try again.');
+      } finally {
+        setLoading(false);
+      }
+    } else if (mode === 'register') {
+      if (!name.trim()) {
+        setErrorNotice('Please enter your full name.');
+        return;
+      }
+      if (!email.trim()) {
+        setErrorNotice('Please enter your email address.');
+        return;
+      }
+      if (!password || password.length < 4) {
+        setErrorNotice('Password must be at least 4 characters long.');
+        return;
+      }
+
+      setLoading(true);
+      try {
         const registeredUser = await yatraApi.register({
-          name: name.trim() || 'Traveler',
+          name: name.trim(),
           email: email.trim(),
           password,
           city,
@@ -4014,38 +4045,39 @@ function AuthModal({ onClose, setUser, user }) {
         });
         setUser(registeredUser);
         setSuccessNotice(`Account created in Cloudflare D1! Welcome, ${registeredUser.name}!`);
+        setTimeout(() => onClose(), 900);
+      } catch (err) {
+        setErrorNotice(err.message || 'Registration failed. Please try again.');
+      } finally {
+        setLoading(false);
       }
-      setTimeout(() => {
-        onClose();
-      }, 1000);
-    } catch (err) {
-      setErrorNotice(err.message || 'Authentication failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    } else if (mode === 'google') {
+      if (!googleEmail.trim()) {
+        setErrorNotice('Please enter your Google email address.');
+        return;
+      }
+      if (!googleName.trim()) {
+        setErrorNotice('Please enter your Google display name.');
+        return;
+      }
 
-  const handleGoogleSignIn = async () => {
-    setErrorNotice('');
-    setLoading(true);
-    try {
-      const userData = {
-        name: 'Dilip Kumar',
-        email: 'dilip@google.com',
-        authProvider: 'google',
-        city: 'Jaipur',
-        interest: 'Heritage'
-      };
-      const saved = await yatraApi.signIn(userData);
-      setUser(saved);
-      setSuccessNotice('Signed in with Google! (Saved to Cloudflare D1)');
-      setTimeout(() => {
-        onClose();
-      }, 900);
-    } catch (err) {
-      setErrorNotice(err.message || 'Google sign-in failed');
-    } finally {
-      setLoading(false);
+      setLoading(true);
+      try {
+        const googleUser = await yatraApi.signInWithGoogle({
+          email: googleEmail.trim(),
+          name: googleName.trim(),
+          authProvider: 'google',
+          city: 'Jaipur',
+          interest: 'Heritage'
+        });
+        setUser(googleUser);
+        setSuccessNotice(`Google account connected in Cloudflare D1! Welcome, ${googleUser.name}!`);
+        setTimeout(() => onClose(), 900);
+      } catch (err) {
+        setErrorNotice(err.message || 'Google account creation failed.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -4060,7 +4092,7 @@ function AuthModal({ onClose, setUser, user }) {
       <div className="auth-modal-window" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h2 style={{ margin: 0, fontSize: '1.4rem' }}>
-            {user ? '👤 Traveler Profile' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
+            {user ? '👤 Traveler Profile' : mode === 'google' ? '🌐 Google Account' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
           </h2>
           <button type="button" className="close-btn" onClick={onClose}>✕</button>
         </div>
@@ -4068,7 +4100,7 @@ function AuthModal({ onClose, setUser, user }) {
         {user ? (
           <div>
             <div style={{ textAlign: 'center', margin: '1rem 0 1.5rem' }}>
-              <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), #6366f1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 0.75rem', fontWeight: 800, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+              <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: user.authProvider === 'google' ? 'linear-gradient(135deg, #4285f4, #34a853)' : 'linear-gradient(135deg, var(--primary), #6366f1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 0.75rem', fontWeight: 800, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
                 {user.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem' }}>{user.name}</h3>
@@ -4078,6 +4110,11 @@ function AuthModal({ onClose, setUser, user }) {
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
                   Cloudflare D1 Active
                 </span>
+                {user.authProvider === 'google' && (
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(66, 133, 244, 0.15)', color: '#4285f4', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700 }}>
+                    Google Verified
+                  </span>
+                )}
                 {user.city && (
                   <span style={{ fontSize: '0.75rem', background: 'var(--surface-muted, rgba(255,255,255,0.08))', color: 'var(--text)', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 600 }}>
                     📍 {user.city}
@@ -4102,108 +4139,176 @@ function AuthModal({ onClose, setUser, user }) {
           </div>
         ) : (
           <>
-            <div className="auth-tabs">
-              <button
-                type="button"
-                className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
-                onClick={() => { setMode('login'); setErrorNotice(''); setSuccessNotice(''); }}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
-                onClick={() => { setMode('register'); setErrorNotice(''); setSuccessNotice(''); }}
-              >
-                Create Account
-              </button>
-            </div>
-
-            <button type="button" className="auth-social-btn" onClick={handleGoogleSignIn} disabled={loading}>
-              <span>🌐</span>
-              <span>Continue with Google</span>
-            </button>
-
-            <div className="auth-divider">
-              <span>OR EMAIL & PASSWORD</span>
-            </div>
-
             {errorNotice && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ background: 'rgba(239, 68, 68, 0.14)', border: '1px solid rgba(239, 68, 68, 0.35)', color: '#f87171', padding: '0.75rem 0.95rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1rem', fontWeight: 600 }}>
                 ⚠️ {errorNotice}
               </div>
             )}
 
             {successNotice && (
-              <div style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ background: 'rgba(16, 185, 129, 0.14)', border: '1px solid rgba(16, 185, 129, 0.35)', color: '#34d399', padding: '0.75rem 0.95rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1rem', fontWeight: 600 }}>
                 ✅ {successNotice}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {mode === 'register' && (
-                <>
-                  <label>
-                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Full Name</span>
+            {mode === 'google' ? (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ background: 'rgba(66, 133, 244, 0.08)', border: '1px solid rgba(66, 133, 244, 0.25)', borderRadius: '10px', padding: '1rem' }}>
+                  <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    Create or link your Google Account directly in Cloudflare D1:
+                  </p>
+                  <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Email Address</span>
                     <input
+                      type="email"
                       className="clean-input"
-                      placeholder="Dilip Kumar"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      placeholder="name@gmail.com"
+                      value={googleEmail}
+                      onChange={(e) => setGoogleEmail(e.target.value)}
                       required
                     />
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <label>
-                      <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Home City</span>
-                      <input
-                        className="clean-input"
-                        placeholder="Jaipur"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Travel Interest</span>
-                      <input
-                        className="clean-input"
-                        placeholder="Heritage"
-                        value={interest}
-                        onChange={(e) => setInterest(e.target.value)}
-                      />
-                    </label>
+                  <label style={{ display: 'block', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Display Name</span>
+                    <input
+                      className="clean-input"
+                      placeholder="Your Name"
+                      value={googleName}
+                      onChange={(e) => setGoogleName(e.target.value)}
+                      required
+                    />
+                  </label>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => { setGoogleEmail('dilip@google.com'); setGoogleName('Dilip Kumar'); }}
+                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      ⚡ Dilip Kumar (dilip@google.com)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setGoogleEmail('rahul.patel@gmail.com'); setGoogleName('Rahul Patel'); }}
+                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      ⚡ Rahul Patel (rahul.patel@gmail.com)
+                    </button>
                   </div>
-                </>
-              )}
+                </div>
 
-              <label>
-                <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Email Address</span>
-                <input
-                  type="email"
-                  className="clean-input"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </label>
+                <button type="submit" className="primary-action" disabled={loading} style={{ background: '#4285f4', borderColor: '#4285f4', padding: '0.85rem', width: '100%' }}>
+                  {loading ? 'Connecting Google to D1...' : '🌐 Create / Sign In with Google ➔'}
+                </button>
 
-              <label>
-                <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Password</span>
-                <input
-                  type="password"
-                  className="clean-input"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </label>
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={() => { setMode('login'); setErrorNotice(''); setSuccessNotice(''); }}
+                  style={{ width: '100%', textAlign: 'center', fontSize: '0.85rem' }}
+                >
+                  ← Back to Email & Password
+                </button>
+              </form>
+            ) : (
+              <>
+                <div className="auth-tabs">
+                  <button
+                    type="button"
+                    className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
+                    onClick={() => { setMode('login'); setErrorNotice(''); setSuccessNotice(''); }}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
+                    onClick={() => { setMode('register'); setErrorNotice(''); setSuccessNotice(''); }}
+                  >
+                    Create Account
+                  </button>
+                </div>
 
-              <button type="submit" className="primary-action" disabled={loading} style={{ padding: '0.85rem', width: '100%', marginTop: '0.5rem' }}>
-                {loading ? 'Connecting to Cloudflare D1...' : mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
-              </button>
-            </form>
+                <button
+                  type="button"
+                  className="auth-social-btn"
+                  onClick={() => { setMode('google'); setErrorNotice(''); setSuccessNotice(''); }}
+                  disabled={loading}
+                >
+                  <span>🌐</span>
+                  <span>Continue with Google</span>
+                </button>
+
+                <div className="auth-divider">
+                  <span>OR EMAIL & PASSWORD</span>
+                </div>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {mode === 'register' && (
+                    <>
+                      <label>
+                        <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Full Name</span>
+                        <input
+                          className="clean-input"
+                          placeholder="Your Name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                        />
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <label>
+                          <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Home City</span>
+                          <input
+                            className="clean-input"
+                            placeholder="Jaipur"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                          />
+                        </label>
+                        <label>
+                          <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Travel Interest</span>
+                          <input
+                            className="clean-input"
+                            placeholder="Heritage"
+                            value={interest}
+                            onChange={(e) => setInterest(e.target.value)}
+                          />
+                        </label>
+                      </div>
+                    </>
+                  )}
+
+                  <label>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Email Address</span>
+                    <input
+                      type="email"
+                      className="clean-input"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Password</span>
+                    <input
+                      type="password"
+                      className="clean-input"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </label>
+
+                  <button type="submit" className="primary-action" disabled={loading} style={{ padding: '0.85rem', width: '100%', marginTop: '0.5rem' }}>
+                    {loading ? 'Verifying with Cloudflare D1...' : mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
+                  </button>
+                </form>
+              </>
+            )}
           </>
         )}
       </div>

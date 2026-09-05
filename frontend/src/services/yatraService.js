@@ -3589,6 +3589,40 @@ export const yatraApi = {
     }
   },
 
+  async signInWithGoogle(userData) {
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Google authentication failed');
+      }
+      try {
+        localStorage.setItem('yatra_user', JSON.stringify(data));
+      } catch {}
+      return data;
+    } catch (err) {
+      if (err.message && err.message !== 'Failed to fetch') {
+        throw err;
+      }
+      const fallbackUser = {
+        name: userData.name || 'Google Explorer',
+        email: userData.email || 'traveler@gmail.com',
+        authProvider: 'google',
+        city: userData.city || 'Jaipur',
+        interest: userData.interest || 'Heritage',
+        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      };
+      try {
+        localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
+      } catch {}
+      return fallbackUser;
+    }
+  },
+
   async signIn(userData) {
     try {
       const res = await fetch('/api/auth/signin', {

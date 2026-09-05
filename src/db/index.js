@@ -327,7 +327,9 @@ export async function getUserByEmail(db, email) {
 }
 
 export async function verifyUserLogin(db, email, password) {
-  if (!email || !email.trim()) throw new Error('Email is required');
+  if (!email || !email.trim()) {
+    return { success: false, error: 'Email address is required' };
+  }
   const cleanEmail = email.trim().toLowerCase();
 
   const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = ?').bind(cleanEmail);
@@ -336,14 +338,78 @@ export async function verifyUserLogin(db, email, password) {
     return { success: false, error: 'No account found with this email. Please click Create Account.' };
   }
 
-  if (row.password && password) {
+  // If user account was created via Google without password
+  if (row.auth_provider === 'google' && !row.password) {
+    return {
+      success: false,
+      error: 'This account was created with Google. Please click "Continue with Google" below.'
+    };
+  }
+
+  // Password is required
+  if (!password || !password.trim()) {
+    return { success: false, error: 'Password is required to sign in.' };
+  }
+
+  // If account has password, it MUST match
+  if (row.password) {
     if (row.password !== password) {
       return { success: false, error: 'Incorrect password. Please verify your password and try again.' };
     }
+  } else {
+    // If account was created without a password, set their password now
+    await db.prepare('UPDATE users SET password = ? WHERE id = ?').bind(password, row.id).run();
   }
 
   await db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').bind(row.id).run();
   return { success: true, user: formatUser(row) };
+}
+
+export async function saveGoogleUser(db, { email, name, avatarUrl = null, city = 'Jaipur', interest = 'Heritage' } = {}) {
+  if (!email || !email.trim()) throw new Error('Google email is required');
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanName = name?.trim() || cleanEmail.split('@')[0];
+
+  const stmt = db.prepare(`
+    INSERT INTO users (email, name, avatar_url, auth_provider, city, interest, last_login_at)
+    VALUES (?, ?, ?, 'google', ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(email) DO UPDATE SET
+      name = excluded.name,
+      avatar_url = COALESCE(excluded.avatar_url, users.avatar_url),
+      auth_provider = 'google',
+      city = COALESCE(users.city, excluded.city),
+      interest = COALESCE(users.interest, excluded.interest),
+      last_login_at = CURRENT_TIMESTAMP
+  `).bind(cleanEmail, cleanName, avatarUrl, city, interest);
+
+  await stmt.run();
+  return getUserByEmail(db, cleanEmail);
+}
+
+export async function saveUserRegistration(db, { email, name, password, city = 'Jaipur', interest = 'Heritage' } = {}) {
+  if (!email || !email.trim()) throw new Error('Email is required');
+  if (!password || password.trim().length < 4) throw new Error('Password must be at least 4 characters long');
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanName = name?.trim() || cleanEmail.split('@')[0];
+
+  const existing = await getUserByEmail(db, cleanEmail);
+  if (existing) {
+    const row = await db.prepare('SELECT password FROM users WHERE LOWER(email) = ?').bind(cleanEmail).first();
+    if (row && row.password) {
+      throw new Error('An account with this email already exists. Please Sign In instead.');
+    }
+    await db.prepare('UPDATE users SET name = ?, password = ?, city = ?, interest = ?, last_login_at = CURRENT_TIMESTAMP WHERE LOWER(email) = ?')
+      .bind(cleanName, password, city, interest, cleanEmail).run();
+    return getUserByEmail(db, cleanEmail);
+  }
+
+  const stmt = db.prepare(`
+    INSERT INTO users (email, name, password, auth_provider, city, interest, last_login_at)
+    VALUES (?, ?, ?, 'email', ?, ?, CURRENT_TIMESTAMP)
+  `).bind(cleanEmail, cleanName, password, city, interest);
+
+  await stmt.run();
+  return getUserByEmail(db, cleanEmail);
 }
 
 export async function saveUserSignIn(db, { email, name, password = null, avatarUrl = null, authProvider = 'email', city = 'Jaipur', interest = 'Heritage' } = {}) {

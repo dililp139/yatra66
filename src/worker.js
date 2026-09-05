@@ -189,8 +189,23 @@ export default {
         // POST /api/auth/register
         if (pathname === '/api/auth/register' && method === 'POST') {
           const body = await request.json();
-          const user = await db.saveUserSignIn(env.DB, body);
-          return jsonResponse(user, 201);
+          try {
+            const user = await db.saveUserRegistration(env.DB, body);
+            return jsonResponse(user, 201);
+          } catch (err) {
+            return errorResponse(err.message, 400);
+          }
+        }
+
+        // POST /api/auth/google
+        if (pathname === '/api/auth/google' && method === 'POST') {
+          const body = await request.json();
+          try {
+            const user = await db.saveGoogleUser(env.DB, body);
+            return jsonResponse(user, 200);
+          } catch (err) {
+            return errorResponse(err.message, 400);
+          }
         }
 
         // POST /api/auth/signin
