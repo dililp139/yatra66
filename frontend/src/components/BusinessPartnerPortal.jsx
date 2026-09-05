@@ -91,6 +91,19 @@ export default function BusinessPartnerPortal({ setPage }) {
     description: '',
   });
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
+  const [mobilePhotoPreview, setMobilePhotoPreview] = useState(null);
+
+  const handleMobilePhotoPick = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setMobilePhotoPreview(ev.target.result);
+        setRegForm((prev) => ({ ...prev, photoUrl: ev.target.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Business Profile Edit Form (inside portal)
   const [profileForm, setProfileForm] = useState(null);
@@ -1149,6 +1162,59 @@ export default function BusinessPartnerPortal({ setPage }) {
                     />
                   </label>
                 </div>
+
+                <label>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', display: 'block', marginBottom: '2px' }}>
+                    📷 Mobile Photo (Take Photo with Camera or Choose from Gallery)
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleMobilePhotoPick}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      backgroundColor: '#0f172a',
+                      border: '1px dashed #334155',
+                      color: '#94a3b8',
+                      fontSize: '0.825rem',
+                      boxSizing: 'border-box',
+                      cursor: 'pointer',
+                    }}
+                  />
+                  {mobilePhotoPreview && (
+                    <div style={{ marginTop: '8px', position: 'relative', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
+                      <img src={mobilePhotoPreview} alt="Mobile Photo Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobilePhotoPreview(null);
+                          setRegForm((prev) => ({ ...prev, photoUrl: '' }));
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '6px',
+                          right: '6px',
+                          background: 'rgba(0,0,0,0.7)',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </label>
 
                 <button
                   type="submit"

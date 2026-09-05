@@ -7212,3 +7212,227 @@ body {
   object-fit: cover;
   flex-shrink: 0;
 }
+
+
+/* =============================================================
+   MOBILE PHOTOS & MOBILE PHONE RESPONSIVENESS OVERHAUL
+   ============================================================= */
+
+/* 1. Mobile Camera Photo Orientation & Responsive Image Sizing */
+img {
+  max-width: 100%;
+  image-orientation: from-image; /* Preserves mobile phone camera EXIF orientation */
+}
+
+/* 2. Responsive Card Photo Aspect Ratios for Phones */
+.card-image-wrap,
+.destination-photo-wrap,
+.hotel-card-image,
+.gem-card-image,
+.rental-vehicle-card-img {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--border-subtle, #e2e8f0);
+}
+
+.card-image-wrap img,
+.destination-photo-wrap img,
+.hotel-card-image img,
+.gem-card-image img,
+.rental-vehicle-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Mobile Photo Lightbox Overlay */
+.mobile-photo-lightbox-backdrop {
+  animation: mobileLightboxFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mobileLightboxFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* 3. Mobile Phone Specific Breakpoints (< 768px and < 480px) */
+@media (max-width: 768px) {
+  /* Prevent any horizontal blowout on mobile phones */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .app-shell {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Mobile Topbar: Clean horizontal header */
+  .topbar {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.6rem 1rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .topbar .brand {
+    flex-shrink: 0;
+  }
+
+  /* Nav links horizontal touch scroll with momentum */
+  .nav-links {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Hero Section on Mobile */
+  .hero-section {
+    padding: 1rem 0.5rem 2rem !important;
+  }
+
+  .hero-copy h1 {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  .hero-copy p {
+    font-size: 0.95rem !important;
+  }
+
+  /* Touch-friendly horizontal swiping for pills */
+  .quick-explore-pills,
+  .sih-quick-actions-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none;
+    gap: 0.6rem !important;
+    padding-bottom: 0.5rem;
+  }
+
+  .quick-explore-pills::-webkit-scrollbar,
+  .sih-quick-actions-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sih-action-card {
+    flex: 0 0 200px !important;
+    min-width: 200px !important;
+  }
+
+  /* Destination Photo Cards on Mobile Phones */
+  .home-destinations-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .card-image-wrap {
+    height: 200px !important;
+    aspect-ratio: 16 / 10;
+  }
+
+  .destination-hero-img-wrap {
+    height: 250px !important;
+  }
+
+  .destination-hero-gradient {
+    padding: 1rem !important;
+  }
+
+  .destination-hero-gradient h1 {
+    font-size: 1.65rem !important;
+  }
+
+  /* Pages Padding on Mobile */
+  .page {
+    padding: 0.75rem !important;
+  }
+
+  /* Modals Responsive on Phone Screens */
+  .auth-modal-window,
+  .modal-content,
+  .sih-modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 1.25rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px !important;
+    margin: 0.5rem auto !important;
+  }
+
+  /* Touch target sizing: 44px minimum for thumbs */
+  button, select, input[type="button"], input[type="submit"] {
+    min-height: 38px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS auto-zoom on mobile phone keyboards */
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-copy h1 {
+    font-size: 1.75rem !important;
+  }
+
+  .card-image-wrap {
+    height: 180px !important;
+    aspect-ratio: 16 / 9;
+  }
+
+  .destination-hero-img-wrap {
+    height: 210px !important;
+  }
+
+  .destination-hero-gradient h1 {
+    font-size: 1.45rem !important;
+  }
+
+  .topbar .brand-primary-text {
+    font-size: 1.1rem !important;
+  }
+
+  .topbar .brand-india-tag {
+    display: none;
+  }
+
+  /* Floating safety & chatbot icon size on small screens */
+  .floating-safety-pill {
+    bottom: 75px !important;
+    right: 14px !important;
+  }
+
+  .yatra-ai-floating-btn {
+    bottom: 14px !important;
+    right: 14px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
+}

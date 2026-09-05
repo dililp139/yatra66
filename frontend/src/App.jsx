@@ -312,6 +312,7 @@ function App() {
   });
   const [sitePasswordInput, setSitePasswordInput] = useState('');
   const [sitePasswordError, setSitePasswordError] = useState('');
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
 
   const handleUnlockSite = (e) => {
     e.preventDefault();
@@ -696,24 +697,32 @@ function App() {
     onOpenPassport: () => setPassportOpen(true),
     visitedStatesCount,
     onOpenEnquiry: (biz) => setEnquiryModalBiz(biz),
+    openLightbox: (photo) => setLightboxPhoto(photo),
   };
 
   // SITE ACCESS PASSWORD GUARD ("OPENIT")
   if (!siteUnlocked) {
     return (
-      <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
-        <h2>Enter Password to Access Site</h2>
-        <form onSubmit={handleUnlockSite}>
-          <input
-            type="password"
-            placeholder="Password"
-            value={sitePasswordInput}
-            onChange={(e) => setSitePasswordInput(e.target.value)}
-            autoFocus
-          />
-          <button type="submit">Submit</button>
-        </form>
-        {sitePasswordError && <p style={{ color: 'red' }}>{sitePasswordError}</p>}
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem", fontFamily: "system-ui, -apple-system, sans-serif", textAlign: "center", boxSizing: "border-box", backgroundColor: "#f8fafc" }}>
+        <div style={{ width: "100%", maxWidth: "340px", padding: "2rem 1.5rem", backgroundColor: "#ffffff", borderRadius: "16px", boxShadow: "0 10px 25px rgba(0,0,0,0.06)", border: "1px solid #e2e8f0", boxSizing: "border-box" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔒</div>
+          <h2 style={{ fontSize: "1.35rem", margin: "0 0 0.5rem", color: "#0f172a" }}>Site Access Required</h2>
+          <p style={{ margin: "0 0 1.25rem", fontSize: "0.875rem", color: "#64748b" }}>Please enter access password to view the site.</p>
+          <form onSubmit={handleUnlockSite} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={sitePasswordInput}
+              onChange={(e) => setSitePasswordInput(e.target.value)}
+              autoFocus
+              style={{ width: "100%", padding: "12px 14px", fontSize: "16px", borderRadius: "8px", border: "1.5px solid #cbd5e1", boxSizing: "border-box", outline: "none" }}
+            />
+            <button type="submit" style={{ padding: "12px", fontSize: "16px", fontWeight: 700, background: "#0284c7", color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              Unlock Website ➔
+            </button>
+          </form>
+          {sitePasswordError && <p style={{ color: "#ef4444", margin: "0.75rem 0 0", fontSize: "0.85rem", fontWeight: 600 }}>⚠️ {sitePasswordError}</p>}
+        </div>
       </div>
     );
   }
@@ -2042,6 +2051,35 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
                     }}
                   />
                   <span className="card-region-badge">{dest.region}</span>
+                  <button
+                    type="button"
+                    className="photo-zoom-btn"
+                    title="View Full Mobile Photo"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (openLightbox) openLightbox({ url: rawUrl, title: dest.name, subtitle: `${dest.state} • ${dest.region}` });
+                    }}
+                    style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      left: '8px',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '20px',
+                      padding: '3px 9px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backdropFilter: 'blur(4px)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <span>🔍</span>
+                    <span>Photo</span>
+                  </button>
                   <span className="card-rating-badge">⭐ {dest.rating || dest.averageRating || 4.8}</span>
                   <button
                     type="button"
@@ -6347,6 +6385,84 @@ function AuthModal({ onClose, setUser, user, setPage }) {
           </>
         )}
       </div>
+    
+      {/* Mobile Photo Lightbox Modal */}
+      {lightboxPhoto && (
+        <div
+          className="mobile-photo-lightbox-backdrop"
+          onClick={() => setLightboxPhoto(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.92)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '1rem',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxPhoto(null)}
+            style={{
+              position: 'absolute',
+              top: '18px',
+              right: '18px',
+              background: 'rgba(255, 255, 255, 0.25)',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.4rem',
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              zIndex: 100000,
+            }}
+            aria-label="Close Photo"
+          >
+            ✕
+          </button>
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '96vw',
+              maxHeight: '88vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src={lightboxPhoto.url}
+              alt={lightboxPhoto.title || 'Photo'}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '78vh',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+              }}
+            />
+            {lightboxPhoto.title && (
+              <div style={{ marginTop: '0.85rem', textAlign: 'center', color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>{lightboxPhoto.title}</h3>
+                {lightboxPhoto.subtitle && (
+                  <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+                    {lightboxPhoto.subtitle}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
