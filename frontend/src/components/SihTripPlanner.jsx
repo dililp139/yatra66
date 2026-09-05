@@ -162,7 +162,353 @@ const MULTI_DAY_TEMPLATES = {
       ],
     },
   ],
+  Udaipur: [
+    {
+      day: 1,
+      theme: 'Royal City Palace, Lakeside Ghats & Bagore ki Haveli',
+      waypoints: [
+        { name: 'Lake Pichola Heritage Haveli Stay', lat: 24.5764, lng: 73.6835, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'City Palace Museum & Mor Chowk Peacock Courtyard', lat: 24.5762, lng: 73.6835, type: 'Royal Citadel', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Jagdish Temple 1651 AD Carved Sandstone Shrines', lat: 24.5794, lng: 73.6841, type: 'Historic Temple', time: '12:00 PM', slot: 'Morning' },
+        { name: 'Ambrai Ghat Waterfront Royal Mewari Lunch', lat: 24.5800, lng: 73.6780, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Lake Pichola Sunset Boat Cruise to Jag Mandir', lat: 24.5680, lng: 73.6760, type: 'Scenic Cruise', time: '04:30 PM', slot: 'Evening' },
+        { name: 'Bagore Ki Haveli Dharohar Folk Dance & Puppet Show', lat: 24.5797, lng: 73.6806, type: 'Cultural Night', time: '07:00 PM', slot: 'Night' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Monsoon Mountain Palaces, Royal Fountains & Crafts',
+      waypoints: [
+        { name: 'Saheliyon Ki Bari (Garden of Royal Maidens)', lat: 24.6045, lng: 73.6848, type: 'Royal Gardens', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Fateh Sagar Lake Promenade & Nehru Park Island', lat: 24.6020, lng: 73.6720, type: 'Scenic Lake', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Shilpgram Rural Arts & Crafts Complex Lunch', lat: 24.6200, lng: 73.6550, type: 'Artisan Village', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Sajjangarh Monsoon Palace Sunset Panoramic Viewpoint', lat: 24.5905, lng: 73.6375, type: 'Mountain Palace', time: '05:00 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Varanasi: [
+    {
+      day: 1,
+      theme: 'Ancient River Ghats, Dawn Wooden Boat & Maha Aarti',
+      waypoints: [
+        { name: 'Assi Ghat Riverside Heritage Homestay', lat: 25.2890, lng: 83.0060, type: 'Start / Accommodation', time: '05:15 AM', slot: 'Morning' },
+        { name: 'Subah-e-Banaras Dawn Wooden Boat Cruise on the Ganga', lat: 25.2950, lng: 83.0100, type: 'Sacred River Trail', time: '05:45 AM', slot: 'Morning' },
+        { name: 'Kashi Vishwanath Golden Temple Darshan & Corridor', lat: 25.3109, lng: 83.0107, type: 'Spiritual Sanctuary', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Kachori Gali & Blue Lassi Authentic Banarasi Brunch', lat: 25.3110, lng: 83.0120, type: 'Culinary Stop', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Manikarnika & Harishchandra Ghat Philosophical Walk', lat: 25.3100, lng: 83.0130, type: 'Heritage Ghats', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Dashashwamedh Ghat Grand Evening Ganga Aarti', lat: 25.3076, lng: 83.0104, type: 'Spiritual Night', time: '06:30 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Buddhist Sarnath, Silk Weavers & Mughal Forts',
+      waypoints: [
+        { name: 'Sarnath Dhamek Stupa & Deer Park (Buddha First Sermon)', lat: 25.3811, lng: 83.0242, type: 'UNESCO Monument', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Sarnath Archaeological Museum (Ashoka Lion Capital)', lat: 25.3780, lng: 83.0220, type: 'National Museum', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Madanpura Handloom Banarasi Silk Weaving Masterclass', lat: 25.3050, lng: 83.0020, type: 'Artisan Workshop', time: '02:00 PM', slot: 'Afternoon' },
+        { name: 'Ramnagar Fort & Vintage Royal Car Museum', lat: 25.2710, lng: 83.0270, type: 'Riverside Citadel', time: '04:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Amritsar: [
+    {
+      day: 1,
+      theme: 'Golden Temple Splendor, Langar & Freedom Memorials',
+      waypoints: [
+        { name: 'Heritage Street Stay (Town Hall)', lat: 31.6250, lng: 74.8780, type: 'Start / Accommodation', time: '06:30 AM', slot: 'Morning' },
+        { name: 'Sri Harmandir Sahib (Golden Temple) Sunrise & Amrit Sarovar', lat: 31.6200, lng: 74.8765, type: 'Sacred Sanctum', time: '07:15 AM', slot: 'Morning' },
+        { name: 'Guru Ka Langar (World Largest Free Community Kitchen)', lat: 31.6190, lng: 74.8770, type: 'Langar Community', time: '10:00 AM', slot: 'Morning' },
+        { name: 'Jallianwala Bagh Historic Memorial & Martyr Well', lat: 31.6206, lng: 74.8797, type: 'Historic Monument', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Kesar Da Dhaba Authentic Amritsari Kulcha & Dal Makhani', lat: 31.6240, lng: 74.8750, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Partition Museum (Town Hall Historic Archives)', lat: 31.6260, lng: 74.8790, type: 'Heritage Museum', time: '03:45 PM', slot: 'Afternoon' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Frontier Valour at Wagah Border & Historic Forts',
+      waypoints: [
+        { name: 'Gobindgarh Fort & Toshakhana Sikh Military Museum', lat: 31.6290, lng: 74.8580, type: 'Military Citadel', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Kanha Sweets Traditional Chana Puri & Lassi', lat: 31.6360, lng: 74.8710, type: 'Culinary Stop', time: '12:00 PM', slot: 'Afternoon' },
+        { name: 'Wagah Border Sunset Beating Retreat Ceremony (Indo-Pak)', lat: 31.6045, lng: 74.5738, type: 'National Ceremony', time: '03:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Manali: [
+    {
+      day: 1,
+      theme: 'Ancient Cedar Temples, Old Manali Cafes & Hot Springs',
+      waypoints: [
+        { name: 'Log Huts Old Manali Pine Resort', lat: 32.2530, lng: 77.1820, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Hadimba Devi 1553 AD Pagoda Wooden Temple', lat: 32.2483, lng: 77.1806, type: 'Ancient Temple', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Manu Temple & Old Manali Village Trail', lat: 32.2570, lng: 77.1750, type: 'Historic Village', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Cafe 1947 Beas Riverfront Himalayan Trout Lunch', lat: 32.2550, lng: 77.1790, type: 'Riverfront Cafe', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Vashisht Natural Hot Sulphur Springs & Temple', lat: 32.2630, lng: 77.1950, type: 'Natural Spring', time: '03:45 PM', slot: 'Afternoon' },
+        { name: 'Mall Road Evening Stroll & Tibetan Market', lat: 32.2390, lng: 77.1880, type: 'Alpine Market', time: '06:00 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'High Mountain Passes & Solang Valley Adventure',
+      waypoints: [
+        { name: 'Solang Valley Adventure Arena & Paragliding Point', lat: 32.3160, lng: 77.1570, type: 'Alpine Adventure', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Atal Tunnel (World Longest Highway Tunnel Above 10,000ft)', lat: 32.3640, lng: 77.1400, type: 'Engineering Marvel', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Sissu Waterfall & Lahaul Valley Viewpoint', lat: 32.4760, lng: 77.1210, type: 'High Valley View', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Naggar Castle (500-Year-Old Himalayan Citadel)', lat: 32.1380, lng: 77.1740, type: 'Historic Fortress', time: '04:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Kochi: [
+    {
+      day: 1,
+      theme: 'Colonial Fort Kochi, Chinese Fishing Nets & Synagogues',
+      waypoints: [
+        { name: 'Princess Street Heritage Stay (Fort Kochi)', lat: 9.9650, lng: 76.2420, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Fort Kochi Beach & Cantilevered Chinese Fishing Nets', lat: 9.9679, lng: 76.2415, type: 'Maritime Icon', time: '09:15 AM', slot: 'Morning' },
+        { name: 'St. Francis Church (Vasco da Gama Original Burial Place)', lat: 9.9660, lng: 76.2430, type: 'Historic Church', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Kashi Art Cafe Fresh Fusion Seafood Lunch', lat: 9.9640, lng: 76.2420, type: 'Artisan Cafe', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Jew Town Antiques & Paradesi Synagogue (1568 AD)', lat: 9.9575, lng: 76.2594, type: 'Ancient Heritage', time: '03:15 PM', slot: 'Afternoon' },
+        { name: 'Kerala Kathakali Centre Classical Drama Performance', lat: 9.9630, lng: 76.2450, type: 'Cultural Night', time: '06:00 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Mural Palaces, Spices & Backwater Boat Cruise',
+      waypoints: [
+        { name: 'Mattancherry Dutch Palace & Ramayana Murals', lat: 9.9580, lng: 76.2580, type: 'Royal Palace', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Cochin Spice Bazaars (Ginger, Cardamom & Pepper Warehouses)', lat: 9.9560, lng: 76.2570, type: 'Spice Market', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Traditional Kerala Sadhya Feast on Banana Leaf', lat: 9.9700, lng: 76.2800, type: 'Culinary Stop', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Kumbalangi Integrated Eco-Tourism Island Canoe Trail', lat: 9.8730, lng: 76.2860, type: 'Backwater Ecology', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Marine Drive Rainbow Bridge Sunset Promenade', lat: 9.9780, lng: 76.2750, type: 'Sunset Walk', time: '06:15 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Rishikesh: [
+    {
+      day: 1,
+      theme: 'Holy River Bridges, Ashrams & Evening Ganga Aarti',
+      waypoints: [
+        { name: 'Tapovan Riverside Yoga Retreat Stay', lat: 30.1340, lng: 78.3240, type: 'Start / Accommodation', time: '06:00 AM', slot: 'Morning' },
+        { name: 'Triveni Ghat Sacred Morning Ganga Walk', lat: 30.1060, lng: 78.2980, type: 'Spiritual Ghat', time: '07:30 AM', slot: 'Morning' },
+        { name: 'Ram Jhula & Swarg Ashram Crossing', lat: 30.1230, lng: 78.3160, type: 'Suspension Bridge', time: '10:00 AM', slot: 'Morning' },
+        { name: 'Chotiwala Traditional Pure Ghee Ayurvedic Thali', lat: 30.1220, lng: 78.3180, type: 'Culinary Stop', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Beatles Ashram (Chaurasi Kutia Graffiti & Meditation Domes)', lat: 30.1130, lng: 78.3220, type: 'Historic Ashram', time: '03:15 PM', slot: 'Afternoon' },
+        { name: 'Parmarth Niketan Sunset Ganga Aarti & Chanting', lat: 30.1180, lng: 78.3130, type: 'Spiritual Evening', time: '06:00 PM', slot: 'Night' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'White Water Rapids, Waterfalls & Cave Solitude',
+      waypoints: [
+        { name: 'Shivpuri Grade III White Water Rafting Launch', lat: 30.1400, lng: 78.3900, type: 'River Adventure', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Neer Garh Jungle Waterfall Trek & Plunge Pool', lat: 30.1440, lng: 78.3360, type: 'Jungle Waterfall', time: '12:00 PM', slot: 'Afternoon' },
+        { name: 'Little Buddha Cafe Organic Salad & Ginger Lemon Chai', lat: 30.1300, lng: 78.3270, type: 'Riverfront Cafe', time: '02:30 PM', slot: 'Afternoon' },
+        { name: 'Vashishta Guha Ancient Meditation Cave on Riverbank', lat: 30.1650, lng: 78.4320, type: 'Sacred Cave', time: '04:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Hampi: [
+    {
+      day: 1,
+      theme: 'Sacred Hillside Temples & Tungabhadra Monoliths',
+      waypoints: [
+        { name: 'Kamalapur Heritage Stay', lat: 15.3180, lng: 76.4780, type: 'Start / Accommodation', time: '07:00 AM', slot: 'Morning' },
+        { name: 'Virupaksha 7th-Century Temple & Hampi Bazaar', lat: 15.3353, lng: 76.4600, type: 'Living UNESCO Temple', time: '08:00 AM', slot: 'Morning' },
+        { name: 'Hemakuta Hill Monolithic Ganesha & Sunset Rocks', lat: 15.3320, lng: 76.4610, type: 'Granite Monolith', time: '10:30 AM', slot: 'Morning' },
+        { name: 'Mango Tree Riverside South Indian Banana Leaf Thali', lat: 15.3340, lng: 76.4630, type: 'Culinary Stop', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Achyutaraya Temple & Courtesans Street', lat: 15.3360, lng: 76.4710, type: 'Ruined Monument', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Matanga Hill Sunset Panoramic 360-Degree Lookout', lat: 15.3330, lng: 76.4680, type: 'Sunset Point', time: '05:30 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Royal Enclosure, Stone Chariot & Coracle Rides',
+      waypoints: [
+        { name: 'Vijaya Vittala Temple & Mesmerizing Stone Chariot', lat: 15.3438, lng: 76.4772, type: 'Architectural Marvel', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Queen Bath, Stepped Tank & Royal Stepped Court', lat: 15.3190, lng: 76.4750, type: 'Royal Complex', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Lotus Mahal & Majestic Elephant Stables', lat: 15.3210, lng: 76.4800, type: 'Indo-Islamic Palace', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Tungabhadra River Traditional Round Coracle Boat Ride', lat: 15.3400, lng: 76.4700, type: 'River Adventure', time: '04:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Bundi: [
+    {
+      day: 1,
+      theme: 'City of 50+ Baoris, Taragarh Fortress & Miniature Murals',
+      waypoints: [
+        { name: 'Nawal Sagar Traditional Haveli Stay', lat: 25.4410, lng: 75.6380, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Taragarh Fort & Ruined Star Ramparts', lat: 25.4480, lng: 75.6330, type: 'Hilltop Fortress', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Chitrashala (Garh Palace Frescoes of Krishna)', lat: 25.4450, lng: 75.6350, type: 'Miniature Art', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Authentic Bundi Laddoo & Dal Baati Lunch', lat: 25.4420, lng: 75.6400, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Raniji Ki Baori (46-Meter Masterpiece Stepwell)', lat: 25.4414, lng: 75.6454, type: 'Ancient Stepwell', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Nawal Sagar Lake Sunset Water Reflection', lat: 25.4400, lng: 75.6370, type: 'Sunset Point', time: '05:45 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Orchha: [
+    {
+      day: 1,
+      theme: 'Medieval River Citadel, Soaring Chhatris & Palaces',
+      waypoints: [
+        { name: 'Betwa River Retreat Heritage Stay', lat: 25.3520, lng: 78.6400, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Jahangir Mahal (17th Century Bundela Architecture)', lat: 25.3508, lng: 78.6433, type: 'Royal Citadel', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Raja Mahal Vibrant Court Murals & Diwan-i-Khas', lat: 25.3515, lng: 78.6420, type: 'Ancient Murals', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Bundelkhandi Thali & Fresh Mawa Jalebi', lat: 25.3500, lng: 78.6410, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Chaturbhuj Temple Soaring Spire Lookout', lat: 25.3525, lng: 78.6405, type: 'Historic Temple', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Betwa River Chhatris (Cenotaphs) Golden Hour Reflection', lat: 25.3480, lng: 78.6450, type: 'Riverfront Sunset', time: '05:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Mandu: [
+    {
+      day: 1,
+      theme: 'Floating Palaces, Acoustical Halls & Romantic Pavilions',
+      waypoints: [
+        { name: 'Malwa Heritage Resort Stay', lat: 22.3650, lng: 75.4050, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Jahaz Mahal (Ship Palace Floating Between Twin Lakes)', lat: 22.3664, lng: 75.4042, type: 'Water Palace', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Hindola Mahal (Swinging Palace with Slanted Walls)', lat: 22.3670, lng: 75.4030, type: 'Architectural Gem', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Baobab Tamarind Juice & Malwi Dal Bafla Lunch', lat: 22.3640, lng: 75.4060, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Hoshang Shah Marble Tomb (Inspiration for Taj Mahal)', lat: 22.3630, lng: 75.4020, type: 'Marble Mausoleum', time: '03:30 PM', slot: 'Afternoon' },
+        { name: 'Rani Roopmati Pavilion Sunset Over Narmada Valley', lat: 22.3380, lng: 75.4080, type: 'Panoramic Viewpoint', time: '05:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Shillong: [
+    {
+      day: 1,
+      theme: 'Scotland of the East: Pine Lakes, Waterfalls & Rock Music',
+      waypoints: [
+        { name: 'Pinewood Heritage Lodge Stay', lat: 25.5780, lng: 91.8890, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Ward Lake Botanical Garden & Wooden Bridge', lat: 25.5750, lng: 91.8870, type: 'Botanical Lake', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Elephant Falls Three-Tier Cascades', lat: 25.5360, lng: 91.8230, type: 'Natural Waterfall', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Dylan Cafe Khasi Jadoh & Roasted Pork Lunch', lat: 25.5720, lng: 91.8840, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Shillong Peak 360-Degree Himalayan Viewpoint', lat: 25.5340, lng: 91.8490, type: 'Mountain View', time: '03:45 PM', slot: 'Afternoon' },
+        { name: 'Police Bazar Street Food & Live Acoustic Music', lat: 25.5790, lng: 91.8820, type: 'Cultural Night', time: '06:30 PM', slot: 'Evening' },
+      ],
+    },
+  ],
+  Leh: [
+    {
+      day: 1,
+      theme: 'Indus Valley Stupas, Palaces & Mountain High Passes',
+      waypoints: [
+        { name: 'Changspa Boutique Ladakhi Stay', lat: 34.1650, lng: 77.5750, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Shanti Stupa White Dome Panoramic Sunrise', lat: 34.1726, lng: 77.5810, type: 'Buddhist Stupa', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Leh Royal Palace & Tsemo Gompa Ramparts', lat: 34.1660, lng: 77.5850, type: 'Tibetan Palace', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Tibetan Kitchen Steamed Tingmo & Thukpa Lunch', lat: 34.1640, lng: 77.5840, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Spituk Gompa & Indus River Confluence Valley', lat: 34.1310, lng: 77.5250, type: 'Monastery View', time: '03:45 PM', slot: 'Afternoon' },
+      ],
+    },
+  ],
+  Mawlynnong: [
+    {
+      day: 1,
+      theme: 'Asia Cleanest Village Eco-Trail & Living Root Bridges',
+      waypoints: [
+        { name: 'Mawlynnong Village Traditional Bamboo Homestay', lat: 25.2016, lng: 91.9056, type: 'Start / Accommodation', time: '08:00 AM', slot: 'Morning' },
+        { name: 'Riwai Single-Decker Living Root Bridge Trail', lat: 25.1980, lng: 91.9120, type: 'Bio-Engineering Wonder', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Mawlynnong Eco-Village Walk & Bamboo Dustbins Walkway', lat: 25.2020, lng: 91.9060, type: 'Eco-Village Trail', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Traditional Khasi Bamboo Shoot & Red Rice Lunch', lat: 25.2018, lng: 91.9050, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Sky Walk Bamboo Treehouse Panorama (Bangladesh Plains)', lat: 25.2030, lng: 91.9070, type: 'Treehouse Viewpoint', time: '04:00 PM', slot: 'Afternoon' },
+        { name: 'Balancing Rock Natural Geological Phenomenon', lat: 25.2005, lng: 91.9040, type: 'Natural Marvel', time: '05:30 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Dawki Crystal Clear Umngot River & Borhill Falls',
+      waypoints: [
+        { name: 'Dawki Umngot River Crystal Boat Cruise (Floating Boats)', lat: 25.1850, lng: 92.0190, type: 'Glass River Boating', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Tamabil Indo-Bangladesh Friendship Frontier Point', lat: 25.1760, lng: 92.0130, type: 'International Frontier', time: '11:00 AM', slot: 'Morning' },
+        { name: 'Jaflong Zero Point Riverbank Fish Lunch', lat: 25.1800, lng: 92.0160, type: 'Riverside Cafe', time: '01:00 PM', slot: 'Afternoon' },
+        { name: 'Borhill Cascading Waterfalls & Bamboo Forest Walk', lat: 25.1950, lng: 91.9800, type: 'Jungle Waterfall', time: '03:45 PM', slot: 'Afternoon' },
+      ],
+    },
+  ],
+  Chettinad: [
+    {
+      day: 1,
+      theme: '1000-Window Palaces, Banana Leaf Feasts & Tiles',
+      waypoints: [
+        { name: 'Kanadukathan Heritage Chettinad Mansion Stay', lat: 10.1742, lng: 78.7885, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: 'Chettinad Raja Palace (1000 Windows & Italian Marble)', lat: 10.1750, lng: 78.7890, type: 'Palatial Mansion', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Athangudi Handmade Floral Terracotta Tile Guilds', lat: 10.1980, lng: 78.8460, type: 'Artisan Workshop', time: '11:45 AM', slot: 'Morning' },
+        { name: 'Authentic 18-Dish Chettinad Banana Leaf Feast (Vada & Kuzhambu)', lat: 10.1720, lng: 78.7850, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Chettinad Cotton Kandangi Handloom Weavers Cooperative', lat: 10.0700, lng: 78.7800, type: 'Textile Guild', time: '04:00 PM', slot: 'Afternoon' },
+        { name: 'Ayyanar Terracotta Giant Sacred Horse Shrine', lat: 10.1200, lng: 78.8000, type: 'Folk Shrine', time: '06:00 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Ancient Rock-Cut Forts & Karaikudi Antique Bazaars',
+      waypoints: [
+        { name: 'Thirumayam Rock-Cut Fortress & Cave Temples', lat: 10.2450, lng: 78.7510, type: 'Ancient Citadel', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Karaikudi Muneeswarar Temple & Heritage Street', lat: 10.0710, lng: 78.7820, type: 'Heritage Street', time: '11:30 AM', slot: 'Morning' },
+        { name: 'The Bangala Traditional Chettinad Lunch', lat: 10.0750, lng: 78.7900, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Karaikudi Antique Bazaar (Belgian Mirrors & Vintage Brass)', lat: 10.0680, lng: 78.7750, type: 'Vintage Market', time: '03:45 PM', slot: 'Afternoon' },
+      ],
+    },
+  ],
+  Spiti: [
+    {
+      day: 1,
+      theme: 'Ancient Tibetan Monasteries & World Highest Villages',
+      waypoints: [
+        { name: 'Kaza High-Altitude Himalayan Homestay', lat: 32.2276, lng: 78.0710, type: 'Start / Accommodation', time: '08:00 AM', slot: 'Morning' },
+        { name: 'Key Gompa (1000-Year-Old Fortress Tibetan Monastery)', lat: 32.2980, lng: 78.0120, type: 'Sacred Monastery', time: '09:30 AM', slot: 'Morning' },
+        { name: 'Kibber Village (High Himalayan Snow Leopard Trail)', lat: 32.3330, lng: 78.0100, type: 'High Altitude Village', time: '11:45 AM', slot: 'Morning' },
+        { name: 'Chicham Bridge (Highest Suspension Bridge in Asia)', lat: 32.3480, lng: 78.0050, type: 'Engineering Feat', time: '01:30 PM', slot: 'Afternoon' },
+        { name: 'Tibetan Butter Tea, Siddu & Thukpa Mountain Lunch', lat: 32.2280, lng: 78.0720, type: 'Culinary Stop', time: '03:00 PM', slot: 'Afternoon' },
+        { name: 'Kaza Monastery Stupa Sunset Glow', lat: 32.2260, lng: 78.0700, type: 'Sunset Stupa', time: '05:30 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: 'Highest Post Office & Marine Fossils of Langza',
+      waypoints: [
+        { name: 'Hikkim (World Highest Post Office at 14,567 ft - Post a Card)', lat: 32.2530, lng: 78.1340, type: 'World Highest Post', time: '09:00 AM', slot: 'Morning' },
+        { name: 'Komic Monastery (World Highest Motorrable Settlement)', lat: 32.2350, lng: 78.1480, type: 'Sacred Gompa', time: '11:30 AM', slot: 'Morning' },
+        { name: 'Langza Giant Golden Buddha Statue & Tethys Sea Fossils', lat: 32.2680, lng: 78.1180, type: 'Fossil Village', time: '02:00 PM', slot: 'Afternoon' },
+        { name: 'Pin Valley National Park Stargazing & Riverside Campfire', lat: 31.9500, lng: 78.0300, type: 'Dark Sky Stargazing', time: '06:30 PM', slot: 'Night' },
+      ],
+    },
+  ],
+
 };
+
+function getCityItineraryTemplate(cityName, allCities) {
+  if (MULTI_DAY_TEMPLATES[cityName]) return MULTI_DAY_TEMPLATES[cityName];
+  // Match case-insensitively
+  const key = Object.keys(MULTI_DAY_TEMPLATES).find(k => k.toLowerCase() === cityName.toLowerCase());
+  if (key) return MULTI_DAY_TEMPLATES[key];
+
+  const matched = (allCities || []).find(c => c.name.toLowerCase() === cityName.toLowerCase());
+  const lat = matched?.latitude || 26.9124;
+  const lng = matched?.longitude || 75.7873;
+
+  return [
+    {
+      day: 1,
+      theme: `Iconic Heritage Landmarks & Cultural Center (${cityName})`,
+      waypoints: [
+        { name: `${cityName} Heritage Hotel / Haveli Stay`, lat: lat, lng: lng, type: 'Start / Accommodation', time: '08:30 AM', slot: 'Morning' },
+        { name: `${cityName} Historical Citadel & Monument Square`, lat: lat + 0.007, lng: lng + 0.006, type: 'Historic Landmark', time: '09:45 AM', slot: 'Morning' },
+        { name: `Traditional ${cityName} Authentic Regional Lunch`, lat: lat + 0.003, lng: lng + 0.008, type: 'Culinary Stop', time: '01:00 PM', slot: 'Afternoon' },
+        { name: `${cityName} Artisan Guilds & Traditional Bazaars`, lat: lat - 0.004, lng: lng + 0.005, type: 'Artisan Bazaar', time: '03:30 PM', slot: 'Afternoon' },
+        { name: `${cityName} Golden Hour Sunset Viewpoint`, lat: lat - 0.006, lng: lng - 0.005, type: 'Sunset Point', time: '05:45 PM', slot: 'Evening' },
+      ],
+    },
+    {
+      day: 2,
+      theme: `Nature Trails, Sacred Shrines & Local Delicacies (${cityName})`,
+      waypoints: [
+        { name: `${cityName} Morning Botanical Gardens / Lake Walk`, lat: lat + 0.009, lng: lng - 0.006, type: 'Nature Trail', time: '08:30 AM', slot: 'Morning' },
+        { name: `${cityName} Sacred Sanctuary & Historic Shrines`, lat: lat + 0.012, lng: lng - 0.003, type: 'Spiritual Sanctuary', time: '11:00 AM', slot: 'Morning' },
+        { name: `Iconic ${cityName} Street Gastronomy & Sweets`, lat: lat + 0.004, lng: lng + 0.002, type: 'Culinary Stop', time: '01:30 PM', slot: 'Afternoon' },
+        { name: `${cityName} Museum & Living Heritage Gallery`, lat: lat - 0.003, lng: lng + 0.011, type: 'Heritage Museum', time: '04:00 PM', slot: 'Afternoon' },
+        { name: `${cityName} Evening Cultural Illumination & Walk`, lat: lat - 0.001, lng: lng - 0.001, type: 'Cultural Night', time: '06:30 PM', slot: 'Evening' },
+      ],
+    }
+  ];
+}
 
 export default function SihTripPlanner({
   cities = [],
@@ -172,7 +518,19 @@ export default function SihTripPlanner({
   handleOpenBooking,
 }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [plannerTab, setPlannerTab] = useState('itinerary'); // 'itinerary' | 'hotels' | 'cabs'
+  const [plannerTab, setPlannerTab] = useState('itinerary');
+
+  // Search & Live Suggestions State for All Cities
+  const [citySearchInput, setCitySearchInput] = useState('');
+  const [showLiveSuggestions, setShowLiveSuggestions] = useState(false);
+  const [cityCategoryFilter, setCityCategoryFilter] = useState('all');
+
+  // Sync cityChoice whenever selectedCity prop updates
+  useEffect(() => {
+    if (selectedCity && selectedCity !== cityChoice) {
+      setCityChoice(selectedCity);
+    }
+  }, [selectedCity]); // 'itinerary' | 'hotels' | 'cabs'
   const [cityChoice, setCityChoice] = useState(selectedCity || 'Jaipur');
   const [durationDays, setDurationDays] = useState(3);
   const [customDaysInput, setCustomDaysInput] = useState(3);
@@ -224,7 +582,7 @@ export default function SihTripPlanner({
       });
     }
 
-    const templates = MULTI_DAY_TEMPLATES[cityChoice] || MULTI_DAY_TEMPLATES.Jaipur;
+    const templates = getCityItineraryTemplate(cityChoice, allPlannerCities);
     const plan = [];
     for (let d = 1; d <= durationDays; d++) {
       const templateIndex = (d - 1) % templates.length;
@@ -346,7 +704,89 @@ export default function SihTripPlanner({
     ];
   }, [cityChoice]);
 
-  const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
+  // Comprehensive list of ALL 32+ Indian destinations
+  const allPlannerCities = useMemo(() => {
+    const defaultList = [
+      { id: 1, name: 'Jaipur', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'forts', 'culture'], rating: 4.8, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
+      { id: 2, name: 'Agra', state: 'Uttar Pradesh', region: 'North India', themes: ['heritage', 'romantic', 'architecture'], rating: 4.9, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800', bestSeason: 'Oct to Mar' },
+      { id: 3, name: 'Delhi', state: 'Delhi', region: 'North India', themes: ['history', 'food', 'markets'], rating: 4.6, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800', bestSeason: 'Oct to Mar' },
+      { id: 4, name: 'Mumbai', state: 'Maharashtra', region: 'West India', themes: ['beaches', 'nightlife', 'food'], rating: 4.5, estimatedDailyBudget: 6500, heroImage: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800', bestSeason: 'Nov to Feb' },
+      { id: 5, name: 'Udaipur', state: 'Rajasthan', region: 'West India', themes: ['lakes', 'palaces', 'romantic'], rating: 4.8, estimatedDailyBudget: 5000, heroImage: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800', bestSeason: 'Sep to Mar' },
+      { id: 6, name: 'Varanasi', state: 'Uttar Pradesh', region: 'North India', themes: ['spiritual', 'culture', 'river'], rating: 4.7, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800', bestSeason: 'Oct to Mar' },
+      { id: 7, name: 'Goa', state: 'Goa', region: 'West India', themes: ['beaches', 'nightlife', 'heritage'], rating: 4.7, estimatedDailyBudget: 6200, heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', bestSeason: 'Nov to Feb' },
+      { id: 8, name: 'Kochi', state: 'Kerala', region: 'South India', themes: ['backwaters', 'heritage', 'food'], rating: 4.6, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', bestSeason: 'Sep to Mar' },
+      { id: 9, name: 'Amritsar', state: 'Punjab', region: 'North India', themes: ['spiritual', 'food', 'heritage'], rating: 4.9, estimatedDailyBudget: 3600, heroImage: 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800', bestSeason: 'Oct to Mar' },
+      { id: 10, name: 'Manali', state: 'Himachal Pradesh', region: 'North India', themes: ['mountains', 'adventure', 'snow'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', bestSeason: 'Oct to Jun' },
+      { id: 11, name: 'Rishikesh', state: 'Uttarakhand', region: 'North India', themes: ['yoga', 'spiritual', 'adventure'], rating: 4.8, estimatedDailyBudget: 3400, heroImage: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', bestSeason: 'Sep to Apr' },
+      { id: 12, name: 'Hampi', state: 'Karnataka', region: 'South India', themes: ['unesco', 'heritage', 'ruins'], rating: 4.9, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?w=800', bestSeason: 'Oct to Feb' },
+      { id: 13, name: 'Shimla', state: 'Himachal Pradesh', region: 'North India', themes: ['colonial', 'snow', 'mountains'], rating: 4.7, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', bestSeason: 'Oct to Jun' },
+      { id: 14, name: 'Leh Ladakh', state: 'Ladakh', region: 'North India', themes: ['adventure', 'monasteries', 'lakes'], rating: 4.9, estimatedDailyBudget: 5800, heroImage: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800', bestSeason: 'May to Sep' },
+      { id: 15, name: 'Mysore', state: 'Karnataka', region: 'South India', themes: ['palaces', 'silk', 'heritage'], rating: 4.8, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', bestSeason: 'Oct to Mar' },
+      { id: 16, name: 'Srinagar', state: 'Jammu & Kashmir', region: 'North India', themes: ['lakes', 'houseboats', 'nature'], rating: 4.8, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800', bestSeason: 'Apr to Oct' },
+      { id: 17, name: 'Pondicherry', state: 'Puducherry', region: 'South India', themes: ['french-quarter', 'beaches', 'cafes'], rating: 4.7, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', bestSeason: 'Oct to Mar' },
+      { id: 18, name: 'Hyderabad', state: 'Telangana', region: 'South India', themes: ['biryani', 'palaces', 'history'], rating: 4.7, estimatedDailyBudget: 4500, heroImage: 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800', bestSeason: 'Oct to Mar' },
+      { id: 19, name: 'Kolkata', state: 'West Bengal', region: 'East India', themes: ['heritage', 'literature', 'sweets'], rating: 4.7, estimatedDailyBudget: 3900, heroImage: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', bestSeason: 'Oct to Mar' },
+      { id: 20, name: 'Jodhpur', state: 'Rajasthan', region: 'West India', themes: ['blue-city', 'forts', 'desert'], rating: 4.8, estimatedDailyBudget: 4100, heroImage: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', bestSeason: 'Oct to Mar' },
+      { id: 21, name: 'Ooty', state: 'Tamil Nadu', region: 'South India', themes: ['hills', 'tea-gardens', 'toy-train'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
+      { id: 22, name: 'Shillong', state: 'Meghalaya', region: 'North-East', themes: ['waterfalls', 'clouds', 'nature'], rating: 4.8, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
+      { id: 23, name: 'Darjeeling', state: 'West Bengal', region: 'East India', themes: ['mountains', 'tea', 'unesco'], rating: 4.7, estimatedDailyBudget: 4800, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
+      { id: 24, name: 'Bengaluru', state: 'Karnataka', region: 'South India', themes: ['gardens', 'food', 'culture'], rating: 4.6, estimatedDailyBudget: 5400, heroImage: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', bestSeason: 'Sep to Mar' },
+      // Offbeat Gems
+      { id: 25, name: 'Bundi', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'stepwells', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2800, heroImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800', bestSeason: 'Oct to Mar' },
+      { id: 26, name: 'Orchha', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'river', 'spiritual', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2600, heroImage: 'https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=800', bestSeason: 'Oct to Mar' },
+      { id: 27, name: 'Mandu', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'water-palaces', 'offbeat'], rating: 4.7, estimatedDailyBudget: 2700, heroImage: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800', bestSeason: 'Jul to Mar' },
+      { id: 28, name: 'Samode', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'crafts', 'weavers', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
+      { id: 29, name: 'Mawlynnong', state: 'Meghalaya', region: 'North-East', themes: ['nature', 'ecotourism', 'offbeat'], rating: 4.9, estimatedDailyBudget: 2500, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
+      { id: 30, name: 'Ziro', state: 'Arunachal Pradesh', region: 'North-East', themes: ['nature', 'tribal', 'mountains', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2900, heroImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', bestSeason: 'Mar to Oct' },
+      { id: 31, name: 'Chettinad', state: 'Tamil Nadu', region: 'South India', themes: ['heritage', 'mansions', 'food', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3000, heroImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', bestSeason: 'Nov to Mar' },
+      { id: 32, name: 'Spiti Valley', state: 'Himachal Pradesh', region: 'North India', themes: ['monasteries', 'mountains', 'offbeat'], rating: 4.9, estimatedDailyBudget: 3500, heroImage: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800', bestSeason: 'Jun to Oct' },
+    ];
+
+    if (!cities || cities.length === 0) return defaultList;
+    const map = new Map();
+    defaultList.forEach(c => map.set(c.name.toLowerCase(), c));
+    cities.forEach(c => {
+      const existing = map.get(c.name.toLowerCase()) || {};
+      map.set(c.name.toLowerCase(), { ...existing, ...c });
+    });
+    return Array.from(map.values());
+  }, [cities]);
+
+  // Live autocomplete search suggestions
+  const liveSuggestions = useMemo(() => {
+    const q = citySearchInput.trim().toLowerCase();
+    if (!q) return [];
+    return allPlannerCities.filter((c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.state.toLowerCase().includes(q) ||
+      (c.region || '').toLowerCase().includes(q) ||
+      (c.themes || []).some((t) => t.toLowerCase().includes(q))
+    ).slice(0, 6);
+  }, [citySearchInput, allPlannerCities]);
+
+  // Filtered cities displayed in the card grid
+  const filteredGridCities = useMemo(() => {
+    const q = citySearchInput.trim().toLowerCase();
+    return allPlannerCities.filter((c) => {
+      const matchQuery = !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.state.toLowerCase().includes(q) ||
+        (c.region || '').toLowerCase().includes(q) ||
+        (c.themes || []).some((t) => t.toLowerCase().includes(q));
+
+      const matchCat =
+        cityCategoryFilter === 'all' ||
+        (cityCategoryFilter === 'heritage' && (c.themes || []).some((t) => ['heritage', 'forts', 'palaces', 'unesco', 'history'].includes(t))) ||
+        (cityCategoryFilter === 'mountains' && (c.themes || []).some((t) => ['mountains', 'snow', 'hills', 'adventure'].includes(t))) ||
+        (cityCategoryFilter === 'coastal' && (c.themes || []).some((t) => ['beaches', 'backwaters', 'lakes', 'river'].includes(t))) ||
+        (cityCategoryFilter === 'spiritual' && (c.themes || []).some((t) => ['spiritual', 'yoga', 'river'].includes(t))) ||
+        (cityCategoryFilter === 'offbeat' && (c.themes || []).some((t) => ['offbeat', 'stepwells', 'ecotourism', 'tribal'].includes(t)));
+
+      return matchQuery && matchCat;
+    });
+  }, [citySearchInput, cityCategoryFilter, allPlannerCities]);
+
+    const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
   const [rebalanceTarget, setRebalanceTarget] = useState(null);
   const [injectedBizIds, setInjectedBizIds] = useState([]);
 
@@ -792,77 +1232,246 @@ export default function SihTripPlanner({
       {/* STEP 1: DESTINATION */}
       {currentStep === 1 && (
         <div className="glass-panel" style={{ padding: '2rem', borderRadius: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div>
-              <h3 style={{ margin: '0 0 0.25rem', color: 'var(--text-main)' }}>Where in India would you like to explore?</h3>
-              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Select from our top curated destinations or pick any of India’s 24 heritage hubs.
+<div style={{ marginBottom: '2rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+              <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+                ✨ Step 1 of 6: Choose Your Destination
+              </span>
+              <h3 style={{ margin: '0.4rem 0 0.35rem', fontSize: '1.75rem', color: 'var(--text-main)', fontWeight: 800 }}>
+                Where are you travelling in India?
+              </h3>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.925rem' }}>
+                Select from 32+ royal heritage capitals, Himalayan valleys, beach retreats, or secret offbeat sanctuaries.
               </p>
             </div>
 
-            {/* FULL CITY SELECTOR DROPDOWN */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>Choose City:</span>
-              <select
-                value={cityChoice}
-                onChange={(e) => setCityChoice(e.target.value)}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: '10px',
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-surface)',
-                  fontSize: '0.9rem',
-                  fontWeight: 700,
-                  color: 'var(--text-main)',
-                }}
-              >
-                {cities.length > 0 ? (
-                  cities.map((c) => (
-                    <option key={c.id} value={c.name}>{c.name} ({c.state})</option>
-                  ))
-                ) : (
-                  FIVE_CITIES_MVP.map((c) => (
-                    <option key={c.id} value={c.name}>{c.name} ({c.state})</option>
-                  ))
+            {/* ANIMATED SMART SEARCH BAR WITH LIVE AUTOCOMPLETE SUGGESTIONS */}
+            <div className="planner-search-container">
+              <div className="planner-search-input-wrap">
+                <span className="planner-search-icon-anim">🔍</span>
+                <input
+                  type="text"
+                  className="planner-city-input"
+                  placeholder="Search any destination (e.g. Amritsar, Udaipur, Bundi, Manali, Shillong, Hampi)..."
+                  value={citySearchInput}
+                  onChange={(e) => {
+                    setCitySearchInput(e.target.value);
+                    setShowLiveSuggestions(true);
+                  }}
+                  onFocus={() => setShowLiveSuggestions(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      if (liveSuggestions.length > 0) {
+                        setCityChoice(liveSuggestions[0].name);
+                        setCitySearchInput(liveSuggestions[0].name);
+                        setShowLiveSuggestions(false);
+                      }
+                    }
+                  }}
+                />
+                {citySearchInput && (
+                  <button
+                    type="button"
+                    className="planner-clear-search-btn"
+                    onClick={() => {
+                      setCitySearchInput('');
+                      setShowLiveSuggestions(false);
+                    }}
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
                 )}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-            {FIVE_CITIES_MVP.map((c) => {
-              const isSelected = cityChoice === c.name;
-              return (
-                <div
-                  key={c.id}
-                  onClick={() => setCityChoice(c.name)}
-                  className={`planner-selection-card ${isSelected ? 'selected' : ''}`}
-                  style={{
-                    cursor: 'pointer',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    border: isSelected ? '3px solid #0f766e' : '1px solid var(--border-color, #e2e8f0)',
-                    background: isSelected ? 'rgba(15, 118, 110, 0.08)' : 'var(--bg-surface, white)',
-                    boxShadow: isSelected ? '0 0 0 3px rgba(15, 118, 110, 0.25), 0 8px 24px rgba(15, 118, 110, 0.15)' : 'none',
-                    transition: 'all 0.2s ease',
-                    position: 'relative',
+                <button
+                  type="button"
+                  className="planner-search-submit-btn"
+                  onClick={() => {
+                    if (liveSuggestions.length > 0) {
+                      setCityChoice(liveSuggestions[0].name);
+                      setCitySearchInput(liveSuggestions[0].name);
+                    }
+                    setShowLiveSuggestions(false);
                   }}
                 >
-                  {isSelected && (
-                    <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0f766e', color: 'white', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, zIndex: 2 }}>
-                      ✓
-                    </span>
-                  )}
-                  <div style={{ height: '110px', overflow: 'hidden' }}>
-                    <img src={c.heroImage} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <span>Explore Destination</span>
+                  <span style={{ fontSize: '1rem', marginLeft: '2px' }}>➔</span>
+                </button>
+              </div>
+
+              {/* LIVE SUGGESTIONS DROPDOWN */}
+              {showLiveSuggestions && liveSuggestions.length > 0 && (
+                <div className="planner-suggestions-dropdown">
+                  <div style={{ padding: '6px 12px', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, borderBottom: '1px solid var(--border-color, #e2e8f0)' }}>
+                    ✨ Matching Destinations ({liveSuggestions.length})
                   </div>
-                  <div style={{ padding: '0.75rem' }}>
-                    <strong style={{ fontSize: '1rem', color: 'var(--text-main)', display: 'block' }}>{c.name}</strong>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.state} • {c.recommendedDuration}</span>
-                  </div>
+                  {liveSuggestions.map((sug) => (
+                    <div
+                      key={sug.id || sug.name}
+                      className="planner-suggestion-item"
+                      onClick={() => {
+                        setCityChoice(sug.name);
+                        setCitySearchInput(sug.name);
+                        setShowLiveSuggestions(false);
+                      }}
+                    >
+                      <img
+                        src={sug.heroImage}
+                        alt={sug.name}
+                        className="planner-suggestion-thumb"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{sug.name}</strong>
+                          <span style={{ fontSize: '0.75rem', color: '#0f766e', fontWeight: 700 }}>
+                            {sug.state}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          📍 {sug.region} • {(sug.themes || []).map(t => '#' + t).join(' ')}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f766e', background: 'rgba(15, 118, 110, 0.1)', padding: '4px 10px', borderRadius: '12px' }}>
+                        Select ➔
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
+              )}
+            </div>
+
+            {/* CATEGORY FILTER PILLS */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
+              {[
+                { id: 'all', label: `All Destinations (${allPlannerCities.length})` },
+                { id: 'heritage', label: '🏰 Royal Heritage' },
+                { id: 'mountains', label: '🏔️ Mountains & Snow' },
+                { id: 'coastal', label: '🏖️ Coastal & Lakes' },
+                { id: 'offbeat', label: '💎 Hidden Offbeat Gems' },
+                { id: 'spiritual', label: '🧘 Spiritual Ghats' },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setCityCategoryFilter(pill.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    border: '1px solid',
+                    borderColor: cityCategoryFilter === pill.id ? '#0f766e' : 'var(--border-color, #cbd5e1)',
+                    background: cityCategoryFilter === pill.id ? '#0f766e' : 'var(--bg-surface-elevated, #f8fafc)',
+                    color: cityCategoryFilter === pill.id ? '#ffffff' : 'var(--text-main)',
+                    fontSize: '0.825rem',
+                    fontWeight: cityCategoryFilter === pill.id ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            {/* CURRENT SELECTION BADGE */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'rgba(15, 118, 110, 0.08)', padding: '0.75rem 1.25rem', borderRadius: '14px', border: '1px solid rgba(15, 118, 110, 0.2)' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Currently Planning For:</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f766e' }}>
+                  📍 {cityChoice}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Quick Select:</span>
+                <select
+                  value={cityChoice}
+                  onChange={(e) => setCityChoice(e.target.value)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color, #cbd5e1)',
+                    background: 'var(--bg-surface, #ffffff)',
+                    color: 'var(--text-main)',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {allPlannerCities.map((c) => (
+                    <option key={c.id || c.name} value={c.name}>
+                      {c.name} ({c.state})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* RESPONSIVE GRID OF ALL MATCHING DESTINATION CARDS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+              {filteredGridCities.map((c) => {
+                const isSelected = cityChoice.toLowerCase() === c.name.toLowerCase();
+                return (
+                  <div
+                    key={c.id || c.name}
+                    onClick={() => setCityChoice(c.name)}
+                    className={`planner-selection-card ${isSelected ? 'selected' : ''}`}
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      border: isSelected ? '3px solid #0f766e' : '1px solid var(--border-color, #e2e8f0)',
+                      background: isSelected ? 'rgba(15, 118, 110, 0.08)' : 'var(--bg-surface, white)',
+                      boxShadow: isSelected ? '0 0 0 3px rgba(15, 118, 110, 0.25), 0 8px 24px rgba(15, 118, 110, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)',
+                      transition: 'all 0.2s ease',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    {isSelected && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: '#0f766e',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '12px',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          zIndex: 2,
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                        }}
+                      >
+                        ✓ Selected
+                      </span>
+                    )}
+                    <div style={{ height: '120px', overflow: 'hidden', position: 'relative' }}>
+                      <img
+                        src={c.heroImage}
+                        alt={c.name}
+                        loading="lazy"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <span style={{ position: 'absolute', bottom: '6px', left: '8px', background: 'rgba(15,23,42,0.85)', color: '#ffffff', fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '8px' }}>
+                        {c.region}
+                      </span>
+                    </div>
+                    <div style={{ padding: '0.85rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>{c.name}</strong>
+                        <span style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 700 }}>
+                          ⭐ {c.rating || 4.8}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        {c.state} • Best: {c.bestSeason || 'Oct to Mar'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

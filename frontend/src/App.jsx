@@ -577,7 +577,7 @@ function App() {
     budget,
     cabFares,
     cities,
-    city: details?.city || createDefaultDetails(selectedMarker).city,
+    city: (details?.city && details.city.id === selectedMarker.id) ? details.city : (selectedMarker || cities[0]),
     currency,
     currencyData,
     details,
@@ -5095,7 +5095,8 @@ const _CITY_FOOD_RECOMMENDATIONS = {
   Shillong: 'Khasi Jadoh rice, smoked pork with bamboo shoot & local Meghalayan honey tea',
 };
 
-function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpenBooking }) {
+function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpenBooking, selectedMarker }) {
+  const chosenCity = selectedMarker?.name || city?.name || 'Jaipur';
   return (
     <section className="page planner-page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
       <PageTitle
@@ -5106,7 +5107,7 @@ function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpen
 
       <SihTripPlanner
         cities={cities}
-        selectedCity={city?.name || 'Jaipur'}
+        selectedCity={chosenCity}
         formatPrice={formatPrice}
         handleAddMilestone={handleAddMilestone}
         handleOpenBooking={handleOpenBooking}
