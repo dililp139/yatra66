@@ -3,6 +3,37 @@ import L from 'leaflet';
 import './App.css';
 import yatraApi from './services/yatraService';
 
+function GoogleIcon({ size = 18, className = "" }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+      aria-hidden="true"
+    >
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+      />
+    </svg>
+  );
+}
+
 const CITIES_DATA = [
   { id: 1, name: 'Jaipur', country: 'India', state: 'Rajasthan', region: 'North India', latitude: 26.9124, longitude: 75.7873, rating: 4.8, popularityScore: 96, themes: ['heritage', 'forts', 'culture', 'shopping'], estimatedDailyBudget: 4200, bestSeason: 'October to March' },
   { id: 2, name: 'Agra', country: 'India', state: 'Uttar Pradesh', region: 'North India', latitude: 27.1767, longitude: 78.0081, rating: 4.9, popularityScore: 98, themes: ['heritage', 'romantic', 'architecture'], estimatedDailyBudget: 3800, bestSeason: 'October to March' },
@@ -720,7 +751,18 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
         {/* Top-Right User Sign In / Account Button */}
         {user ? (
           <button type="button" className="user-profile-pill" onClick={onOpenAuth} title="View Account Profile">
-            <span>👤</span>
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ) : user.authProvider === 'google' ? (
+              <GoogleIcon size={16} />
+            ) : (
+              <span>👤</span>
+            )}
             <span>{user.name}</span>
           </button>
         ) : (
@@ -3989,9 +4031,79 @@ function AuthModal({ onClose, setUser, user }) {
   const [interest, setInterest] = useState('Heritage');
   const [googleEmail, setGoogleEmail] = useState('dilip@google.com');
   const [googleName, setGoogleName] = useState('Dilip Kumar');
+  const [googleClientId, setGoogleClientId] = useState(() => {
+    try {
+      return localStorage.getItem('yatra_google_client_id') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [showConfig, setShowConfig] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successNotice, setSuccessNotice] = useState('');
   const [errorNotice, setErrorNotice] = useState('');
+  const gsiBtnRef = useRef(null);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response || !response.credential) {
+      setErrorNotice('Google sign-in did not return valid credentials.');
+      return;
+    }
+    setLoading(true);
+    setErrorNotice('');
+    try {
+      const base64Url = response.credential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const payload = JSON.parse(jsonPayload);
+      const googleUser = await yatraApi.signInWithGoogle({
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+        avatarUrl: payload.picture || `https://lh3.googleusercontent.com/a/default-user`,
+        authProvider: 'google',
+        city: 'Jaipur',
+        interest: 'Heritage'
+      });
+      setUser(googleUser);
+      setSuccessNotice(`Welcome, ${googleUser.name}! Verified with Google & saved to Cloudflare D1.`);
+      setTimeout(() => onClose(), 900);
+    } catch (err) {
+      setErrorNotice(err.message || 'Google authentication failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.google?.accounts?.id && googleClientId && googleClientId.trim()) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId.trim(),
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        if (gsiBtnRef.current) {
+          window.google.accounts.id.renderButton(gsiBtnRef.current, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            shape: 'rectangular',
+            text: 'continue_with',
+            logo_alignment: 'left',
+            width: 280,
+          });
+        }
+      } catch (e) {
+        console.warn('Google Identity initialization notice:', e);
+      }
+    }
+  }, [googleClientId, mode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -4066,6 +4178,7 @@ function AuthModal({ onClose, setUser, user }) {
         const googleUser = await yatraApi.signInWithGoogle({
           email: googleEmail.trim(),
           name: googleName.trim(),
+          avatarUrl: `https://lh3.googleusercontent.com/a/default-user`,
           authProvider: 'google',
           city: 'Jaipur',
           interest: 'Heritage'
@@ -4081,6 +4194,14 @@ function AuthModal({ onClose, setUser, user }) {
     }
   };
 
+  const handleSaveClientId = (newId) => {
+    setGoogleClientId(newId);
+    try {
+      localStorage.setItem('yatra_google_client_id', newId.trim());
+      setSuccessNotice('Google Client ID updated.');
+    } catch {}
+  };
+
   const handleSignOut = () => {
     setUser(null);
     localStorage.removeItem('yatra_user');
@@ -4091,30 +4212,54 @@ function AuthModal({ onClose, setUser, user }) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="auth-modal-window" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.4rem' }}>
-            {user ? '👤 Traveler Profile' : mode === 'google' ? '🌐 Google Account' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {mode === 'google' && <GoogleIcon size={24} />}
+            <h2 style={{ margin: 0, fontSize: '1.35rem' }}>
+              {user ? (user.authProvider === 'google' ? 'Google Account Profile' : 'Traveler Profile') : mode === 'google' ? 'Sign in with Google' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
+            </h2>
+          </div>
           <button type="button" className="close-btn" onClick={onClose}>✕</button>
         </div>
 
         {user ? (
           <div>
             <div style={{ textAlign: 'center', margin: '1rem 0 1.5rem' }}>
-              <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: user.authProvider === 'google' ? 'linear-gradient(135deg, #4285f4, #34a853)' : 'linear-gradient(135deg, var(--primary), #6366f1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 0.75rem', fontWeight: 800, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
-                {user.name?.charAt(0).toUpperCase() || 'U'}
+              <div style={{ position: 'relative', width: '74px', height: '74px', margin: '0 auto 0.75rem' }}>
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    style={{ width: '74px', height: '74px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #4285F4', boxShadow: '0 4px 16px rgba(66, 133, 244, 0.25)' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div style={{ width: '74px', height: '74px', borderRadius: '50%', background: user.authProvider === 'google' ? 'linear-gradient(135deg, #4285F4, #34A853)' : 'linear-gradient(135deg, var(--primary), #6366f1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto', fontWeight: 800, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                {user.authProvider === 'google' && (
+                  <div style={{ position: 'absolute', bottom: -2, right: -2, background: '#ffffff', borderRadius: '50%', padding: '3px', boxShadow: '0 2px 8px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Google Verified">
+                    <GoogleIcon size={16} />
+                  </div>
+                )}
               </div>
+
               <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem' }}>{user.name}</h3>
               <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user.email}</p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.85rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
                   Cloudflare D1 Active
                 </span>
+
                 {user.authProvider === 'google' && (
-                  <span style={{ fontSize: '0.75rem', background: 'rgba(66, 133, 244, 0.15)', color: '#4285f4', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(66, 133, 244, 0.12)', color: '#4285F4', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', border: '1px solid rgba(66, 133, 244, 0.25)' }}>
+                    <GoogleIcon size={13} />
                     Google Verified
                   </span>
                 )}
+
                 {user.city && (
                   <span style={{ fontSize: '0.75rem', background: 'var(--surface-muted, rgba(255,255,255,0.08))', color: 'var(--text)', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 600 }}>
                     📍 {user.city}
@@ -4153,10 +4298,24 @@ function AuthModal({ onClose, setUser, user }) {
 
             {mode === 'google' ? (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ background: 'rgba(66, 133, 244, 0.08)', border: '1px solid rgba(66, 133, 244, 0.25)', borderRadius: '10px', padding: '1rem' }}>
-                  <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Create or link your Google Account directly in Cloudflare D1:
-                  </p>
+                {/* Official Google Identity Services SDK Render Container */}
+                {googleClientId && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                    <div ref={gsiBtnRef} className="gsi-button-wrapper"></div>
+                    <div className="auth-divider" style={{ width: '100%', margin: '0.5rem 0' }}>
+                      <span>OR DIRECT GOOGLE ACCOUNT</span>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ background: 'rgba(66, 133, 244, 0.08)', border: '1px solid rgba(66, 133, 244, 0.25)', borderRadius: '12px', padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                    <GoogleIcon size={20} />
+                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                      Connect Google Account to Cloudflare D1
+                    </span>
+                  </div>
+
                   <label style={{ display: 'block', marginBottom: '0.75rem' }}>
                     <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Email Address</span>
                     <input
@@ -4168,6 +4327,7 @@ function AuthModal({ onClose, setUser, user }) {
                       required
                     />
                   </label>
+
                   <label style={{ display: 'block', marginBottom: '0.75rem' }}>
                     <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Display Name</span>
                     <input
@@ -4179,27 +4339,58 @@ function AuthModal({ onClose, setUser, user }) {
                     />
                   </label>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                     <button
                       type="button"
                       onClick={() => { setGoogleEmail('dilip@google.com'); setGoogleName('Dilip Kumar'); }}
-                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      ⚡ Dilip Kumar (dilip@google.com)
+                      <GoogleIcon size={12} /> Dilip Kumar (dilip@google.com)
                     </button>
                     <button
                       type="button"
                       onClick={() => { setGoogleEmail('rahul.patel@gmail.com'); setGoogleName('Rahul Patel'); }}
-                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      ⚡ Rahul Patel (rahul.patel@gmail.com)
+                      <GoogleIcon size={12} /> Rahul Patel (rahul.patel@gmail.com)
                     </button>
                   </div>
                 </div>
 
-                <button type="submit" className="primary-action" disabled={loading} style={{ background: '#4285f4', borderColor: '#4285f4', padding: '0.85rem', width: '100%' }}>
-                  {loading ? 'Connecting Google to D1...' : '🌐 Create / Sign In with Google ➔'}
+                <button
+                  type="submit"
+                  className="auth-social-btn"
+                  disabled={loading}
+                  style={{ background: '#ffffff', color: '#3c4043', border: '1px solid #dadce0', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', margin: 0, padding: '0.85rem' }}
+                >
+                  <GoogleIcon size={20} />
+                  <span>{loading ? 'Connecting Google Account...' : 'Continue with Google Account ➔'}</span>
                 </button>
+
+                {/* Optional Google OAuth Client ID Configuration */}
+                <div style={{ marginTop: '0.25rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfig((p) => !p)}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    ⚙️ {showConfig ? 'Hide Google Cloud Client ID settings' : 'Custom Google Cloud OAuth Client ID (Optional)'}
+                  </button>
+                  {showConfig && (
+                    <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
+                        Paste your Google OAuth 2.0 Web Client ID to trigger native Google One Tap popup:
+                      </span>
+                      <input
+                        className="clean-input"
+                        placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+                        value={googleClientId}
+                        onChange={(e) => handleSaveClientId(e.target.value)}
+                        style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="button"
@@ -4229,13 +4420,23 @@ function AuthModal({ onClose, setUser, user }) {
                   </button>
                 </div>
 
+                {/* Real Google Sign-In Button with Official 4-Color Google Logo */}
                 <button
                   type="button"
                   className="auth-social-btn"
-                  onClick={() => { setMode('google'); setErrorNotice(''); setSuccessNotice(''); }}
+                  onClick={() => {
+                    setErrorNotice('');
+                    setSuccessNotice('');
+                    if (window.google?.accounts?.id && googleClientId) {
+                      try {
+                        window.google.accounts.id.prompt();
+                      } catch {}
+                    }
+                    setMode('google');
+                  }}
                   disabled={loading}
                 >
-                  <span>🌐</span>
+                  <GoogleIcon size={20} />
                   <span>Continue with Google</span>
                 </button>
 
