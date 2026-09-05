@@ -730,6 +730,7 @@ function App() {
           user={user}
           setUser={setUser}
           onClose={() => setAuthModalOpen(false)}
+          setPage={setPage}
         />
       )}
 
@@ -931,31 +932,6 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPasspor
         >
           <span>🏆</span>
           <span>Passport ({visitedStatesCount}/28)</span>
-        </button>
-
-        {/* Business Partner Portal Quick Access */}
-        <button
-          type="button"
-          className="partner-portal-btn-pill"
-          onClick={() => setPage('business')}
-          title="Tourism Business Partner Portal"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: page === 'business' ? '#0f766e' : 'rgba(15, 118, 110, 0.1)',
-            border: '1px solid #0f766e',
-            color: page === 'business' ? '#ffffff' : '#0f766e',
-            padding: '5px 12px',
-            borderRadius: '16px',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-        >
-          <span>🏢</span>
-          <span>Partner Portal</span>
         </button>
 
         {/* Side Theme Switcher */}
@@ -5736,7 +5712,7 @@ function createFallbackFares(details) {
   })));
 }
 
-function AuthModal({ onClose, setUser, user }) {
+function AuthModal({ onClose, setUser, user, setPage }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register' | 'google'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -6050,6 +6026,17 @@ function AuthModal({ onClose, setUser, user }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button
+                type="button"
+                className="secondary-action"
+                style={{ width: '100%', color: '#0f766e', fontWeight: 700, borderColor: '#0f766e' }}
+                onClick={() => {
+                  onClose();
+                  if (setPage) setPage('business');
+                }}
+              >
+                🏢 Switch to Business Partner Portal ➔
+              </button>
               <button type="button" className="secondary-action" style={{ width: '100%' }} onClick={onClose}>
                 Close
               </button>
@@ -6185,7 +6172,7 @@ function AuthModal({ onClose, setUser, user }) {
                     className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
                     onClick={() => { setMode('login'); setErrorNotice(''); setSuccessNotice(''); }}
                   >
-                    Sign In
+                    Traveler Sign In
                   </button>
                   <button
                     type="button"
@@ -6193,6 +6180,17 @@ function AuthModal({ onClose, setUser, user }) {
                     onClick={() => { setMode('register'); setErrorNotice(''); setSuccessNotice(''); }}
                   >
                     Create Account
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-tab-btn"
+                    style={{ color: '#0f766e', fontWeight: 700 }}
+                    onClick={() => {
+                      onClose();
+                      if (setPage) setPage('business');
+                    }}
+                  >
+                    🏢 Business Portal
                   </button>
                 </div>
 
@@ -6274,6 +6272,31 @@ function AuthModal({ onClose, setUser, user }) {
                   <button type="submit" className="primary-action" disabled={loading} style={{ padding: '0.85rem', width: '100%', marginTop: '0.5rem' }}>
                     {loading ? 'Verifying with Cloudflare D1...' : mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
                   </button>
+
+                  <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Are you a hotel, homestay, guide, or artisan partner?{' '}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (setPage) setPage('business');
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0f766e',
+                        fontWeight: 700,
+                        fontSize: '0.825rem',
+                        cursor: 'pointer',
+                        padding: 0,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Sign In to Business Portal ➔
+                    </button>
+                  </div>
                 </form>
               </>
             )}
