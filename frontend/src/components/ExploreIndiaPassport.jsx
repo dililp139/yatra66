@@ -195,7 +195,7 @@ export default function ExploreIndiaPassport({ isOpen, onClose, onPlanForState }
                   borderRadius: '12px',
                 }}
               >
-                Official SIH Edition
+                Official Traveler Edition
               </span>
             </div>
             <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted, #64748b)', fontSize: '0.9rem' }}>

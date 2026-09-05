@@ -6,6 +6,7 @@ import SihTripPlanner from './components/SihTripPlanner';
 import SihHiddenGems from './components/SihHiddenGems';
 import SihExperiences from './components/SihExperiences';
 import SihMarketplace from './components/SihMarketplace';
+import BusinessPartnerPortal from './components/BusinessPartnerPortal';
 import SihSafetyModal from './components/SihSafetyModal';
 import SihEnquiryModal from './components/SihEnquiryModal';
 import FloatingSafetyHelp from './components/FloatingSafetyHelp';
@@ -145,54 +146,101 @@ const CITY_PHOTOS = {
 };
 
 const LANDMARK_PHOTOS = {
-  'Amber Fort': 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800',
-  'Hawa Mahal': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800',
+  'Amber Fort': 'https://images.unsplash.com/photo-1599602193934-2936d8b8f5e8?w=800',
+  'Hawa Mahal': 'https://images.unsplash.com/photo-1524229648276-e66561fe45a9?w=800',
   'City Palace Jaipur': 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800',
+  'Jal Mahal': 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?w=800',
   'Taj Mahal': 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800',
   'Agra Fort': 'https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=800',
   'Mehtab Bagh': 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800',
   'Red Fort': 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800',
   'India Gate': 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800',
   'Qutub Minar': 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800',
+  'Humayun’s Tomb': 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800',
   'Gateway of India': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800',
   'Marine Drive': 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=800',
   'Elephanta Caves': 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800',
+  'Bandra-Worli Sea Link': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800',
   'City Palace Udaipur': 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800',
   'Lake Pichola': 'https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?w=800',
+  'Jag Mandir': 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800',
+  'Saheliyon-ki-Bari': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800',
   'Dashashwamedh Ghat': 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800',
   'Kashi Vishwanath Temple': 'https://images.unsplash.com/photo-1627894483216-2138af692e32?w=800',
-  'Baga Beach': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
+  'Assi Ghat': 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800',
+  'Ganga Boat Ride': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+  'Baga Beach': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800',
   'Basilica of Bom Jesus': 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=800',
+  'Fort Aguada': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800',
+  'Fontainhas Latin Quarter': 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800',
   'Fort Kochi': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800',
   'Chinese Fishing Nets': 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800',
+  'Mattancherry Palace': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800',
+  'Kerala Backwaters': 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?w=800',
   'Golden Temple (Harmandir Sahib)': 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800',
   'Wagah Border': 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=800',
+  'Jallianwala Bagh': 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800',
+  'Gobindgarh Fort': 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800',
   'Solang Valley': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800',
-  'Hadimba Temple': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800',
+  'Hadimba Temple': 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800',
+  'Jogini Waterfall': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800',
+  'Rohtang Pass': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800',
   'Ram Jhula & Laxman Jhula': 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
   'Triveni Ghat Evening Aarti': 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800',
+  'Beatles Ashram': 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
+  'Ganga Beach Shivpuri': 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
   'Bangalore Palace': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800',
   'Lalbagh Botanical Garden': 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800',
+  'Cubbon Park': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800',
+  'Vidhana Soudha': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800',
   'Virupaksha Temple': 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?w=800',
   'Stone Chariot & Vijaya Vittala': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800',
-  'Tiger Hill Sunrise': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
-  'Happy Valley Tea Estate': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+  'Matanga Hill': 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?w=800',
+  'Lotus Mahal': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800',
+  'Tiger Hill Sunrise': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800',
+  'Batasia Loop': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+  'Happy Valley Tea Estate': 'https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?w=800',
+  'Japanese Peace Pagoda': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
   'The Ridge & Mall Road': 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800',
-  'Kufri Snow Point': 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800',
+  'Christ Church': 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800',
+  'Jakhoo Hill & Temple': 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800',
+  'Kufri Snow Point': 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800',
   'Pangong Tso Lake': 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800',
   'Thiksey Monastery': 'https://images.unsplash.com/photo-1566438480900-0609be27a4be?w=800',
+  'Nubra Valley Dunes': 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800',
+  'Shanti Stupa': 'https://images.unsplash.com/photo-1566438480900-0609be27a4be?w=800',
   'Mysore Palace (Amba Vilas)': 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800',
-  'Chamundi Hill & Temple': 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800',
+  'Chamundi Hill & Temple': 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800',
+  'Brindavan Gardens': 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800',
+  'St. Philomena’s Cathedral': 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800',
   'Dal Lake & Shikara Cruise': 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800',
   'Mughal Gardens (Shalimar)': 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800',
+  'Nishat Bagh': 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800',
+  'Pari Mahal': 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800',
   'White Town French Quarter': 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800',
   'Auroville Matrimandir': 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800',
+  'Promenade Beach': 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800',
+  'Serenity Beach': 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800',
   'Charminar': 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800',
   'Golconda Fort': 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800',
+  'Chowmahalla Palace': 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800',
+  'Hussain Sagar Lake': 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800',
   'Victoria Memorial': 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800',
+  'Howrah Bridge': 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800',
+  'Dakshineswar Kali Temple': 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800',
+  'Park Street & Vintage Tram': 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800',
   'Mehrangarh Fort': 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
+  'Jaswant Thada': 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
+  'Umaid Bhawan Palace': 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
+  'Blue City Alleys': 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
   'Nilgiri Mountain Railway': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+  'Ooty Lake': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+  'Botanical Gardens': 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800',
+  'Doddabetta Peak': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800',
   'Nohkalikai Falls': 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800',
+  'Umiam Lake': 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800',
+  'Elephant Falls': 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800',
+  'Living Root Bridges': 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800',
 };
 
 const HOTEL_PHOTOS = {
@@ -654,6 +702,7 @@ function App() {
       {page === 'gems' && <GemsPage {...appState} />}
       {page === 'experiences' && <ExperiencesPage {...appState} />}
       {page === 'marketplace' && <MarketplacePage {...appState} />}
+        {page === 'business' && <BusinessPortalPage {...appState} />}
 
       {safetyModalOpen && (
         <SihSafetyModal
@@ -737,6 +786,7 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPasspor
       items: [
         { id: 'hotels', icon: '🏨', title: lang === 'hi' ? 'होटल व रिसॉर्ट' : 'Hotels & Stays', desc: 'Verified havelis & stays' },
         { id: 'marketplace', icon: '🤝', title: lang === 'hi' ? 'स्थानीय व्यापार' : 'Support Local', desc: '0% commission marketplace' },
+        { id: 'business', icon: '🏢', title: lang === 'hi' ? 'व्यापार पोर्टल' : 'Business Partner Portal', desc: 'Partner analytics & merchant login' },
         { id: 'experiences', icon: '🎨', title: lang === 'hi' ? 'कारीगर अनुभव' : 'Artisan Masterclasses', desc: 'Immersive cultural workshops' },
         { id: 'bookings', icon: '🎟️', title: lang === 'hi' ? 'मेरी बुकिंग' : 'My Bookings', desc: 'Confirmed vouchers & tickets' },
       ],
@@ -1235,7 +1285,7 @@ const ICONIC_HOME_PLACES = [
     cityId: 1,
     state: 'Rajasthan',
     category: 'Forts & Palaces',
-    image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800',
+    image: 'https://images.unsplash.com/photo-1599602193934-2936d8b8f5e8?w=800',
     rating: 4.9,
     reviews: 1420,
     entryFee: 100,
@@ -1319,7 +1369,7 @@ const TOP_TOURIST_PLACES = [
     state: 'Rajasthan',
     category: 'Forts & Palaces',
     catId: 'forts',
-    image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800',
+    image: 'https://images.unsplash.com/photo-1599602193934-2936d8b8f5e8?w=800',
     rating: 4.9,
     reviews: 1420,
     entryFee: 100,
@@ -1870,16 +1920,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </div>
           </article>
 
-          <article className="mini-dashboard glass-panel">
-            <div className="stat-card">
-              <strong>{visibleDestinations.length}</strong>
-              <span>Destinations</span>
-            </div>
-            <div className="stat-card">
-              <strong>0%</strong>
-              <span>OTA Commission</span>
-            </div>
-          </article>
+          
         </div>
       </div>
 
@@ -1896,7 +1937,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         ))}
       </div>
 
-      {/* AI "DISCOVER INDIA" RECOMMENDATION ENGINE (SIH Innovation 2) */}
+      {/* AI "DISCOVER INDIA" RECOMMENDATION ENGINE */}
       <DiscoverIndiaAiEngine
         onPlanTrip={(cityName) => {
           const matched = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
@@ -1928,7 +1969,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         )}
 
         <div className="home-destinations-grid">
-          {visibleDestinations.slice(0, 8).map((dest) => {
+          {visibleDestinations.slice(0, 4).map((dest) => {
             const rawUrl = CITY_PHOTOS[dest.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41';
             const photoUrl = rawUrl.includes('?') ? `${rawUrl}&w=400&q=70&auto=format` : `${rawUrl}?w=400&q=70&auto=format`;
             return (
@@ -2001,116 +2042,6 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         </div>
       </div>
 
-      {/* SECTION: SMART TRAVEL GATEWAY (Minimal Quick Access) */}
-      <div style={{ margin: '3rem 0' }}>
-        <div style={{ textAlign: 'center', maxWidth: '650px', margin: '0 auto 2rem' }}>
-          <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
-            🚀 Explore Everything on Yatra 66
-          </span>
-          <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
-            Your Intelligent Indian Travel Suite
-          </h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.925rem' }}>
-            Jump directly into AI trip architecture, offbeat stepwells, 0% commission local stays, and vehicle rentals.
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
-          <div
-            className="glass-panel"
-            onClick={() => setPage('planner')}
-            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
-          >
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🗺️</div>
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>AI Smart Trip Planner</h3>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-              Generate personalized multi-day itineraries with route distance minimization and budget estimates.
-            </p>
-            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Plan Trip ➔</span>
-          </div>
-
-          <div
-            className="glass-panel"
-            onClick={() => setPage('gems')}
-            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
-          >
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🌿</div>
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Hidden Gems & Escapes</h3>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-              Discover secret architectural stepwells, quiet heritage hamlets, and uncrowded artisan villages.
-            </p>
-            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Discover Gems ➔</span>
-          </div>
-
-          <div
-            className="glass-panel"
-            onClick={() => setPage('marketplace')}
-            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
-          >
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🤝</div>
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Support Local Marketplace</h3>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-              Connect directly with verified family havelis, licensed guides, and village artisans with 0% commission.
-            </p>
-            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Explore Local ➔</span>
-          </div>
-
-          <div
-            className="glass-panel"
-            onClick={() => setPage('rentals')}
-            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
-          >
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🚗</div>
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Vehicle & Cab Rentals</h3>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-              Verified local car, bike, and taxi fleet operators across 9 major tourist hubs with direct contacts.
-            </p>
-            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>View Rentals ➔</span>
-          </div>
-        </div>
-      </div>
-
-      {/* WHY CHOOSE YATRA 66 */}
-      <div className="sih-why-section">
-        <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 2rem' }}>
-          <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
-            🚀 Integrated Tourism Ecosystem
-          </span>
-          <h2 style={{ fontSize: '1.9rem', margin: '0.5rem 0 0.35rem', color: 'var(--text-main)' }}>
-            Why Travelers & Local Businesses Choose Yatra 66
-          </h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            A unified solution that boosts Indian tourism, local hotels, guides, and artisans through smart innovation.
-          </p>
-        </div>
-
-        <div className="sih-why-grid">
-          <div className="sih-why-card">
-            <span className="sih-why-icon">🧳</span>
-            <div className="sih-why-title">For Travelers</div>
-            <p className="sih-why-text">
-              Zero guesswork: personalized multi-day itineraries with AI transparency, nearest-neighbor route distance optimization that saves 40%+ travel time, and clear breakdown of transport, food, and stay expenses.
-            </p>
-          </div>
-
-          <div className="sih-why-card">
-            <span className="sih-why-icon">🏡</span>
-            <div className="sih-why-title">For Local Businesses</div>
-            <p className="sih-why-text">
-              Equal digital visibility: zero listing fees and 0% predatory OTA commission. Travelers connect directly with verified homestays, licensed local guides, and village artisan cooperatives via WhatsApp & phone.
-            </p>
-          </div>
-
-          <div className="sih-why-card">
-            <span className="sih-why-icon">🌿</span>
-            <div className="sih-why-title">For Sustainable Tourism</div>
-            <p className="sih-why-text">
-              Hotspot decongestion: proactive promotion of secret architectural stepwells, quiet heritage hamlets, and rural craft hubs to distribute tourist footfall evenly and preserve fragile heritage ecosystems.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* STARTUP & TOURISM ECOSYSTEM FOOTER */}
       <footer className="sih-startup-footer">
         <div className="sih-footer-inner">
@@ -2148,13 +2079,13 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           </div>
 
           <div className="sih-footer-col">
-            <h4>Local Marketplace</h4>
+            <h4>For Businesses & Local</h4>
             <ul>
+              <li><button type="button" onClick={() => setPage('business')} style={{ color: '#ea580c', fontWeight: 700 }}>🏢 Partner Login / Portal</button></li>
+              <li><button type="button" onClick={() => setPage('business')}>Business Analytics</button></li>
               <li><button type="button" onClick={() => setPage('marketplace')}>Support Local Directory</button></li>
-              <li><button type="button" onClick={() => setPage('marketplace')}>Register Local Business</button></li>
               <li><button type="button" onClick={() => setPage('marketplace')}>Verified Homestays</button></li>
-              <li><button type="button" onClick={() => setPage('marketplace')}>Licensed Tour Guides</button></li>
-              <li><button type="button" onClick={() => setPage('map')}>Interactive Map</button></li>
+              <li><button type="button" onClick={() => setPage('marketplace')}>Licensed Guides</button></li>
             </ul>
           </div>
 
@@ -4144,6 +4075,35 @@ function FestivalsPage({ cities, setPage, setSelectedId }) {
 // -------------------------------------------------------------
 // DESTINATIONS, PLANNER, BOOKINGS, SIGNUP & MODAL
 // -------------------------------------------------------------
+
+// Mapping of cities to their actual landmark names for fallback data
+const CITY_LANDMARKS = {
+  Jaipur: ['Amber Fort', 'Hawa Mahal', 'City Palace Jaipur', 'Jal Mahal'],
+  Agra: ['Taj Mahal', 'Agra Fort', 'Mehtab Bagh', 'Red Fort'],
+  Delhi: ['India Gate', 'Qutub Minar', 'Red Fort', 'Humayun’s Tomb'],
+  Mumbai: ['Gateway of India', 'Marine Drive', 'Elephanta Caves', 'Bandra-Worli Sea Link'],
+  Udaipur: ['City Palace Udaipur', 'Lake Pichola', 'Jag Mandir', 'Saheliyon-ki-Bari'],
+  Varanasi: ['Dashashwamedh Ghat', 'Kashi Vishwanath Temple', 'Assi Ghat', 'Ganga Boat Ride'],
+  Goa: ['Baga Beach', 'Basilica of Bom Jesus', 'Fort Aguada', 'Fontainhas Latin Quarter'],
+  Kochi: ['Fort Kochi', 'Chinese Fishing Nets', 'Mattancherry Palace', 'Kerala Backwaters'],
+  Amritsar: ['Golden Temple (Harmandir Sahib)', 'Wagah Border', 'Jallianwala Bagh', 'Gobindgarh Fort'],
+  Manali: ['Solang Valley', 'Hadimba Temple', 'Jogini Waterfall', 'Rohtang Pass'],
+  Rishikesh: ['Ram Jhula & Laxman Jhula', 'Triveni Ghat Evening Aarti', 'Beatles Ashram', 'Ganga Beach Shivpuri'],
+  Bengaluru: ['Bangalore Palace', 'Lalbagh Botanical Garden', 'Cubbon Park', 'Vidhana Soudha'],
+  Hampi: ['Virupaksha Temple', 'Stone Chariot & Vijaya Vittala', 'Matanga Hill', 'Lotus Mahal'],
+  Darjeeling: ['Tiger Hill Sunrise', 'Batasia Loop', 'Happy Valley Tea Estate', 'Japanese Peace Pagoda'],
+  Shimla: ['The Ridge & Mall Road', 'Christ Church', 'Jakhoo Hill & Temple', 'Kufri Snow Point'],
+  'Leh Ladakh': ['Pangong Tso Lake', 'Thiksey Monastery', 'Nubra Valley Dunes', 'Shanti Stupa'],
+  Mysore: ['Mysore Palace (Amba Vilas)', 'Chamundi Hill & Temple', 'Brindavan Gardens', 'St. Philomena’s Cathedral'],
+  Srinagar: ['Dal Lake & Shikara Cruise', 'Mughal Gardens (Shalimar)', 'Nishat Bagh', 'Pari Mahal'],
+  Pondicherry: ['White Town French Quarter', 'Auroville Matrimandir', 'Promenade Beach', 'Serenity Beach'],
+  Hyderabad: ['Charminar', 'Golconda Fort', 'Chowmahalla Palace', 'Hussain Sagar Lake'],
+  Kolkata: ['Victoria Memorial', 'Howrah Bridge', 'Dakshineswar Kali Temple', 'Park Street & Vintage Tram'],
+  Jodhpur: ['Mehrangarh Fort', 'Jaswant Thada', 'Umaid Bhawan Palace', 'Blue City Alleys'],
+  Ooty: ['Nilgiri Mountain Railway', 'Ooty Lake', 'Botanical Gardens', 'Doddabetta Peak'],
+  Shillong: ['Nohkalikai Falls', 'Umiam Lake', 'Elephant Falls', 'Living Root Bridges'],
+};
+
 const CITY_FAST_FACTS = {
   Jaipur: {
     idealDays: '2 - 3 Days',
@@ -4153,8 +4113,8 @@ const CITY_FAST_FACTS = {
     topDishes: ['Dal Baati Churma', 'Pyaaz Kachori', 'Ghevar', 'Laal Maas', 'Ker Sangri'],
     dayTrips: ['Nahargarh Fort Sunset & Padao', 'Chand Baori Stepwell (Abhaneri)', 'Samode Palace Heritage Trek', 'Pushkar Holy Lake & Dunes'],
     photos: [
-      { name: 'Amber Fort', url: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800', tag: 'UNESCO Citadel' },
-      { name: 'Hawa Mahal', url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', tag: 'Palace of Winds' },
+      { name: 'Amber Fort', url: 'https://images.unsplash.com/photo-1599602193934-2936d8b8f5e8?w=800', tag: 'UNESCO Citadel' },
+      { name: 'Hawa Mahal', url: 'https://images.unsplash.com/photo-1524229648276-e66561fe45a9?w=800', tag: 'Palace of Winds' },
       { name: 'City Palace Jaipur', url: 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800', tag: 'Royal Residence' },
       { name: 'Jal Mahal', url: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?w=800', tag: 'Water Palace' },
     ],
@@ -5144,10 +5104,18 @@ function ExperiencesPage({ formatPrice, handleOpenBooking, onOpenEnquiry, setPag
   );
 }
 
-function MarketplacePage({ onOpenEnquiry }) {
+function MarketplacePage({ onOpenEnquiry, setPage }) {
   return (
     <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <SihMarketplace onEnquire={onOpenEnquiry} />
+      <SihMarketplace onEnquire={onOpenEnquiry} setPage={setPage} />
+    </section>
+  );
+}
+
+function BusinessPortalPage({ setPage }) {
+  return (
+    <section className="page" style={{ maxWidth: '1300px', margin: '0 auto', padding: '1rem' }}>
+      <BusinessPartnerPortal setPage={setPage} />
     </section>
   );
 }
@@ -5677,11 +5645,32 @@ function createDefaultDetails(marker) {
       estimatedDailyBudget: marker.estimatedDailyBudget || 4200,
       themes: marker.themes || ['heritage', 'culture', 'landmarks'],
     },
-    famousPlaces: [
-      { id: marker.id * 100, name: `${marker.name} Historic Fort & Palace`, category: 'Heritage Fort', description: `Explore the iconic royal architecture, ancient ramparts, and panoramic views of ${marker.name}.`, latitude: marker.latitude, longitude: marker.longitude, rating: 4.8, entryFee: 250, recommendedHours: 3 },
-      { id: marker.id * 100 + 1, name: `${marker.name} Heritage Chowk & Bazaar`, category: 'Cultural Walk', description: `Vibrant pedestrian bazaar, artisanal handicrafts, street food, and authentic local culture in ${marker.name}.`, latitude: marker.latitude + 0.008, longitude: marker.longitude + 0.008, rating: 4.7, entryFee: 0, recommendedHours: 2 },
-      { id: marker.id * 100 + 2, name: `${marker.name} Sacred Ghats & Temple Complex`, category: 'Spiritual', description: `Ancient riverside pavilions, temple ceremonies, and evening spiritual aarti in ${marker.name}.`, latitude: marker.latitude - 0.008, longitude: marker.longitude - 0.008, rating: 4.9, entryFee: 0, recommendedHours: 2 },
-    ],
+    famousPlaces: (function() {
+      const cityLandmarks = CITY_LANDMARKS[marker.name] || [
+        `${marker.name} Historic Fort & Palace`,
+        `${marker.name} Heritage Chowk & Bazaar`,
+        `${marker.name} Sacred Ghats & Temple Complex`
+      ];
+      
+      const categories = ['Heritage Fort', 'Cultural Walk', 'Spiritual'];
+      const descriptions = [
+        `Explore the iconic royal architecture, ancient ramparts, and panoramic views of ${marker.name}.`,
+        `Vibrant pedestrian bazaar, artisanal handicrafts, street food, and authentic local culture in ${marker.name}.`,
+        `Ancient riverside pavilions, temple ceremonies, and evening spiritual aarti in ${marker.name}.`
+      ];
+      
+      return cityLandmarks.map((landmarkName, index) => ({
+        id: marker.id * 100 + index,
+        name: landmarkName,
+        category: categories[index] || 'Landmark',
+        description: descriptions[index] || `Famous landmark in ${marker.name}.`,
+        latitude: marker.latitude + (index === 1 ? 0.008 : index === 2 ? -0.008 : 0),
+        longitude: marker.longitude + (index === 1 ? 0.008 : index === 2 ? -0.008 : 0),
+        rating: 4.8 - (index * 0.1),
+        entryFee: index === 0 ? 250 : 0,
+        recommendedHours: index === 0 ? 3 : 2
+      }));
+    })(),
     recommendedHotels: [
       { id: marker.id * 1000, name: `Grand ${marker.name} Heritage Haveli`, type: 'Heritage', address: `Old City Heritage District, ${marker.name}`, latitude: marker.latitude, longitude: marker.longitude, rating: 4.8, pricePerNight: 4200, amenities: ['Free WiFi', 'Breakfast', 'Courtyard Pool', 'Folk Music'], nearbyAttractionIds: [marker.id * 100] },
       { id: marker.id * 1000 + 1, name: `Zostel ${marker.name} (Backpacker Hub)`, type: 'Hostel', address: `Near Old Chowk, ${marker.name}`, latitude: marker.latitude + 0.005, longitude: marker.longitude + 0.004, rating: 4.7, pricePerNight: 850, amenities: ['Shared Dorm', 'High-Speed WiFi', 'Rooftop Cafe', 'Travel Desk'], nearbyAttractionIds: [marker.id * 100] },

@@ -1,4 +1,3 @@
-import TourismBusinessDashboard from './TourismBusinessDashboard';
 import { useState, useMemo } from 'react';
 import { LOCAL_BUSINESSES_DATA, registerLocalBusiness, getCustomLocalBusinesses, getStoredBusinessEnquiries } from '../services/sihData';
 import yatraApi from '../services/yatraService';
@@ -27,7 +26,7 @@ const CATEGORIES = [
   { id: 'Culinary Walking Host', label: 'Food & Culinary', icon: '🍲' },
 ];
 
-export default function SihMarketplace({ onEnquire }) {
+export default function SihMarketplace({ onEnquire, setPage }) {
   const [activeTab, setActiveTab] = useState('browse');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map' // 'browse' | 'register' | 'enquiries'
   const [activeCategory, setActiveCategory] = useState('all');
@@ -268,14 +267,6 @@ export default function SihMarketplace({ onEnquire }) {
           </button>
           <button
             type="button"
-            className={`secondary-action ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
-            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-          >
-            📈 Business Dashboard
-          </button>
-          <button
-            type="button"
             className={`secondary-action ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => setActiveTab('register')}
             style={{ padding: '8px 16px', fontSize: '0.85rem' }}
@@ -284,11 +275,11 @@ export default function SihMarketplace({ onEnquire }) {
           </button>
           <button
             type="button"
-            className={`secondary-action ${activeTab === 'enquiries' ? 'active' : ''}`}
-            onClick={() => setActiveTab('enquiries')}
-            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+            className="secondary-action"
+            onClick={() => setPage && setPage('business')}
+            style={{ padding: '8px 16px', fontSize: '0.85rem', color: '#0f766e', fontWeight: 700 }}
           >
-            📩 Enquiries ({enquiries.length})
+            🏢 Business Partner Portal ➔
           </button>
         </div>
       </div>
@@ -697,10 +688,7 @@ export default function SihMarketplace({ onEnquire }) {
         </>
       )}
 
-      {/* VIEW: REGISTER LOCAL BUSINESS */}
-      {activeTab === 'dashboard' && (
-        <TourismBusinessDashboard />
-      )}
+      
 
       {activeTab === 'register' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
@@ -918,57 +906,6 @@ export default function SihMarketplace({ onEnquire }) {
         </div>
       )}
 
-      {/* VIEW: ENQUIRIES DASHBOARD */}
-      {activeTab === 'enquiries' && (
-        <div>
-          {enquiries.length === 0 ? (
-            <div className="glass-panel" style={{ textAlign: 'center', padding: '3rem 1rem', borderRadius: '16px' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📭</div>
-              <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No Enquiries Yet</h3>
-              <p style={{ margin: '0.5rem 0 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                When travelers send inquiries to local homestays or guides, they will appear here in real-time.
-              </p>
-              <button type="button" className="secondary-action" onClick={() => setActiveTab('browse')}>
-                Browse Marketplace
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {enquiries.map((enq) => (
-                <div
-                  key={enq.id}
-                  className="glass-panel"
-                  style={{ padding: '1.25rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span className="card-tag market-badge-commission">
-                        {enq.id}
-                      </span>
-                      <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>{enq.businessName}</strong>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>• {enq.city}</span>
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginTop: '2px' }}>
-                      Traveler: <strong>{enq.travelerName}</strong> ({enq.contact}) • Date: <strong>{enq.travelDate}</strong> • Group: {enq.groupSize}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
-                      &ldquo;{enq.notes}&rdquo;
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#059669', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      {enq.status || 'Dispatched Directly'}
-                    </span>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      {new Date(enq.timestamp).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+      </div>
   );
 }

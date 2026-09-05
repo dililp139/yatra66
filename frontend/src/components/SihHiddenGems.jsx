@@ -77,7 +77,7 @@ export default function SihHiddenGems({ onPlanForCity }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span style={{ fontSize: '1.25rem' }}>💡</span>
             <strong style={{ color: 'var(--text-main)', fontSize: '1rem' }}>
-              The SIH Tourism Multiplier Effect:
+              The Local Economic Multiplier Effect:
             </strong>
           </div>
           <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
@@ -330,7 +330,7 @@ export default function SihHiddenGems({ onPlanForCity }) {
               🚀 Destination Opportunity Score Algorithm
             </h3>
             <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '750px' }}>
-              Our proprietary SIH Opportunity Score identifies lesser-known heritage hubs with exceptional architectural richness, strong infrastructure, and low crowding that need tourism distribution.
+              Our Destination Opportunity Score identifies lesser-known heritage hubs with exceptional architectural richness, strong infrastructure, and low crowding that need tourism distribution.
             </p>
           </div>
 
