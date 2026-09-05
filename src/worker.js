@@ -176,6 +176,23 @@ export default {
         }
 
         // --- AUTH & SIGN-IN API ---
+        // POST /api/auth/login
+        if (pathname === '/api/auth/login' && method === 'POST') {
+          const body = await request.json();
+          const result = await db.verifyUserLogin(env.DB, body.email, body.password);
+          if (!result.success) {
+            return errorResponse(result.error, 401);
+          }
+          return jsonResponse(result.user, 200);
+        }
+
+        // POST /api/auth/register
+        if (pathname === '/api/auth/register' && method === 'POST') {
+          const body = await request.json();
+          const user = await db.saveUserSignIn(env.DB, body);
+          return jsonResponse(user, 201);
+        }
+
         // POST /api/auth/signin
         if (pathname === '/api/auth/signin' && method === 'POST') {
           const body = await request.json();

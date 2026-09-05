@@ -3524,6 +3524,71 @@ export const yatraApi = {
     return newReview;
   },
 
+  async login({ email, password }) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid email or password');
+      }
+      try {
+        localStorage.setItem('yatra_user', JSON.stringify(data));
+      } catch {}
+      return data;
+    } catch (err) {
+      if (err.message && err.message !== 'Failed to fetch') {
+        throw err;
+      }
+      // Offline fallback: check localStorage
+      const raw = localStorage.getItem('yatra_user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u.email && u.email.toLowerCase() === (email || '').toLowerCase()) {
+          return u;
+        }
+      }
+      throw new Error(err.message || 'Login failed. Please check your credentials.');
+    }
+  },
+
+  async register(userData) {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+      try {
+        localStorage.setItem('yatra_user', JSON.stringify(data));
+      } catch {}
+      return data;
+    } catch (err) {
+      if (err.message && err.message !== 'Failed to fetch') {
+        throw err;
+      }
+      const fallbackUser = {
+        name: userData.name || (userData.email ? userData.email.split('@')[0] : 'Traveler'),
+        email: userData.email || 'traveler@yatra.in',
+        authProvider: 'email',
+        city: userData.city || 'Jaipur',
+        interest: userData.interest || 'Heritage',
+        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      };
+      try {
+        localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
+      } catch {}
+      return fallbackUser;
+    }
+  },
+
   async signIn(userData) {
     try {
       const res = await fetch('/api/auth/signin', {

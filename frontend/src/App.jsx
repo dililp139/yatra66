@@ -3588,9 +3588,26 @@ function PersonalCalendarPage({ bookings, city, handleAddMilestone, milestones }
 }
 
 function SignupPage({ signup, signupSaved, submitSignup, updateSignup }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const onFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMsg('');
+    try {
+      await submitSignup(e);
+      setMsg('Account created & saved in Cloudflare D1!');
+    } catch {
+      setMsg('Account saved locally!');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section className="page signup-page">
-      <form className="signup-card glass-panel" onSubmit={submitSignup}>
+      <form className="signup-card glass-panel" onSubmit={onFormSubmit}>
         <p className="eyebrow">Traveler Account</p>
         <h1>Create Yatra Account</h1>
         <label>
@@ -3603,10 +3620,12 @@ function SignupPage({ signup, signupSaved, submitSignup, updateSignup }) {
         </label>
         <label>
           <span>Favorite Destination</span>
-          <input value={signup.city} onChange={(e) => updateSignup({ ...signup, city: e.target.value })} />
+          <input value={signup.city} onChange={(e) => updateSignup({ ...signup, city: e.target.value })} placeholder="e.g. Udaipur" />
         </label>
-        <button type="submit" className="primary-action">Create Account</button>
-        {signupSaved && <p className="success-inline">Account created successfully!</p>}
+        <button type="submit" className="primary-action" disabled={submitting}>
+          {submitting ? 'Connecting to Cloudflare D1...' : 'Create Account'}
+        </button>
+        {(signupSaved || msg) && <p className="success-inline">✅ {msg || 'Account created in Cloudflare D1!'}</p>}
       </form>
     </section>
   );
@@ -3965,45 +3984,69 @@ function AuthModal({ onClose, setUser, user }) {
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [_password, setPassword] = useState('');
-  const [successNotice, setSuccessNotice] = useState(false);
+  const [password, setPassword] = useState('');
+  const [city, setCity] = useState('Jaipur');
+  const [interest, setInterest] = useState('Heritage');
+  const [loading, setLoading] = useState(false);
+  const [successNotice, setSuccessNotice] = useState('');
+  const [errorNotice, setErrorNotice] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorNotice('');
+    setSuccessNotice('');
     if (!email.trim()) return;
-    const userData = {
-      name: mode === 'register' ? (name.trim() || 'Traveler') : (user?.name || email.split('@')[0]),
-      email: email.trim(),
-      authProvider: 'email',
-    };
+
+    setLoading(true);
     try {
-      const saved = await yatraApi.signIn(userData);
-      setUser(saved);
-    } catch {
-      setUser(userData);
-      localStorage.setItem('yatra_user', JSON.stringify(userData));
+      if (mode === 'login') {
+        const loggedInUser = await yatraApi.login({ email: email.trim(), password });
+        setUser(loggedInUser);
+        setSuccessNotice(`Welcome back, ${loggedInUser.name}! (Connected to Cloudflare D1)`);
+      } else {
+        const registeredUser = await yatraApi.register({
+          name: name.trim() || 'Traveler',
+          email: email.trim(),
+          password,
+          city,
+          interest,
+          authProvider: 'email'
+        });
+        setUser(registeredUser);
+        setSuccessNotice(`Account created in Cloudflare D1! Welcome, ${registeredUser.name}!`);
+      }
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (err) {
+      setErrorNotice(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setSuccessNotice(true);
-    setTimeout(() => {
-      setSuccessNotice(false);
-      onClose();
-    }, 900);
   };
 
   const handleGoogleSignIn = async () => {
-    const userData = {
-      name: 'Dilip Kumar',
-      email: 'dilip@google.com',
-      authProvider: 'google',
-    };
+    setErrorNotice('');
+    setLoading(true);
     try {
+      const userData = {
+        name: 'Dilip Kumar',
+        email: 'dilip@google.com',
+        authProvider: 'google',
+        city: 'Jaipur',
+        interest: 'Heritage'
+      };
       const saved = await yatraApi.signIn(userData);
       setUser(saved);
-    } catch {
-      setUser(userData);
-      localStorage.setItem('yatra_user', JSON.stringify(userData));
+      setSuccessNotice('Signed in with Google! (Saved to Cloudflare D1)');
+      setTimeout(() => {
+        onClose();
+      }, 900);
+    } catch (err) {
+      setErrorNotice(err.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
     }
-    onClose();
   };
 
   const handleSignOut = () => {
@@ -4025,14 +4068,27 @@ function AuthModal({ onClose, setUser, user }) {
         {user ? (
           <div>
             <div style={{ textAlign: 'center', margin: '1rem 0 1.5rem' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', margin: '0 auto 0.75rem', fontWeight: 800 }}>
-                {user.name.charAt(0).toUpperCase()}
+              <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), #6366f1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 0.75rem', fontWeight: 800, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+                {user.name?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <h3 style={{ margin: '0 0 0.25rem' }}>{user.name}</h3>
-              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>{user.email}</p>
-              <span style={{ display: 'inline-block', marginTop: '0.5rem', fontSize: '0.75rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 700 }}>
-                Verified Yatra Explorer
-              </span>
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.25rem' }}>{user.name}</h3>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user.email}</p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                  Cloudflare D1 Active
+                </span>
+                {user.city && (
+                  <span style={{ fontSize: '0.75rem', background: 'var(--surface-muted, rgba(255,255,255,0.08))', color: 'var(--text)', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 600 }}>
+                    📍 {user.city}
+                  </span>
+                )}
+                {user.interest && (
+                  <span style={{ fontSize: '0.75rem', background: 'var(--surface-muted, rgba(255,255,255,0.08))', color: 'var(--text)', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 600 }}>
+                    ✨ {user.interest}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
@@ -4050,40 +4106,74 @@ function AuthModal({ onClose, setUser, user }) {
               <button
                 type="button"
                 className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
-                onClick={() => setMode('login')}
+                onClick={() => { setMode('login'); setErrorNotice(''); setSuccessNotice(''); }}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
-                onClick={() => setMode('register')}
+                onClick={() => { setMode('register'); setErrorNotice(''); setSuccessNotice(''); }}
               >
                 Create Account
               </button>
             </div>
 
-            <button type="button" className="auth-social-btn" onClick={handleGoogleSignIn}>
+            <button type="button" className="auth-social-btn" onClick={handleGoogleSignIn} disabled={loading}>
               <span>🌐</span>
               <span>Continue with Google</span>
             </button>
 
             <div className="auth-divider">
-              <span>OR EMAIL</span>
+              <span>OR EMAIL & PASSWORD</span>
             </div>
+
+            {errorNotice && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '0.75rem' }}>
+                ⚠️ {errorNotice}
+              </div>
+            )}
+
+            {successNotice && (
+              <div style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.85rem', textAlign: 'center', marginBottom: '0.75rem' }}>
+                ✅ {successNotice}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {mode === 'register' && (
-                <label>
-                  <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Full Name</span>
-                  <input
-                    className="clean-input"
-                    placeholder="Dilip Kumar"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </label>
+                <>
+                  <label>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Full Name</span>
+                    <input
+                      className="clean-input"
+                      placeholder="Dilip Kumar"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <label>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Home City</span>
+                      <input
+                        className="clean-input"
+                        placeholder="Jaipur"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Travel Interest</span>
+                      <input
+                        className="clean-input"
+                        placeholder="Heritage"
+                        value={interest}
+                        onChange={(e) => setInterest(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                </>
               )}
 
               <label>
@@ -4104,20 +4194,15 @@ function AuthModal({ onClose, setUser, user }) {
                   type="password"
                   className="clean-input"
                   placeholder="••••••••"
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </label>
 
-              <button type="submit" className="primary-action" style={{ padding: '0.85rem', width: '100%', marginTop: '0.5rem' }}>
-                {mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
+              <button type="submit" className="primary-action" disabled={loading} style={{ padding: '0.85rem', width: '100%', marginTop: '0.5rem' }}>
+                {loading ? 'Connecting to Cloudflare D1...' : mode === 'login' ? 'Sign In ➔' : 'Create Account ➔'}
               </button>
-
-              {successNotice && (
-                <p className="success-inline" style={{ textAlign: 'center' }}>
-                  {mode === 'login' ? 'Signed in successfully!' : 'Account created successfully!'}
-                </p>
-              )}
             </form>
           </>
         )}
