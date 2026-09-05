@@ -3,7 +3,15 @@
 // Powered by gemini-3.6-flash
 // ============================================================================
 
-export const GEMINI_MODEL = 'gemini-3.6-flash';
+export const GEMINI_ACTIVE_MODELS = [
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.7-flash',
+  'gemini-3.8-flash',
+  'gemini-flash-latest',
+  'gemini-3.6-flash'
+];
+export const GEMINI_MODEL = GEMINI_ACTIVE_MODELS[0];
 
 const CITY_COORDINATES = {
   Jaipur: { lat: 26.9124, lng: 75.7873 },
@@ -71,28 +79,35 @@ export async function callGemini(env, payload) {
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please ensure GEMINI_API_KEY secret is set.');
   }
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  let lastError = null;
+  for (const model of GEMINI_ACTIVE_MODELS) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.error('Gemini API returned error status:', response.status, errorBody);
-    throw new Error(`Google Gemini Error (${response.status}): ${errorBody}`);
+      if (response.ok) {
+        const result = await response.json();
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return text;
+        }
+      } else {
+        const errorBody = await response.text();
+        console.warn(`Gemini model ${model} returned status ${response.status}, cascading to next model...`);
+        lastError = `Model ${model} error (${response.status}): ${errorBody}`;
+      }
+    } catch (err) {
+      console.warn(`Gemini model ${model} fetch failed: ${err.message}`);
+      lastError = err.message;
+    }
   }
 
-  const result = await response.json();
-  const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error('Gemini returned an empty candidate');
-  }
-  return text;
+  throw new Error(`All Gemini models exhausted. Last error: ${lastError}`);
 }
 
 /**
@@ -340,7 +355,7 @@ Communication Style:
     },
     contents,
     generationConfig: {
-      temperature: 0.7,
+      temperature: 0.85,
       maxOutputTokens: 1200,
     },
   };
@@ -350,16 +365,24 @@ Communication Style:
     return { reply: replyText };
   } catch (err) {
     console.warn('Gemini chat returned error:', err.message);
+    const lastUserMsg = messages.filter((m) => m.role === 'user').pop();
+    const queryText = (lastUserMsg?.text || lastUserMsg?.content || '').toLowerCase();
+
+    let contextualSection = '';
+    if (queryText.includes('food') || queryText.includes('eat') || queryText.includes('restaurant') || queryText.includes('dish') || queryText.includes('sweet') || queryText.includes('thali')) {
+      contextualSection = `🍲 **Culinary Highlights in ${currentCity}:**\n• Sample authentic heritage recipes, signature regional thalis, and legendary century-old sweet shops in the old market quarter.\n• Prioritize stalls and eateries with high local footfall for the freshest street food.`;
+    } else if (queryText.includes('hotel') || queryText.includes('stay') || queryText.includes('resort') || queryText.includes('room') || queryText.includes('budget') || queryText.includes('hostel')) {
+      contextualSection = `🏨 **Stay Advice for ${currentCity}:**\n• Heritage Havelis and verified family homestays offer the most authentic hospitality with 0% platform commission.\n• Comfortable boutique stays generally range from ₹2,200 to ₹4,500/night with clean amenities.`;
+    } else if (queryText.includes('cab') || queryText.includes('car') || queryText.includes('train') || queryText.includes('bus') || queryText.includes('transit') || queryText.includes('auto') || queryText.includes('reach')) {
+      contextualSection = `🚗 **Transit & Logistics in ${currentCity}:**\n• Check our live Cab Fare comparator on the Hotels & Cabs page for transparent Ola & Uber estimates, or hire prepaid auto-rickshaws.\n• For intercity transit, Vande Bharat express trains and Volvo state buses offer dependable, scenic travel.`;
+    } else if (queryText.includes('monument') || queryText.includes('fort') || queryText.includes('palace') || queryText.includes('temple') || queryText.includes('timing') || queryText.includes('entry') || queryText.includes('ticket')) {
+      contextualSection = `🏛️ **Heritage & Sightseeing in ${currentCity}:**\n• Explore prominent monuments early between 08:30 AM – 11:00 AM for gentle morning light and minimal queues.\n• Remember modest attire guidelines for sacred shrines (cover knees and shoulders; footwear must be deposited at the entrance).`;
+    } else {
+      contextualSection = `✨ **Curated Highlights for ${currentCity}:**\n• Combine major world-famous landmarks with nearby quiet stepwells, village handicraft clusters, and scenic sunset viewpoints.\n• Recommended visit duration: 2 to 3 days for a relaxed, immersive travel pace.`;
+    }
+
     return {
-      reply: `Namaste! 🙏 I am pleased to assist you with exploring **${currentCity}** and destinations across Incredible India.
-
-📍 **Key Travel Recommendations for ${currentCity}:**
-• **Optimal Timings:** Visit iconic heritage monuments early between 08:30 AM – 11:00 AM for soft morning light, pleasant weather, and fewer crowds.
-• **Authentic Food:** Indulge in traditional regional specialties and century-old sweet shops in the old heritage quarter.
-• **Local Transit:** Use our live Cab Fare comparator on the Hotels & Cabs page for transparent Ola & Uber estimates, or hire verified local auto-rickshaws.
-• **Helplines & Safety:** 24/7 National Tourist Police Helpline: **1363** | National Emergency: **112**.
-
-*How else can I assist your journey today? Ask me about specific monuments, clothing etiquette, or hidden gems!*`
+      reply: `Namaste! 🙏 In response to your travel query about **${currentCity}**:\n\n${contextualSection}\n\n🛡️ **Tourist Safety Support:** 24/7 National Tourist Police: **1363** | National Emergency: **112**.\n\n*Feel free to ask me anything specific about hidden photography spots, budget estimations, or local transit!*`
     };
   }
 }

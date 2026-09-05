@@ -6373,3 +6373,360 @@ footer button:hover,
 .theme-dark .sih-modal-content strong {
   color: #f8fafc !important;
 }
+
+
+/* ============================================================================
+   UNIVERSAL DISPLAY NORMALIZATION (Consistent layout across all PC screens)
+   ============================================================================ */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  font-size: 1rem;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Constrain canvas on large/ultra-wide screens so text & cards don't stretch */
+.app-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+}
+
+.topbar {
+  max-width: 1400px;
+  margin: 0.75rem auto 1.5rem;
+  width: calc(100% - 2rem);
+}
+
+.page {
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ============================================================================
+   SUPPORT LOCAL MARKETPLACE STYLES (LIGHT & DARK THEME)
+   ============================================================================ */
+.market-filter-card {
+  background: var(--bg-surface-elevated, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.market-search-input {
+  width: 100%;
+  padding: 10px 40px 10px 16px;
+  border-radius: 30px;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-main, #0f172a);
+  font-size: 0.95rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.market-search-input:focus {
+  border-color: var(--primary, #0f766e);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.market-city-input {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-main, #0f172a);
+  font-size: 0.825rem;
+  min-width: 220px;
+  outline: none;
+  font-family: inherit;
+}
+
+.market-gemini-tag {
+  color: var(--primary, #0f766e);
+}
+
+.market-loading-banner {
+  margin-top: 0.85rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  color: var(--primary, #0f766e);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.market-provider-card {
+  border-radius: 16px;
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-surface, #ffffff);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.market-provider-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.market-avatar-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(15, 118, 110, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.market-verified-badge {
+  display: inline-block;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.market-meta-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.market-rating-tag {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 3px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.market-provider-name {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  color: var(--text-main, #0f172a);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.market-provider-desc {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, #64748b);
+  line-height: 1.5;
+}
+
+.market-pricing-box {
+  background: var(--bg-surface-elevated, #f8fafc);
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.825rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.market-price-label {
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
+
+.market-price-val {
+  color: #0f766e;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.market-contact-val {
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+}
+
+.market-badge-commission {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.market-guarantee-note {
+  background: rgba(15, 118, 110, 0.08);
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #0f766e;
+}
+
+/* ============================================================================
+   DARK MODE COLOR CONTRAST OVERRIDES (THEME-DARK)
+   ============================================================================ */
+.theme-dark .market-filter-card {
+  background: #0e1424 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.theme-dark .market-search-input,
+.theme-dark .market-city-input {
+  background: #151d32 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.theme-dark .market-search-input::placeholder,
+.theme-dark .market-city-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .market-gemini-tag {
+  color: #2dd4bf !important;
+}
+
+.theme-dark .market-loading-banner {
+  background: rgba(45, 212, 191, 0.12) !important;
+  border-color: rgba(45, 212, 191, 0.25) !important;
+  color: #2dd4bf !important;
+}
+
+.theme-dark .market-provider-card {
+  background: #0e1424 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+.theme-dark .market-avatar-icon {
+  background: rgba(45, 212, 191, 0.16) !important;
+}
+
+.theme-dark .market-verified-badge {
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+.theme-dark .market-meta-tag {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .market-rating-tag {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.theme-dark .market-provider-name {
+  color: #f8fafc !important;
+}
+
+.theme-dark .market-provider-desc {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .market-pricing-box {
+  background: #151d32 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .market-price-label {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .market-price-val {
+  color: #2dd4bf !important;
+}
+
+.theme-dark .market-contact-val {
+  color: #f8fafc !important;
+}
+
+.theme-dark .market-badge-commission {
+  background: rgba(45, 212, 191, 0.15) !important;
+  color: #2dd4bf !important;
+}
+
+.theme-dark .market-guarantee-note {
+  background: rgba(45, 212, 191, 0.12) !important;
+  color: #2dd4bf !important;
+}
+
+/* GLOBAL DARK THEME FIXES: HEADINGS, SUBTEXT, CARDS, INPUTS */
+.theme-dark p {
+  color: #94a3b8;
+}
+
+.theme-dark strong {
+  color: #f8fafc;
+}
+
+.theme-dark .glass-panel {
+  background: #0e1424 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .glass-panel h2,
+.theme-dark .glass-panel h3,
+.theme-dark .glass-panel h4 {
+  color: #f8fafc !important;
+}
+
+.theme-dark .stat-card strong,
+.theme-dark .highlight-panel strong {
+  color: #f8fafc !important;
+}
+
+.theme-dark .section-heading h2 {
+  color: #f8fafc !important;
+}
+
+.theme-dark .side-panel {
+  background: #0e1424 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.theme-dark .tip-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.theme-dark .tip-row strong {
+  color: #f8fafc !important;
+}
+
+.theme-dark .tip-row p {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .card-body h3 {
+  color: #f8fafc !important;
+}
+
+.theme-dark .card-body p {
+  color: #94a3b8 !important;
+}

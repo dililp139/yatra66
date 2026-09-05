@@ -120,7 +120,7 @@ const CITY_PHOTOS = {
   Agra: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800',
   Delhi: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800',
   Mumbai: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800',
-  Udaipur: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800',
+  Udaipur: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?w=800',
   Varanasi: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800',
   Goa: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800',
   Kochi: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800',
@@ -139,7 +139,7 @@ const CITY_PHOTOS = {
   Kolkata: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800',
   Jodhpur: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800',
   Ooty: 'https://images.unsplash.com/photo-1574063413132-355dbfd83e25?w=800',
-  Shillong: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800',
+  Shillong: 'https://images.unsplash.com/photo-1607553594002-9844f2d7a22e?w=800',
 };
 
 const LANDMARK_PHOTOS = {
@@ -166,7 +166,7 @@ const LANDMARK_PHOTOS = {
   'Golden Temple (Harmandir Sahib)': 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=600',
   'Wagah Border': 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=600',
   'Solang Valley': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600',
-  'Hadimba Temple': 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=600',
+  'Hadimba Temple': 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600',
   'Ram Jhula & Laxman Jhula': 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600',
   'Triveni Ghat Evening Aarti': 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600',
   'Bangalore Palace': 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=600',
@@ -1162,6 +1162,105 @@ function RentalsPage(props) {
   );
 }
 
+const ICONIC_HOME_PLACES = [
+  {
+    id: 'attr-taj-mahal',
+    name: 'Taj Mahal',
+    cityName: 'Agra',
+    cityId: 2,
+    state: 'Uttar Pradesh',
+    category: 'UNESCO Wonders',
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
+    rating: 5.0,
+    reviews: 4800,
+    entryFee: 250,
+    duration: '2-3 Hours',
+    bestTime: 'Sunrise (06:00 AM)',
+    description: 'Ivory-white marble mausoleum on the Yamuna riverbank, an eternal monument of universal love.',
+    tags: ['World Wonder', 'Mughal Heritage', 'UNESCO'],
+  },
+  {
+    id: 'attr-amber-fort',
+    name: 'Amber Fort & Palace',
+    cityName: 'Jaipur',
+    cityId: 1,
+    state: 'Rajasthan',
+    category: 'Forts & Palaces',
+    image: 'https://images.unsplash.com/photo-1609947017136-9e224e5dfd6d?w=800&q=80',
+    rating: 4.9,
+    reviews: 1420,
+    entryFee: 100,
+    duration: '3-4 Hours',
+    bestTime: '08:00 AM - 11:00 AM',
+    description: 'Hilltop Rajput fortress with ornate Sheesh Mahal (Mirror Palace) overlooking Maota Lake.',
+    tags: ['UNESCO Heritage', 'Mirror Palace', 'Elephant Trail'],
+  },
+  {
+    id: 'attr-gateway-india',
+    name: 'Gateway of India',
+    cityName: 'Mumbai',
+    cityId: 4,
+    state: 'Maharashtra',
+    category: 'Coastal & Lakes',
+    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
+    rating: 4.8,
+    reviews: 2150,
+    entryFee: 0,
+    duration: '1-2 Hours',
+    bestTime: 'Sunset / Evening',
+    description: 'Colonial basalt triumphal arch overlooking Mumbai Harbour and the Arabian Sea.',
+    tags: ['Mumbai Harbour', 'Colonial Landmark', 'Sea Breeze'],
+  },
+  {
+    id: 'attr-golden-temple',
+    name: 'Golden Temple (Harmandir Sahib)',
+    cityName: 'Amritsar',
+    cityId: 9,
+    state: 'Punjab',
+    category: 'Temples & Spiritual',
+    image: 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=800&q=80',
+    rating: 5.0,
+    reviews: 3600,
+    entryFee: 0,
+    duration: '3-4 Hours',
+    bestTime: 'Evening Illumination / 24 hrs',
+    description: 'Spiritual sanctuary gilded in pure gold with serene holy sarovar waters and 24/7 community langar.',
+    tags: ['Spiritual Peace', 'Golden Architecture', 'Holy Sarovar'],
+  },
+  {
+    id: 'attr-city-palace-udaipur',
+    name: 'Lake Pichola & City Palace',
+    cityName: 'Udaipur',
+    cityId: 5,
+    state: 'Rajasthan',
+    category: 'Coastal & Lakes',
+    image: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?w=800&q=80',
+    rating: 4.9,
+    reviews: 1890,
+    entryFee: 300,
+    duration: '3-4 Hours',
+    bestTime: 'Late Afternoon / Sunset Boat Ride',
+    description: 'Towering marble palace complex on the tranquil shores of Lake Pichola with panoramic Aravalli views.',
+    tags: ['City of Lakes', 'Mewar Royalty', 'Sunset Boat Ride'],
+  },
+  {
+    id: 'attr-varanasi-ghats',
+    name: 'Dashashwamedh Ghat & Evening Aarti',
+    cityName: 'Varanasi',
+    cityId: 6,
+    state: 'Uttar Pradesh',
+    category: 'Temples & Spiritual',
+    image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80',
+    rating: 4.9,
+    reviews: 2450,
+    entryFee: 0,
+    duration: '2-3 Hours',
+    bestTime: 'Sunset Aarti (06:30 PM)',
+    description: 'Ancient sacred ghat on the holy Ganga reverberating with rhythmic brass bell aarti chants and floating diyas.',
+    tags: ['Ganga Aarti', 'Spiritual Awakening', 'Ancient Ghats'],
+  },
+];
+
 const TOP_TOURIST_PLACES = [
   {
     id: 'attr-amber-fort',
@@ -1538,7 +1637,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
                       className="preview-photo-img"
                       loading="lazy"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=70&auto=format';
+                        e.currentTarget.onerror = null; e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
                       }}
                     />
                     <span className="preview-photo-region">{searchedCity.region}</span>
@@ -1844,242 +1943,73 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         </div>
       </div>
 
-      {/* MUST-VISIT TOURIST PLACES & ICONIC ATTRACTIONS */}
-      <div className="home-attractions-section" style={{ margin: '3.5rem 0' }}>
-        <div className="home-section-header">
-          <div>
-            <span className="card-tag" style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#ea580c', fontWeight: 800 }}>
-              🏛️ All-India Iconic Tourist Attractions
-            </span>
-            <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)' }}>
-              {lang === 'hi' ? 'भारत के प्रसिद्ध पर्यटन स्थल एवं स्मारक' : 'Famous Tourist Places Across India'}
-            </h2>
-            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-              {lang === 'hi'
-                ? 'किले, महल, पवित्र तीर्थ, सुंदर झीलें और यूनेस्को विश्व धरोहर स्थल — दर्शन समय, प्रवेश शुल्क व सीधी योजना।'
-                : 'Forts, palaces, sacred ghats, pristine lakes, and UNESCO world wonders with entry fees, timings, and instant trip planning.'}
+      {/* SECTION: SMART TRAVEL GATEWAY (Minimal Quick Access) */}
+      <div style={{ margin: '3rem 0' }}>
+        <div style={{ textAlign: 'center', maxWidth: '650px', margin: '0 auto 2rem' }}>
+          <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+            🚀 Explore Everything on Yatra 66
+          </span>
+          <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
+            Your Intelligent Indian Travel Suite
+          </h2>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.925rem' }}>
+            Jump directly into AI trip architecture, offbeat stepwells, 0% commission local stays, and vehicle rentals.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+          <div
+            className="glass-panel"
+            onClick={() => setPage('planner')}
+            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
+          >
+            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🗺️</div>
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>AI Smart Trip Planner</h3>
+            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              Generate personalized multi-day itineraries with route distance minimization and budget estimates.
             </p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-              Showing {filteredAttractions.length} of {TOP_TOURIST_PLACES.length} places
-            </span>
-          </div>
-        </div>
-
-        {/* Filter controls bar */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', margin: '1.25rem 0 1.5rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {[
-              { id: 'all', label: 'All Places' },
-              { id: 'forts', label: '🏰 Forts & Palaces' },
-              { id: 'spiritual', label: '🛕 Temples & Spiritual' },
-              { id: 'unesco', label: '✨ UNESCO Wonders' },
-              { id: 'nature', label: '🏔️ Hills & Nature' },
-              { id: 'coastal', label: '🌊 Coastal & Lakes' },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                className={`quick-pill-tag ${attrCategory === cat.id ? 'active' : ''}`}
-                style={{
-                  background: attrCategory === cat.id ? 'var(--brand-primary, #0f766e)' : 'var(--bg-surface-elevated, #f1f5f9)',
-                  color: attrCategory === cat.id ? '#ffffff' : 'var(--text-main)',
-                  borderColor: attrCategory === cat.id ? 'var(--brand-primary, #0f766e)' : 'transparent',
-                  fontWeight: attrCategory === cat.id ? 700 : 500,
-                  cursor: 'pointer',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  border: '1px solid',
-                  fontSize: '0.825rem',
-                  transition: 'all 0.15s ease'
-                }}
-                onClick={() => setAttrCategory(cat.id)}
-              >
-                {cat.label}
-              </button>
-            ))}
+            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Plan Trip ➔</span>
           </div>
 
-          <div style={{ position: 'relative', minWidth: '240px', flex: '0 1 300px' }}>
-            <input
-              type="text"
-              placeholder="Search place, city or tag..."
-              value={attrQuery}
-              onChange={(e) => setAttrQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px 12px 8px 32px',
-                borderRadius: '20px',
-                border: '1px solid var(--border-color, #cbd5e1)',
-                background: 'var(--bg-surface, #ffffff)',
-                color: 'var(--text-main)',
-                fontSize: '0.85rem'
-              }}
-            />
-            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '0.85rem' }}>🔍</span>
-            {attrQuery && (
-              <button
-                type="button"
-                onClick={() => setAttrQuery('')}
-                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.85rem' }}
-              >
-                ✕
-              </button>
-            )}
+          <div
+            className="glass-panel"
+            onClick={() => setPage('gems')}
+            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
+          >
+            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🌿</div>
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Hidden Gems & Escapes</h3>
+            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              Discover secret architectural stepwells, quiet heritage hamlets, and uncrowded artisan villages.
+            </p>
+            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Discover Gems ➔</span>
+          </div>
+
+          <div
+            className="glass-panel"
+            onClick={() => setPage('marketplace')}
+            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
+          >
+            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🤝</div>
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Support Local Marketplace</h3>
+            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              Connect directly with verified family havelis, licensed guides, and village artisans with 0% commission.
+            </p>
+            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>Explore Local ➔</span>
+          </div>
+
+          <div
+            className="glass-panel"
+            onClick={() => setPage('rentals')}
+            style={{ padding: '1.5rem', borderRadius: '16px', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', border: '1px solid var(--border-color)' }}
+          >
+            <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🚗</div>
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>Vehicle & Cab Rentals</h3>
+            <p style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              Verified local car, bike, and taxi fleet operators across 9 major tourist hubs with direct contacts.
+            </p>
+            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem' }}>View Rentals ➔</span>
           </div>
         </div>
-
-        {/* Tourist places cards grid (Progressively loaded on scroll with entrance animation) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-          {displayedAttractions.map((place, idx) => (
-            <article
-              key={place.id}
-              className="destination-photo-card progressive-place-card"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                border: '1px solid var(--border-color, #e2e8f0)',
-                background: 'var(--bg-surface, #ffffff)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-                animation: 'fadeInUp 0.4s ease backwards',
-                animationDelay: `${(idx % 6) * 0.07}s`
-              }}
-            >
-              <div className="card-image-wrap" style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
-                <img
-                  src={place.image}
-                  alt={place.name}
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <span className="card-region-badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(15,23,42,0.75)', color: '#ffffff', padding: '3px 9px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 600 }}>
-                  📍 {place.cityName}, {place.state}
-                </span>
-                <span className="card-rating-badge" style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(255,255,255,0.92)', color: '#0f172a', padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  ⭐ {place.rating} ({place.reviews})
-                </span>
-                <span style={{ position: 'absolute', bottom: '8px', left: '10px', background: 'rgba(15,118,110,0.9)', color: '#ffffff', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600 }}>
-                  ⏱️ {place.duration}
-                </span>
-              </div>
-
-              <div className="card-body" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px', marginBottom: '0.25rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.3 }}>{place.name}</h3>
-                  </div>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.35rem 0 0.65rem', lineHeight: 1.45 }}>
-                    {place.description}
-                  </p>
-                  
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '0.85rem' }}>
-                    {place.tags.map((t, idx) => (
-                      <span key={idx} style={{ fontSize: '0.7rem', padding: '2px 7px', background: 'var(--bg-surface-elevated, #f1f5f9)', color: 'var(--text-muted)', borderRadius: '4px' }}>
-                        #{t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', marginBottom: '0.85rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Best Timing:</span>
-                      <strong style={{ color: 'var(--text-main)' }}>{place.bestTime}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Entry Fee:</span>
-                      <strong style={{ color: place.entryFee === 0 ? '#059669' : '#0f766e' }}>
-                        {place.entryFee === 0 ? 'Free Entry' : `₹${place.entryFee} / person`}
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color, #e2e8f0)' }}>
-                  <button
-                    type="button"
-                    className="primary-action"
-                    style={{ flex: 1, padding: '7px 10px', fontSize: '0.8rem', borderRadius: '8px' }}
-                    onClick={() => {
-                      if (place.cityId) setSelectedId(place.cityId);
-                      setPage('planner');
-                    }}
-                  >
-                    ✨ Plan Trip ➔
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-action"
-                    style={{ padding: '7px 12px', fontSize: '0.8rem', borderRadius: '8px' }}
-                    onClick={() => {
-                      if (place.cityId) setSelectedId(place.cityId);
-                      setPage('destinations');
-                    }}
-                  >
-                    View City
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {/* PROGRESSIVE LOAD MORE BUTTON & SENTINEL (Scroll to save data) */}
-        {placesVisibleCount < filteredAttractions.length && (
-          <div style={{ textAlign: 'center', marginTop: '2.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-            <button
-              type="button"
-              className="primary-action"
-              onClick={() => setPlacesVisibleCount((prev) => Math.min(prev + 6, filteredAttractions.length))}
-              style={{
-                padding: '12px 30px',
-                borderRadius: '30px',
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                boxShadow: '0 4px 18px rgba(15, 118, 110, 0.25)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              <span>✨ Load More Places ({filteredAttractions.length - placesVisibleCount} remaining)</span>
-              <span>⬇️</span>
-            </button>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Showing {displayedAttractions.length} of {filteredAttractions.length} places (Scroll down to load automatically)
-            </span>
-            <div ref={loadMoreSentinelRef} style={{ height: '24px', width: '100%' }} />
-          </div>
-        )}
-      </div>
-
-      {/* SECTION: GO BEYOND THE FAMOUS (HIDDEN GEMS) */}
-      <div style={{ margin: '3.5rem 0' }}>
-        <SihHiddenGems
-          onPlanForCity={(cityName) => {
-            const matched = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
-            if (matched) setSelectedId(matched.id);
-            setPage('planner');
-          }}
-        />
-      </div>
-
-      {/* SECTION: EXPERIENCE REAL INDIA (LOCAL EXPERIENCES) */}
-      <div style={{ margin: '3.5rem 0' }}>
-        <SihExperiences
-          onEnquire={(biz) => onOpenEnquiry && onOpenEnquiry(biz)}
-        />
-      </div>
-
-      {/* SECTION: SUPPORT LOCAL TOURISM MARKETPLACE */}
-      <div style={{ margin: '3.5rem 0' }}>
-        <SihMarketplace
-          onEnquire={(biz) => onOpenEnquiry && onOpenEnquiry(biz)}
-        />
       </div>
 
       {/* WHY CHOOSE YATRA 66 */}
@@ -4414,6 +4344,8 @@ const CITY_FAST_FACTS = {
 };
 
 function DestinationsPage({ cities, city, details, formatPrice, handleAddReview, hiddenCityIds = [], onHideCity, onUnhideAllCities, selectedId, selectedMarker, setSelectedId, setPage }) {
+  // Check if a specific city has been selected (Requirement: if person chooses any city, don't show any other city recommendation; show if not selected)
+  const isCitySelected = Boolean(selectedId && city);
   const places = details?.famousPlaces || [];
   const tips = details?.travelTips || [];
   const reviews = details?.reviews || [];
@@ -4445,7 +4377,19 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
   return (
     <section className="page destinations-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.5rem' }}>
-        <PageTitle eyebrow="Destination Overview & Heritage Insights" title={`${city.name}, ${city.state}`} text={city.description} />
+        <div>
+          {isCitySelected && (
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={() => setSelectedId(null)}
+              style={{ marginBottom: '0.75rem', padding: '6px 14px', fontSize: '0.825rem', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span>← Browse All Indian Destinations (24 Cities)</span>
+            </button>
+          )}
+          <PageTitle eyebrow="Destination Overview & Heritage Insights" title={`${city.name}, ${city.state}`} text={city.description} />
+        </div>
         <button
           type="button"
           className="hide-card-btn"
@@ -4472,6 +4416,13 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
 
       {visibleCities && visibleCities.length > 0 && (
         <div className="city-pill-selector">
+          <button
+            type="button"
+            className={!selectedId ? 'active' : ''}
+            onClick={() => setSelectedId(null)}
+          >
+            🏛️ All Cities ({visibleCities.length})
+          </button>
           {visibleCities.map((c) => (
             <button
               key={c.id}
@@ -4485,8 +4436,62 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
         </div>
       )}
 
-      {/* FEATURE 1: INTERACTIVE DESTINATION HERO SHOWCASE & QUICK ACTIONS (Requirement 13) */}
-      <div className="destination-hero-card">
+      {!isCitySelected ? (
+        /* ALL DESTINATIONS DISCOVERY GRID (Shown when user has NOT selected a city) */
+        <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.4rem', margin: '0 0 0.35rem', color: 'var(--text-main)' }}>
+              Choose a Destination to Explore
+            </h3>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              Select any of India's 24 iconic heritage hubs below to view comprehensive monument guides, timings, fast facts, and traveler reviews.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.35rem' }}>
+            {visibleCities.map((c) => (
+              <article
+                key={c.id}
+                className="destination-photo-card"
+                onClick={() => setSelectedId(c.id)}
+                style={{ cursor: 'pointer', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)', background: 'var(--bg-surface)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+              >
+                <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
+                  <img
+                    src={CITY_PHOTOS[c.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'}
+                    alt={c.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                  />
+                  <span style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(15,23,42,0.8)', color: '#ffffff', padding: '3px 8px', borderRadius: '10px', fontSize: '0.72rem', fontWeight: 600 }}>
+                    📍 {c.state}
+                  </span>
+                  <span style={{ position: 'absolute', top: '10px', right: '10px', background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '10px', fontSize: '0.72rem', fontWeight: 800 }}>
+                    ⭐ {c.rating || 4.8}
+                  </span>
+                </div>
+                <div style={{ padding: '1rem' }}>
+                  <h4 style={{ margin: '0 0 0.3rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>{c.name}</h4>
+                  <p style={{ margin: '0 0 0.75rem', fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+                    {c.description}
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.78rem', color: '#0f766e', fontWeight: 700 }}>
+                      💰 ₹{c.estimatedDailyBudget || 4000}/day
+                    </span>
+                    <button type="button" className="primary-action" style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '6px' }}>
+                      View Details ➔
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* SINGLE SELECTED CITY VIEW (Zero other city recommendations shown when a city is chosen) */
+        <>
+          <div className="destination-hero-card">
         <div className="destination-hero-img-wrap">
           <img
             src={CITY_PHOTOS[city.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200'}
@@ -4668,7 +4673,9 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
       </div>
 
       {/* SLIDING PHOTO CAROUSEL ANIMATION */}
-      <DestinationsCarousel cities={visibleCities} onSelectCity={setSelectedId} />
+      {!isCitySelected && (
+        <DestinationsCarousel cities={visibleCities} onSelectCity={setSelectedId} />
+      )}
 
       <div className="stats-grid">
         <span>
@@ -4831,6 +4838,8 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
           ))}
         </aside>
       </div>
+        </>
+      )}
     </section>
   );
 }
