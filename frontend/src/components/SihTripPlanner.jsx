@@ -564,6 +564,88 @@ export default function SihTripPlanner({
   // Packing list state
   const [checkedPacking, setCheckedPacking] = useState({});
 
+  // Comprehensive list of ALL 32+ Indian destinations
+  const allPlannerCities = useMemo(() => {
+    const defaultList = [
+      { id: 1, name: 'Jaipur', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'forts', 'culture'], rating: 4.8, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
+      { id: 2, name: 'Agra', state: 'Uttar Pradesh', region: 'North India', themes: ['heritage', 'romantic', 'architecture'], rating: 4.9, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800', bestSeason: 'Oct to Mar' },
+      { id: 3, name: 'Delhi', state: 'Delhi', region: 'North India', themes: ['history', 'food', 'markets'], rating: 4.6, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800', bestSeason: 'Oct to Mar' },
+      { id: 4, name: 'Mumbai', state: 'Maharashtra', region: 'West India', themes: ['beaches', 'nightlife', 'food'], rating: 4.5, estimatedDailyBudget: 6500, heroImage: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800', bestSeason: 'Nov to Feb' },
+      { id: 5, name: 'Udaipur', state: 'Rajasthan', region: 'West India', themes: ['lakes', 'palaces', 'romantic'], rating: 4.8, estimatedDailyBudget: 5000, heroImage: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800', bestSeason: 'Sep to Mar' },
+      { id: 6, name: 'Varanasi', state: 'Uttar Pradesh', region: 'North India', themes: ['spiritual', 'culture', 'river'], rating: 4.7, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800', bestSeason: 'Oct to Mar' },
+      { id: 7, name: 'Goa', state: 'Goa', region: 'West India', themes: ['beaches', 'nightlife', 'heritage'], rating: 4.7, estimatedDailyBudget: 6200, heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', bestSeason: 'Nov to Feb' },
+      { id: 8, name: 'Kochi', state: 'Kerala', region: 'South India', themes: ['backwaters', 'heritage', 'food'], rating: 4.6, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', bestSeason: 'Sep to Mar' },
+      { id: 9, name: 'Amritsar', state: 'Punjab', region: 'North India', themes: ['spiritual', 'food', 'heritage'], rating: 4.9, estimatedDailyBudget: 3600, heroImage: 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800', bestSeason: 'Oct to Mar' },
+      { id: 10, name: 'Manali', state: 'Himachal Pradesh', region: 'North India', themes: ['mountains', 'adventure', 'snow'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', bestSeason: 'Oct to Jun' },
+      { id: 11, name: 'Rishikesh', state: 'Uttarakhand', region: 'North India', themes: ['yoga', 'spiritual', 'adventure'], rating: 4.8, estimatedDailyBudget: 3400, heroImage: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', bestSeason: 'Sep to Apr' },
+      { id: 12, name: 'Hampi', state: 'Karnataka', region: 'South India', themes: ['unesco', 'heritage', 'ruins'], rating: 4.9, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?w=800', bestSeason: 'Oct to Feb' },
+      { id: 13, name: 'Shimla', state: 'Himachal Pradesh', region: 'North India', themes: ['colonial', 'snow', 'mountains'], rating: 4.7, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', bestSeason: 'Oct to Jun' },
+      { id: 14, name: 'Leh Ladakh', state: 'Ladakh', region: 'North India', themes: ['adventure', 'monasteries', 'lakes'], rating: 4.9, estimatedDailyBudget: 5800, heroImage: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800', bestSeason: 'May to Sep' },
+      { id: 15, name: 'Mysore', state: 'Karnataka', region: 'South India', themes: ['palaces', 'silk', 'heritage'], rating: 4.8, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', bestSeason: 'Oct to Mar' },
+      { id: 16, name: 'Srinagar', state: 'Jammu & Kashmir', region: 'North India', themes: ['lakes', 'houseboats', 'nature'], rating: 4.8, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800', bestSeason: 'Apr to Oct' },
+      { id: 17, name: 'Pondicherry', state: 'Puducherry', region: 'South India', themes: ['french-quarter', 'beaches', 'cafes'], rating: 4.7, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', bestSeason: 'Oct to Mar' },
+      { id: 18, name: 'Hyderabad', state: 'Telangana', region: 'South India', themes: ['biryani', 'palaces', 'history'], rating: 4.7, estimatedDailyBudget: 4500, heroImage: 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800', bestSeason: 'Oct to Mar' },
+      { id: 19, name: 'Kolkata', state: 'West Bengal', region: 'East India', themes: ['heritage', 'literature', 'sweets'], rating: 4.7, estimatedDailyBudget: 3900, heroImage: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', bestSeason: 'Oct to Mar' },
+      { id: 20, name: 'Jodhpur', state: 'Rajasthan', region: 'West India', themes: ['blue-city', 'forts', 'desert'], rating: 4.8, estimatedDailyBudget: 4100, heroImage: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', bestSeason: 'Oct to Mar' },
+      { id: 21, name: 'Ooty', state: 'Tamil Nadu', region: 'South India', themes: ['hills', 'tea-gardens', 'toy-train'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
+      { id: 22, name: 'Shillong', state: 'Meghalaya', region: 'North-East', themes: ['waterfalls', 'clouds', 'nature'], rating: 4.8, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
+      { id: 23, name: 'Darjeeling', state: 'West Bengal', region: 'East India', themes: ['mountains', 'tea', 'unesco'], rating: 4.7, estimatedDailyBudget: 4800, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
+      { id: 24, name: 'Bengaluru', state: 'Karnataka', region: 'South India', themes: ['gardens', 'food', 'culture'], rating: 4.6, estimatedDailyBudget: 5400, heroImage: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', bestSeason: 'Sep to Mar' },
+      // Offbeat Gems
+      { id: 25, name: 'Bundi', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'stepwells', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2800, heroImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800', bestSeason: 'Oct to Mar' },
+      { id: 26, name: 'Orchha', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'river', 'spiritual', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2600, heroImage: 'https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=800', bestSeason: 'Oct to Mar' },
+      { id: 27, name: 'Mandu', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'water-palaces', 'offbeat'], rating: 4.7, estimatedDailyBudget: 2700, heroImage: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800', bestSeason: 'Jul to Mar' },
+      { id: 28, name: 'Samode', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'crafts', 'weavers', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
+      { id: 29, name: 'Mawlynnong', state: 'Meghalaya', region: 'North-East', themes: ['nature', 'ecotourism', 'offbeat'], rating: 4.9, estimatedDailyBudget: 2500, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
+      { id: 30, name: 'Ziro', state: 'Arunachal Pradesh', region: 'North-East', themes: ['nature', 'tribal', 'mountains', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2900, heroImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', bestSeason: 'Mar to Oct' },
+      { id: 31, name: 'Chettinad', state: 'Tamil Nadu', region: 'South India', themes: ['heritage', 'mansions', 'food', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3000, heroImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', bestSeason: 'Nov to Mar' },
+      { id: 32, name: 'Spiti Valley', state: 'Himachal Pradesh', region: 'North India', themes: ['monasteries', 'mountains', 'offbeat'], rating: 4.9, estimatedDailyBudget: 3500, heroImage: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800', bestSeason: 'Jun to Oct' },
+    ];
+
+    if (!cities || cities.length === 0) return defaultList;
+    const map = new Map();
+    defaultList.forEach(c => map.set(c.name.toLowerCase(), c));
+    cities.forEach(c => {
+      const existing = map.get(c.name.toLowerCase()) || {};
+      map.set(c.name.toLowerCase(), { ...existing, ...c });
+    });
+    return Array.from(map.values());
+  }, [cities]);
+
+  // Live autocomplete search suggestions
+  const liveSuggestions = useMemo(() => {
+    const q = citySearchInput.trim().toLowerCase();
+    if (!q) return [];
+    return allPlannerCities.filter((c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.state.toLowerCase().includes(q) ||
+      (c.region || '').toLowerCase().includes(q) ||
+      (c.themes || []).some((t) => t.toLowerCase().includes(q))
+    ).slice(0, 6);
+  }, [citySearchInput, allPlannerCities]);
+
+  // Filtered cities displayed in the card grid
+  const filteredGridCities = useMemo(() => {
+    const q = citySearchInput.trim().toLowerCase();
+    return allPlannerCities.filter((c) => {
+      const matchQuery = !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.state.toLowerCase().includes(q) ||
+        (c.region || '').toLowerCase().includes(q) ||
+        (c.themes || []).some((t) => t.toLowerCase().includes(q));
+
+      const matchCat =
+        cityCategoryFilter === 'all' ||
+        (cityCategoryFilter === 'heritage' && (c.themes || []).some((t) => ['heritage', 'forts', 'palaces', 'unesco', 'history'].includes(t))) ||
+        (cityCategoryFilter === 'mountains' && (c.themes || []).some((t) => ['mountains', 'snow', 'hills', 'adventure'].includes(t))) ||
+        (cityCategoryFilter === 'coastal' && (c.themes || []).some((t) => ['beaches', 'backwaters', 'lakes', 'river'].includes(t))) ||
+        (cityCategoryFilter === 'spiritual' && (c.themes || []).some((t) => ['spiritual', 'yoga', 'river'].includes(t))) ||
+        (cityCategoryFilter === 'offbeat' && (c.themes || []).some((t) => ['offbeat', 'stepwells', 'ecotourism', 'tribal'].includes(t)));
+
+      return matchQuery && matchCat;
+    });
+  }, [citySearchInput, cityCategoryFilter, allPlannerCities]);
+
   // Multi-day schedule calculation
   const multiDayPlan = useMemo(() => {
     if (aiPlanData && Array.isArray(aiPlanData.days) && aiPlanData.days.length > 0) {
@@ -704,87 +786,6 @@ export default function SihTripPlanner({
     ];
   }, [cityChoice]);
 
-  // Comprehensive list of ALL 32+ Indian destinations
-  const allPlannerCities = useMemo(() => {
-    const defaultList = [
-      { id: 1, name: 'Jaipur', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'forts', 'culture'], rating: 4.8, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
-      { id: 2, name: 'Agra', state: 'Uttar Pradesh', region: 'North India', themes: ['heritage', 'romantic', 'architecture'], rating: 4.9, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800', bestSeason: 'Oct to Mar' },
-      { id: 3, name: 'Delhi', state: 'Delhi', region: 'North India', themes: ['history', 'food', 'markets'], rating: 4.6, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800', bestSeason: 'Oct to Mar' },
-      { id: 4, name: 'Mumbai', state: 'Maharashtra', region: 'West India', themes: ['beaches', 'nightlife', 'food'], rating: 4.5, estimatedDailyBudget: 6500, heroImage: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800', bestSeason: 'Nov to Feb' },
-      { id: 5, name: 'Udaipur', state: 'Rajasthan', region: 'West India', themes: ['lakes', 'palaces', 'romantic'], rating: 4.8, estimatedDailyBudget: 5000, heroImage: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800', bestSeason: 'Sep to Mar' },
-      { id: 6, name: 'Varanasi', state: 'Uttar Pradesh', region: 'North India', themes: ['spiritual', 'culture', 'river'], rating: 4.7, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800', bestSeason: 'Oct to Mar' },
-      { id: 7, name: 'Goa', state: 'Goa', region: 'West India', themes: ['beaches', 'nightlife', 'heritage'], rating: 4.7, estimatedDailyBudget: 6200, heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', bestSeason: 'Nov to Feb' },
-      { id: 8, name: 'Kochi', state: 'Kerala', region: 'South India', themes: ['backwaters', 'heritage', 'food'], rating: 4.6, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', bestSeason: 'Sep to Mar' },
-      { id: 9, name: 'Amritsar', state: 'Punjab', region: 'North India', themes: ['spiritual', 'food', 'heritage'], rating: 4.9, estimatedDailyBudget: 3600, heroImage: 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=800', bestSeason: 'Oct to Mar' },
-      { id: 10, name: 'Manali', state: 'Himachal Pradesh', region: 'North India', themes: ['mountains', 'adventure', 'snow'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', bestSeason: 'Oct to Jun' },
-      { id: 11, name: 'Rishikesh', state: 'Uttarakhand', region: 'North India', themes: ['yoga', 'spiritual', 'adventure'], rating: 4.8, estimatedDailyBudget: 3400, heroImage: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', bestSeason: 'Sep to Apr' },
-      { id: 12, name: 'Hampi', state: 'Karnataka', region: 'South India', themes: ['unesco', 'heritage', 'ruins'], rating: 4.9, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?w=800', bestSeason: 'Oct to Feb' },
-      { id: 13, name: 'Shimla', state: 'Himachal Pradesh', region: 'North India', themes: ['colonial', 'snow', 'mountains'], rating: 4.7, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', bestSeason: 'Oct to Jun' },
-      { id: 14, name: 'Leh Ladakh', state: 'Ladakh', region: 'North India', themes: ['adventure', 'monasteries', 'lakes'], rating: 4.9, estimatedDailyBudget: 5800, heroImage: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800', bestSeason: 'May to Sep' },
-      { id: 15, name: 'Mysore', state: 'Karnataka', region: 'South India', themes: ['palaces', 'silk', 'heritage'], rating: 4.8, estimatedDailyBudget: 3800, heroImage: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', bestSeason: 'Oct to Mar' },
-      { id: 16, name: 'Srinagar', state: 'Jammu & Kashmir', region: 'North India', themes: ['lakes', 'houseboats', 'nature'], rating: 4.8, estimatedDailyBudget: 5200, heroImage: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800', bestSeason: 'Apr to Oct' },
-      { id: 17, name: 'Pondicherry', state: 'Puducherry', region: 'South India', themes: ['french-quarter', 'beaches', 'cafes'], rating: 4.7, estimatedDailyBudget: 4200, heroImage: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', bestSeason: 'Oct to Mar' },
-      { id: 18, name: 'Hyderabad', state: 'Telangana', region: 'South India', themes: ['biryani', 'palaces', 'history'], rating: 4.7, estimatedDailyBudget: 4500, heroImage: 'https://images.unsplash.com/photo-1572445271230-a78b5944a659?w=800', bestSeason: 'Oct to Mar' },
-      { id: 19, name: 'Kolkata', state: 'West Bengal', region: 'East India', themes: ['heritage', 'literature', 'sweets'], rating: 4.7, estimatedDailyBudget: 3900, heroImage: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', bestSeason: 'Oct to Mar' },
-      { id: 20, name: 'Jodhpur', state: 'Rajasthan', region: 'West India', themes: ['blue-city', 'forts', 'desert'], rating: 4.8, estimatedDailyBudget: 4100, heroImage: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', bestSeason: 'Oct to Mar' },
-      { id: 21, name: 'Ooty', state: 'Tamil Nadu', region: 'South India', themes: ['hills', 'tea-gardens', 'toy-train'], rating: 4.7, estimatedDailyBudget: 4400, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
-      { id: 22, name: 'Shillong', state: 'Meghalaya', region: 'North-East', themes: ['waterfalls', 'clouds', 'nature'], rating: 4.8, estimatedDailyBudget: 4600, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
-      { id: 23, name: 'Darjeeling', state: 'West Bengal', region: 'East India', themes: ['mountains', 'tea', 'unesco'], rating: 4.7, estimatedDailyBudget: 4800, heroImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', bestSeason: 'Oct to May' },
-      { id: 24, name: 'Bengaluru', state: 'Karnataka', region: 'South India', themes: ['gardens', 'food', 'culture'], rating: 4.6, estimatedDailyBudget: 5400, heroImage: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', bestSeason: 'Sep to Mar' },
-      // Offbeat Gems
-      { id: 25, name: 'Bundi', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'stepwells', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2800, heroImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800', bestSeason: 'Oct to Mar' },
-      { id: 26, name: 'Orchha', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'river', 'spiritual', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2600, heroImage: 'https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=800', bestSeason: 'Oct to Mar' },
-      { id: 27, name: 'Mandu', state: 'Madhya Pradesh', region: 'Central India', themes: ['heritage', 'water-palaces', 'offbeat'], rating: 4.7, estimatedDailyBudget: 2700, heroImage: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800', bestSeason: 'Jul to Mar' },
-      { id: 28, name: 'Samode', state: 'Rajasthan', region: 'North India', themes: ['heritage', 'crafts', 'weavers', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3200, heroImage: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', bestSeason: 'Oct to Mar' },
-      { id: 29, name: 'Mawlynnong', state: 'Meghalaya', region: 'North-East', themes: ['nature', 'ecotourism', 'offbeat'], rating: 4.9, estimatedDailyBudget: 2500, heroImage: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', bestSeason: 'Sep to May' },
-      { id: 30, name: 'Ziro', state: 'Arunachal Pradesh', region: 'North-East', themes: ['nature', 'tribal', 'mountains', 'offbeat'], rating: 4.8, estimatedDailyBudget: 2900, heroImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', bestSeason: 'Mar to Oct' },
-      { id: 31, name: 'Chettinad', state: 'Tamil Nadu', region: 'South India', themes: ['heritage', 'mansions', 'food', 'offbeat'], rating: 4.8, estimatedDailyBudget: 3000, heroImage: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', bestSeason: 'Nov to Mar' },
-      { id: 32, name: 'Spiti Valley', state: 'Himachal Pradesh', region: 'North India', themes: ['monasteries', 'mountains', 'offbeat'], rating: 4.9, estimatedDailyBudget: 3500, heroImage: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800', bestSeason: 'Jun to Oct' },
-    ];
-
-    if (!cities || cities.length === 0) return defaultList;
-    const map = new Map();
-    defaultList.forEach(c => map.set(c.name.toLowerCase(), c));
-    cities.forEach(c => {
-      const existing = map.get(c.name.toLowerCase()) || {};
-      map.set(c.name.toLowerCase(), { ...existing, ...c });
-    });
-    return Array.from(map.values());
-  }, [cities]);
-
-  // Live autocomplete search suggestions
-  const liveSuggestions = useMemo(() => {
-    const q = citySearchInput.trim().toLowerCase();
-    if (!q) return [];
-    return allPlannerCities.filter((c) =>
-      c.name.toLowerCase().includes(q) ||
-      c.state.toLowerCase().includes(q) ||
-      (c.region || '').toLowerCase().includes(q) ||
-      (c.themes || []).some((t) => t.toLowerCase().includes(q))
-    ).slice(0, 6);
-  }, [citySearchInput, allPlannerCities]);
-
-  // Filtered cities displayed in the card grid
-  const filteredGridCities = useMemo(() => {
-    const q = citySearchInput.trim().toLowerCase();
-    return allPlannerCities.filter((c) => {
-      const matchQuery = !q ||
-        c.name.toLowerCase().includes(q) ||
-        c.state.toLowerCase().includes(q) ||
-        (c.region || '').toLowerCase().includes(q) ||
-        (c.themes || []).some((t) => t.toLowerCase().includes(q));
-
-      const matchCat =
-        cityCategoryFilter === 'all' ||
-        (cityCategoryFilter === 'heritage' && (c.themes || []).some((t) => ['heritage', 'forts', 'palaces', 'unesco', 'history'].includes(t))) ||
-        (cityCategoryFilter === 'mountains' && (c.themes || []).some((t) => ['mountains', 'snow', 'hills', 'adventure'].includes(t))) ||
-        (cityCategoryFilter === 'coastal' && (c.themes || []).some((t) => ['beaches', 'backwaters', 'lakes', 'river'].includes(t))) ||
-        (cityCategoryFilter === 'spiritual' && (c.themes || []).some((t) => ['spiritual', 'yoga', 'river'].includes(t))) ||
-        (cityCategoryFilter === 'offbeat' && (c.themes || []).some((t) => ['offbeat', 'stepwells', 'ecotourism', 'tribal'].includes(t)));
-
-      return matchQuery && matchCat;
-    });
-  }, [citySearchInput, cityCategoryFilter, allPlannerCities]);
 
     const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
   const [rebalanceTarget, setRebalanceTarget] = useState(null);
