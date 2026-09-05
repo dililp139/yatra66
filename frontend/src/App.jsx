@@ -1376,28 +1376,6 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
   const [attrCategory, setAttrCategory] = useState('all');
   const [attrQuery, setAttrQuery] = useState('');
 
-  // Progressive loading for attractions on scroll (Requirement: load places on scroll to save data)
-  const [placesVisibleCount, setPlacesVisibleCount] = useState(6);
-  const loadMoreSentinelRef = useRef(null);
-
-  useEffect(() => {
-    setPlacesVisibleCount(6);
-  }, [attrCategory, attrQuery]);
-
-  useEffect(() => {
-    if (!loadMoreSentinelRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setPlacesVisibleCount((prev) => Math.min(prev + 6, filteredAttractions.length));
-        }
-      },
-      { rootMargin: '250px' }
-    );
-    observer.observe(loadMoreSentinelRef.current);
-    return () => observer.disconnect();
-  }, [filteredAttractions.length]);
-
   // Smart City Search Bar State
   const [citySearchInput, setCitySearchInput] = useState('');
   const [isSearchingCity, setIsSearchingCity] = useState(false);
@@ -1451,8 +1429,31 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
     });
   }, [attrCategory, attrQuery]);
 
+  // Progressive loading for attractions on scroll (Declared AFTER filteredAttractions to avoid TDZ ReferenceError)
+  const [placesVisibleCount, setPlacesVisibleCount] = useState(6);
+  const loadMoreSentinelRef = useRef(null);
+
+  useEffect(() => {
+    setPlacesVisibleCount(6);
+  }, [attrCategory, attrQuery]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    if (!loadMoreSentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0] && entries[0].isIntersecting) {
+          setPlacesVisibleCount((prev) => Math.min(prev + 6, (filteredAttractions || []).length));
+        }
+      },
+      { rootMargin: '250px' }
+    );
+    observer.observe(loadMoreSentinelRef.current);
+    return () => observer.disconnect();
+  }, [filteredAttractions]);
+
   const displayedAttractions = useMemo(() => {
-    return filteredAttractions.slice(0, placesVisibleCount);
+    return (filteredAttractions || []).slice(0, placesVisibleCount);
   }, [filteredAttractions, placesVisibleCount]);
 
   return (
