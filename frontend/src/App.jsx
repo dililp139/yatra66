@@ -801,6 +801,54 @@ function App() {
 
       {/* Floating Yatra AI Travel Concierge Assistant (Gemini 3.6 Flash) */}
       <YatraAiChatbot currentCity={selectedMarker?.name || 'Jaipur'} />
+
+      {/* Mobile Fixed Bottom App Bar */}
+      <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${page === 'home' ? 'active' : ''}`}
+          onClick={() => setPage('home')}
+        >
+          <span className="nav-icon">🏠</span>
+          <span className="nav-label">{lang === 'hi' ? 'मुख्य' : 'Home'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${page === 'destinations' ? 'active' : ''}`}
+          onClick={() => setPage('destinations')}
+        >
+          <span className="nav-icon">📍</span>
+          <span className="nav-label">{lang === 'hi' ? 'गंतव्य' : 'Places'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${page === 'planner' ? 'active' : ''}`}
+          onClick={() => setPage('planner')}
+        >
+          <span className="nav-icon">✨</span>
+          <span className="nav-label">{lang === 'hi' ? 'प्लानर' : 'Plan'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${page === 'rentals' ? 'active' : ''}`}
+          onClick={() => setPage('rentals')}
+        >
+          <span className="nav-icon">🚗</span>
+          <span className="nav-label">{lang === 'hi' ? 'रेंटल' : 'Rentals'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`mobile-bottom-nav-item ${page === 'marketplace' ? 'active' : ''}`}
+          onClick={() => setPage('marketplace')}
+        >
+          <span className="nav-icon">🤝</span>
+          <span className="nav-label">{lang === 'hi' ? 'स्थानीय' : 'Local'}</span>
+        </button>
+      </nav>
     </div>
   );
 }
@@ -808,6 +856,7 @@ function App() {
 function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPassport, visitedStatesCount = 4, page, setCurrency, setLang, setPage, setTheme, theme, user }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const menuTimerRef = useRef(null);
   const themeTimerRef = useRef(null);
 
@@ -1025,6 +1074,17 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPasspor
           </div>
         </div>
 
+        {/* Mobile Hamburger Menu Toggle Button */}
+        <button
+          type="button"
+          className="mobile-menu-toggle-btn"
+          onClick={() => setMobileDrawerOpen(true)}
+          title="Open Navigation Menu"
+          aria-label="Open Navigation Menu"
+        >
+          <span>☰</span>
+        </button>
+
         {/* Top-Right User Sign In / Account Button */}
         {user ? (
           <button type="button" className="user-profile-pill" onClick={onOpenAuth} title="View Account Profile">
@@ -1049,6 +1109,120 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPasspor
           </button>
         )}
       </div>
+      {/* Mobile Navigation Drawer Sheet */}
+      {mobileDrawerOpen && (
+        <div
+          className="mobile-nav-drawer-backdrop"
+          onClick={() => setMobileDrawerOpen(false)}
+        >
+          <div
+            className="mobile-nav-drawer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mobile-drawer-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CreativeLogo size={28} />
+              </div>
+              <button
+                type="button"
+                className="mobile-drawer-close"
+                onClick={() => setMobileDrawerOpen(false)}
+                aria-label="Close Menu"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mobile-drawer-body">
+              <div className="mobile-drawer-section">
+                <span className="mobile-drawer-label">Explore India</span>
+                <div className="mobile-drawer-grid">
+                  <button type="button" onClick={() => { setPage('home'); setMobileDrawerOpen(false); }}>
+                    <span>🏠</span> <span>Home</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('destinations'); setMobileDrawerOpen(false); }}>
+                    <span>📍</span> <span>Top Destinations</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('planner'); setMobileDrawerOpen(false); }}>
+                    <span>✨</span> <span>AI Smart Trip Planner</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('rentals'); setMobileDrawerOpen(false); }}>
+                    <span>🚗</span> <span>Vehicle & Cab Rentals</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('marketplace'); setMobileDrawerOpen(false); }}>
+                    <span>🤝</span> <span>Support Local Stays & Guides</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('gems'); setMobileDrawerOpen(false); }}>
+                    <span>💎</span> <span>Hidden Gems & Stepwells</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('hotels'); setMobileDrawerOpen(false); }}>
+                    <span>🏨</span> <span>Hotels & Heritage Havelis</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('map'); setMobileDrawerOpen(false); }}>
+                    <span>🗺️</span> <span>Interactive Map</span>
+                  </button>
+                  <button type="button" onClick={() => { setPage('festivals'); setMobileDrawerOpen(false); }}>
+                    <span>🎉</span> <span>Cultural Festivals</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="mobile-drawer-section">
+                <span className="mobile-drawer-label">Account & Tools</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="mobile-drawer-action-btn"
+                    onClick={() => { onOpenPassport(); setMobileDrawerOpen(false); }}
+                  >
+                    🏆 Explore India Passport ({visitedStatesCount}/28)
+                  </button>
+                  <button
+                    type="button"
+                    className="mobile-drawer-action-btn"
+                    onClick={() => { onOpenAuth(); setMobileDrawerOpen(false); }}
+                  >
+                    👤 {user ? user.name : 'Sign In / Register'}
+                  </button>
+                  <button
+                    type="button"
+                    className="mobile-drawer-action-btn"
+                    style={{ color: '#0f766e', fontWeight: 700 }}
+                    onClick={() => { setPage('business'); setMobileDrawerOpen(false); }}
+                  >
+                    🏢 Business Partner Portal ➔
+                  </button>
+                </div>
+              </div>
+
+              <div className="mobile-drawer-section">
+                <span className="mobile-drawer-label">Theme Mode</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  {themesList.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => { setTheme(t.id); localStorage.setItem('yatra_theme', t.id); }}
+                      style={{
+                        padding: '8px',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        borderRadius: '8px',
+                        border: theme === t.id ? '2px solid #0f766e' : '1px solid var(--border-color)',
+                        background: theme === t.id ? 'rgba(15, 118, 110, 0.12)' : 'var(--bg-surface-elevated)',
+                        color: 'var(--text-main)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
