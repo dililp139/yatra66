@@ -351,9 +351,11 @@ function App() {
     setSelectedId(newCity.id);
   };
 
-  // Persist theme choice
+  // Persist theme choice and sync to html and body
   useEffect(() => {
     localStorage.setItem('yatra_theme', theme);
+    document.documentElement.className = `theme-${theme}`;
+    document.body.className = `theme-${theme}`;
   }, [theme]);
 
   const selectedMarker = useMemo(

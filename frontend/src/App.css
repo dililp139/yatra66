@@ -6,6 +6,8 @@
    ================================================================ */
 
 :root,
+html.theme-light,
+body.theme-light,
 .theme-light {
   --bg-app: #fcfbf9;
   --bg-surface: #ffffff;
@@ -37,6 +39,8 @@
   --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+html.theme-dark,
+body.theme-dark,
 .theme-dark {
   --bg-app: #060911;
   --bg-surface: #0e1424;
@@ -66,6 +70,8 @@
   --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+html.theme-sunset,
+body.theme-sunset,
 .theme-sunset {
   --bg-app: #fffbf7;
   --bg-surface: #ffffff;
@@ -95,6 +101,8 @@
   --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+html.theme-emerald,
+body.theme-emerald,
 .theme-emerald {
   --bg-app: #f2fbf6;
   --bg-surface: #ffffff;
@@ -132,6 +140,16 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-app);
+  color: var(--text-main);
+  overflow-x: hidden;
 }
 
 body {
@@ -6389,21 +6407,32 @@ html {
   box-sizing: inherit;
 }
 
-body {
-  font-size: 1rem;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
+  background: var(--bg-app);
+  color: var(--text-main);
   overflow-x: hidden;
 }
 
-/* Constrain canvas on large/ultra-wide screens so text & cards don't stretch */
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .app-shell {
-  max-width: 1440px;
-  margin: 0 auto;
-  width: 100%;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh;
+  margin: 0 !important;
+  padding: 0;
   position: relative;
+  background: var(--bg-app);
+  overflow-x: hidden;
 }
 
 .topbar {
