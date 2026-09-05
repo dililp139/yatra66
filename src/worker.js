@@ -5,7 +5,7 @@
 
 import * as db from './db/index.js';
 import { googleConsentHtml } from './googleConsentPage.js';
-import { generateAiTripPlan, modifyAiItinerary, chatWithAi } from './gemini.js';
+import { generateAiTripPlan, modifyAiItinerary, chatWithAi, generateAiHotels } from './gemini.js';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -110,6 +110,13 @@ export default {
             const body = await request.json();
             const chatRes = await chatWithAi(env, body);
             return jsonResponse(chatRes);
+          }
+
+          // POST /api/ai/hotels
+          if (pathname === '/api/ai/hotels' && method === 'POST') {
+            const body = await request.json();
+            const hotelsRes = await generateAiHotels(env, body);
+            return jsonResponse(hotelsRes);
           }
 
           return errorResponse(`AI Route '${pathname}' with method '${method}' not found`, 404);

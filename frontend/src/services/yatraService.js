@@ -2951,6 +2951,25 @@ export const yatraApi = {
     return fares.sort((a, b) => a.hotelName.localeCompare(b.hotelName) || a.distanceKm - b.distanceKm);
   },
 
+  async getAiHotels(cityName, latitude, longitude, budget = 4000) {
+    try {
+      const res = await fetch('/api/ai/hotels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cityName, latitude, longitude, budget }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.hotels && Array.isArray(data.hotels) && data.hotels.length > 0) {
+          return data.hotels;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch AI hotels from Gemini:', err);
+    }
+    return null;
+  },
+
   async compareHotelPrices(hotelName, cityName, basePriceInr = 4500, starRating = 4.7) {
     await delay(200);
     const safeBase = basePriceInr > 0 ? Number(basePriceInr) : 4500;

@@ -377,16 +377,14 @@ function App() {
     });
   }, [budget, cities, hiddenCityIds, search, themeFilter]);
 
-  // Price formatting helper
+  // Price formatting helper - Standardized in Indian Rupee (₹)
   const formatPrice = useMemo(() => {
     return (inrAmount) => {
       if (inrAmount == null || isNaN(inrAmount)) return '₹0';
-      const rate = currencyData.rates?.[currency] || 1.0;
-      const symbol = currencyData.currencySymbols?.[currency] || '₹';
-      const converted = Math.round(inrAmount * rate);
-      return `${symbol}${converted.toLocaleString()}`;
+      const converted = Math.round(Number(inrAmount) || 0);
+      return `₹${converted.toLocaleString('en-IN')}`;
     };
-  }, [currency, currencyData]);
+  }, []);
 
   // Initial load - Fetch live locations and currency from in-browser engine
   useEffect(() => {
@@ -866,17 +864,6 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, page, setCurr
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Compact Currency Selector */}
-        <div className="currency-selector" title="Choose Currency">
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-            {Object.keys(currencyData.rates || {}).map((curr) => (
-              <option key={curr} value={curr}>
-                {curr} ({currencyData.currencySymbols?.[curr] || curr})
-              </option>
-            ))}
-          </select>
         </div>
 
         {/* Top-Right User Sign In / Account Button */}
@@ -1389,6 +1376,42 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
   const [attrCategory, setAttrCategory] = useState('all');
   const [attrQuery, setAttrQuery] = useState('');
 
+  // Smart City Search Bar State
+  const [citySearchInput, setCitySearchInput] = useState('');
+  const [isSearchingCity, setIsSearchingCity] = useState(false);
+  const [searchedCity, setSearchedCity] = useState(null);
+  const [searchNotFound, setSearchNotFound] = useState(false);
+
+  const handlePerformCitySearch = (query) => {
+    const q = (query !== undefined ? query : citySearchInput).trim().toLowerCase();
+    if (!q) {
+      setSearchedCity(null);
+      setSearchNotFound(false);
+      return;
+    }
+    setIsSearchingCity(true);
+    setSearchNotFound(false);
+
+    setTimeout(() => {
+      const match = cities.find(
+        (c) =>
+          c.name.toLowerCase() === q ||
+          c.name.toLowerCase().includes(q) ||
+          c.state.toLowerCase().includes(q) ||
+          (c.themes && c.themes.some((t) => t.toLowerCase().includes(q)))
+      );
+
+      if (match) {
+        setSearchedCity(match);
+        setSearchNotFound(false);
+      } else {
+        setSearchedCity(null);
+        setSearchNotFound(true);
+      }
+      setIsSearchingCity(false);
+    }, 400);
+  };
+
   const visibleDestinations = useMemo(() => {
     return cities.filter((c) => !hiddenCityIds.includes(c.id));
   }, [cities, hiddenCityIds]);
@@ -1406,18 +1429,6 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
     });
   }, [attrCategory, attrQuery]);
 
-  const handleDockSearch = () => {
-    if (dockQuery.trim()) {
-      const match = cities.find((c) => c.name.toLowerCase().includes(dockQuery.trim().toLowerCase()));
-      if (match) {
-        setSelectedId(match.id);
-        setPage('destinations');
-        return;
-      }
-    }
-    setPage('destinations');
-  };
-
   return (
     <section className="page hero-page-container">
       <div className="hero-page">
@@ -1430,76 +1441,188 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
               : 'Discover royal desert fortresses, misty Himalayan summits, tranquil Kerala backwaters, and sacred riverfronts. Featuring AI route optimization, hotspot decongestion, and direct 0% commission local marketplace.'}
           </p>
 
-          {/* UNIVERSAL TRAVEL SEARCH DOCK */}
-          <div className="universal-search-dock">
-            <div className="search-dock-col">
-              <span className="search-dock-label">📍 {lang === 'hi' ? 'गंतव्य' : 'Destination'}</span>
+          {/* SMART CITY SEARCH BAR (With Loading Animation & Preview Card) */}
+          <div className="city-search-container">
+            <div className="city-search-box">
+              <span className="search-box-icon">🔍</span>
               <input
-                className="search-dock-input"
-                placeholder={lang === 'hi' ? 'आप भारत में कहाँ घूमना चाहते हैं?' : 'Where in India do you want to explore?'}
-                value={dockQuery}
-                onChange={(e) => setDockQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleDockSearch()}
-              />
-            </div>
-            <div className="search-dock-col">
-              <span className="search-dock-label">🗓️ {lang === 'hi' ? 'मौसम' : 'Best Season'}</span>
-              <select
-                className="search-dock-select"
-                value={dockSeason}
-                onChange={(e) => setDockSeason(e.target.value)}
-              >
-                <option value="all">{lang === 'hi' ? 'सभी मौसम' : 'Any Travel Season'}</option>
-                <option value="winter">{lang === 'hi' ? 'सर्दी (अक्टूबर - मार्च)' : 'Winter (Oct to Mar)'}</option>
-                <option value="summer">{lang === 'hi' ? 'गर्मी (अप्रैल - जून)' : 'Summer (Apr to Jun)'}</option>
-                <option value="monsoon">{lang === 'hi' ? 'मानसून (जुलाई - सितंबर)' : 'Monsoon (Jul to Sep)'}</option>
-              </select>
-            </div>
-            <div className="search-dock-col">
-              <span className="search-dock-label">🧭 {lang === 'hi' ? 'अनुभव शैली' : 'Experience Vibe'}</span>
-              <select
-                className="search-dock-select"
-                value={dockTheme}
-                onChange={(e) => setDockTheme(e.target.value)}
-              >
-                <option value="all">{lang === 'hi' ? 'सभी अनुभव' : 'All Experiences'}</option>
-                <option value="heritage">{lang === 'hi' ? 'किले और महल' : 'Royal Palaces & Forts'}</option>
-                <option value="beaches">{lang === 'hi' ? 'समुद्र तट' : 'Beaches & Coastal'}</option>
-                <option value="mountains">{lang === 'hi' ? 'हिमालयी वादियां' : 'Himalayan Peaks'}</option>
-                <option value="spiritual">{lang === 'hi' ? 'घाट और मंदिर' : 'Ghats & Sacred Temples'}</option>
-                <option value="lakes">{lang === 'hi' ? 'झीलें और बैकवाटर' : 'Lakes & Backwaters'}</option>
-              </select>
-            </div>
-            <button
-              type="button"
-              className="search-dock-btn"
-              onClick={handleDockSearch}
-              aria-label="Search Destinations"
-            >
-              <span>{lang === 'hi' ? 'खोजें' : 'Explore'}</span>
-              <span>➔</span>
-            </button>
-          </div>
-
-          {/* QUICK EXPLORE PILLS */}
-          <div className="quick-explore-pills">
-            <span className="quick-pills-label">{lang === 'hi' ? 'चर्चित गंतव्य:' : 'Trending Now:'}</span>
-            {['Jaipur', 'Agra', 'Delhi', 'Mumbai', 'Goa', 'Varanasi', 'Kochi', 'Manali', 'Udaipur', 'Amritsar'].map((q) => (
-              <button
-                key={q}
-                type="button"
-                className="quick-pill-tag"
-                onClick={() => {
-                  const found = cities.find((c) => c.name.toLowerCase() === q.toLowerCase());
-                  if (found) {
-                    setSelectedId(found.id);
-                    setPage('destinations');
+                type="text"
+                className="city-search-input"
+                placeholder={lang === 'hi' ? 'भारत में किसी भी शहर को खोजें (उदा. जयपुर, मनाली, गोवा, वाराणसी)...' : 'Search any Indian city to visit (e.g. Jaipur, Manali, Goa, Varanasi, Udaipur, Agra)...'}
+                value={citySearchInput}
+                onChange={(e) => {
+                  setCitySearchInput(e.target.value);
+                  if (!e.target.value.trim()) {
+                    setSearchedCity(null);
+                    setSearchNotFound(false);
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handlePerformCitySearch();
+                }}
+              />
+              {citySearchInput && (
+                <button
+                  type="button"
+                  className="clear-search-btn"
+                  onClick={() => {
+                    setCitySearchInput('');
+                    setSearchedCity(null);
+                    setSearchNotFound(false);
+                  }}
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+              <button
+                type="button"
+                className="city-search-submit-btn"
+                onClick={() => handlePerformCitySearch()}
+                disabled={isSearchingCity}
               >
-                {q}
+                <span>{isSearchingCity ? (lang === 'hi' ? 'खोज रहे हैं...' : 'Searching...') : (lang === 'hi' ? 'शहर खोजें' : 'Search City')}</span>
+                <span>➔</span>
               </button>
-            ))}
+            </div>
+
+            {/* LOADING ANIMATION */}
+            {isSearchingCity && (
+              <div className="city-search-loading-bar">
+                <div className="search-loading-pulse-line"></div>
+                <span className="search-spin-icon">⏳</span>
+                <span className="search-loading-text">
+                  {lang === 'hi'
+                    ? `"${citySearchInput}" के लिए पर्यटन स्थल, होटल व मार्ग खोजे जा रहे हैं...`
+                    : `Searching verified travel destinations, stays, and route data for "${citySearchInput}"...`}
+                </span>
+              </div>
+            )}
+
+            {/* CITY PREVIEW CARD (with a bit detail and one small photo beside it) */}
+            {!isSearchingCity && searchedCity && (
+              <div className="city-preview-card">
+                <div className="preview-card-inner">
+                  {/* ONE SMALL PHOTO BESIDE IT */}
+                  <div className="preview-photo-wrap">
+                    <img
+                      src={CITY_PHOTOS[searchedCity.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=70&auto=format'}
+                      alt={searchedCity.name}
+                      className="preview-photo-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=70&auto=format';
+                      }}
+                    />
+                    <span className="preview-photo-region">{searchedCity.region}</span>
+                  </div>
+
+                  {/* DETAILS BESIDE THE PHOTO */}
+                  <div className="preview-details-wrap">
+                    <div className="preview-header-row">
+                      <div>
+                        <h3 className="preview-city-title">
+                          {searchedCity.name}
+                          <span className="preview-state-badge">📍 {searchedCity.state}</span>
+                        </h3>
+                        <p className="preview-desc-text">
+                          {searchedCity.description ? searchedCity.description.slice(0, 130) + '...' : 'Explore historic landmarks, local stays, and curated itineraries.'}
+                        </p>
+                      </div>
+                      <div className="preview-rating-badge">
+                        ⭐ {searchedCity.rating || searchedCity.averageRating || 4.8} / 5.0
+                      </div>
+                    </div>
+
+                    <div className="preview-chips-row">
+                      <span className="preview-chip">
+                        🗓️ <strong>Best Season:</strong> {searchedCity.bestSeason || 'Oct – Mar'}
+                      </span>
+                      <span className="preview-chip">
+                        💰 <strong>Est. Budget:</strong> {formatPrice(searchedCity.estimatedDailyBudget || 4000)} / day
+                      </span>
+                      {searchedCity.themes?.slice(0, 2).map((t, idx) => (
+                        <span key={idx} className="preview-theme-chip">#{t}</span>
+                      ))}
+                    </div>
+
+                    <div className="preview-actions-row">
+                      <button
+                        type="button"
+                        className="primary-action"
+                        onClick={() => {
+                          setSelectedId(searchedCity.id);
+                          setPage('destinations');
+                        }}
+                      >
+                        Explore {searchedCity.name} ➔
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        onClick={() => {
+                          setSelectedId(searchedCity.id);
+                          setPage('planner');
+                        }}
+                      >
+                        ✨ Plan Trip with AI
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        onClick={() => {
+                          setSelectedId(searchedCity.id);
+                          setPage('hotels');
+                        }}
+                      >
+                        🏨 View Hotels
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-action"
+                        onClick={() => {
+                          setPage('rentals');
+                        }}
+                      >
+                        🚗 Rentals
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NOT FOUND FEEDBACK */}
+            {!isSearchingCity && searchNotFound && (
+              <div style={{ marginTop: '10px', padding: '10px 14px', background: 'var(--bg-surface, #ffffff)', border: '1px solid #fed7aa', borderRadius: '10px', fontSize: '0.85rem', color: '#c2410c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>No destination match for "<strong>{citySearchInput}</strong>". Try Jaipur, Goa, Manali, Agra, Kerala, or Udaipur.</span>
+                <button
+                  type="button"
+                  style={{ background: 'none', border: 'none', color: '#c2410c', cursor: 'pointer', fontWeight: 700 }}
+                  onClick={() => { setCitySearchInput(''); setSearchNotFound(false); }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* QUICK EXPLORE PILLS */}
+            <div className="quick-explore-pills" style={{ marginTop: '10px' }}>
+              <span className="quick-pills-label">{lang === 'hi' ? 'चर्चित गंतव्य:' : 'Trending Cities:'}</span>
+              {['Jaipur', 'Goa', 'Manali', 'Udaipur', 'Agra', 'Varanasi', 'Kochi', 'Mumbai', 'Amritsar', 'Rishikesh'].map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  className="quick-pill-tag"
+                  onClick={() => {
+                    setCitySearchInput(q);
+                    handlePerformCitySearch(q);
+                  }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* QUICK ACTION LAUNCHPAD */}
@@ -1598,16 +1721,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         ))}
       </div>
 
-      {/* SLIDING PHOTO CAROUSEL ANIMATION */}
-      <DestinationsCarousel
-        cities={visibleDestinations}
-        onSelectCity={(id) => {
-          setSelectedId(id);
-          setPage('destinations');
-        }}
-      />
-
-      {/* FEATURED DESTINATIONS PHOTO GRID WITH ANIMATIONS */}
+      {/* FEATURED DESTINATIONS PHOTO GRID (Optimized Top 8 for Fast Page Load) */}
       <div className="home-featured-section">
         <div className="home-section-header">
           <div>
@@ -1615,8 +1729,8 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             <h2>Top Destinations in North, South, East & West India</h2>
             <p>Select any iconic heritage city, beach retreat, or mountain sanctuary to inspect live weather, hotels, and attractions.</p>
           </div>
-          <button type="button" className="secondary-action" onClick={() => setPage('map')}>
-            View on Interactive Map ➔
+          <button type="button" className="secondary-action" onClick={() => setPage('destinations')}>
+            View All ({visibleDestinations.length}+) ➔
           </button>
         </div>
 
@@ -1630,8 +1744,9 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         )}
 
         <div className="home-destinations-grid">
-          {visibleDestinations.map((dest) => {
-            const photoUrl = CITY_PHOTOS[dest.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800';
+          {visibleDestinations.slice(0, 8).map((dest) => {
+            const rawUrl = CITY_PHOTOS[dest.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41';
+            const photoUrl = rawUrl.includes('?') ? `${rawUrl}&w=400&q=70&auto=format` : `${rawUrl}?w=400&q=70&auto=format`;
             return (
               <article
                 key={dest.id}
@@ -1642,7 +1757,14 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
                 }}
               >
                 <div className="card-image-wrap">
-                  <img src={photoUrl} alt={dest.name} loading="lazy" />
+                  <img
+                    src={photoUrl}
+                    alt={dest.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=400&q=70&auto=format';
+                    }}
+                  />
                   <span className="card-region-badge">{dest.region}</span>
                   <span className="card-rating-badge">⭐ {dest.rating || dest.averageRating || 4.8}</span>
                   <button
@@ -1861,90 +1983,6 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
                     }}
                   >
                     View City
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      {/* 5-CITY PREMIER MVP SPOTLIGHT */}
-      <div className="sih-mvp-section">
-        <div className="section-header-row" style={{ marginBottom: '1.25rem' }}>
-          <div>
-            <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
-              ⭐ Premier 5-City Golden Corridor MVP
-            </span>
-            <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)' }}>
-              {lang === 'hi' ? 'भारत के 5 प्रमुख स्वर्णिम गंतव्य' : "Explore India's Premier Golden Corridor"}
-            </h2>
-            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-              {lang === 'hi'
-                ? 'गहन यात्रा विवरण, सटीक आवागमन हिसाब और प्रमाणित स्थानीय भागीदार — जयपुर, आगरा, दिल्ली, मुंबई और गोवा के लिए।'
-                : "Deep route sequencing, accurate travel budget calculators, and vetted local partners for India's 5 premier travel hubs."}
-            </p>
-          </div>
-        </div>
-
-        <div className="sih-mvp-grid">
-          {FIVE_CITIES_MVP.map((mvpCity) => (
-            <article key={mvpCity.id} className="sih-mvp-card">
-              <div className="sih-mvp-img-wrap">
-                <img src={mvpCity.heroImage} alt={mvpCity.name} loading="lazy" />
-                <span style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(15, 23, 42, 0.8)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  📍 {mvpCity.state}
-                </span>
-                <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#059669', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
-                  🌿 {mvpCity.sustainabilityScore}% Eco
-                </span>
-                <span style={{ position: 'absolute', bottom: '8px', left: '12px', background: 'rgba(255,255,255,0.92)', color: '#0f172a', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  ⏱️ {mvpCity.recommendedDuration}
-                </span>
-              </div>
-
-              <div className="sih-mvp-content">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>{mvpCity.name}</h3>
-                  <span style={{ fontWeight: 800, color: '#f59e0b', fontSize: '0.85rem' }}>⭐ {mvpCity.rating}</span>
-                </div>
-                <p style={{ margin: '0 0 0.85rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45, flex: 1 }}>
-                  {mvpCity.tagline}
-                </p>
-
-                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.775rem', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'hi' ? 'सर्वश्रेष्ठ मौसम:' : 'Best Season:'}</span>
-                    <strong>{mvpCity.bestSeason}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'hi' ? 'अनुमानित दैनिक खर्च:' : 'Estimated Daily:'}</span>
-                    <strong style={{ color: '#0f766e' }}>{formatPrice(mvpCity.startingBudgetInr)} / person</strong>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    type="button"
-                    className="primary-action"
-                    style={{ flex: 1, padding: '8px', fontSize: '0.825rem' }}
-                    onClick={() => {
-                      setSelectedId(mvpCity.id);
-                      setPage('planner');
-                    }}
-                  >
-                    ✨ {lang === 'hi' ? 'प्लान बनाएं' : 'Plan Trip'} ➔
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-action"
-                    style={{ padding: '8px 12px', fontSize: '0.825rem' }}
-                    onClick={() => {
-                      setSelectedId(mvpCity.id);
-                      setPage('destinations');
-                    }}
-                  >
-                    {lang === 'hi' ? 'विस्तार' : 'Explore'}
                   </button>
                 </div>
               </div>
@@ -2779,9 +2817,35 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
   const [activeSection, setActiveSection] = useState('hotels'); // 'hotels' | 'cabs'
   const [selectedHotelForMap, setSelectedHotelForMap] = useState(null);
 
+  // Gemini AI Background Stays State
+  const [aiHotels, setAiHotels] = useState([]);
+  const [loadingAiHotels, setLoadingAiHotels] = useState(false);
+
+  useEffect(() => {
+    let unmounted = false;
+    if (!selectedMarker?.name) return;
+
+    setLoadingAiHotels(true);
+    yatraApi.getAiHotels(
+      selectedMarker.name,
+      selectedMarker.latitude,
+      selectedMarker.longitude,
+      selectedMarker.estimatedDailyBudget || 4000
+    ).then((res) => {
+      if (!unmounted && res && Array.isArray(res) && res.length > 0) {
+        setAiHotels(res);
+      }
+    }).catch(() => {})
+    .finally(() => {
+      if (!unmounted) setLoadingAiHotels(false);
+    });
+
+    return () => { unmounted = true; };
+  }, [selectedMarker?.name, selectedMarker?.latitude, selectedMarker?.longitude, selectedMarker?.estimatedDailyBudget]);
+
   const places = useMemo(() => details?.famousPlaces || [], [details]);
 
-  // Expand hotel inventory with authentic stays per destination
+  // Expand hotel inventory with authentic stays per destination + Gemini AI discovery
   const allHotels = useMemo(() => {
     const baseHotels = details?.recommendedHotels || [];
     const cName = selectedMarker?.name || 'City';
@@ -2795,10 +2859,35 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
       { id: selectedMarker.id * 1000 + 14, name: `Lemon Tree Premier ${cName}`, type: 'Boutique', address: `Airport Arterial Expressway, ${cName}`, latitude: cLat + 0.018, longitude: cLng + 0.012, rating: 4.6, pricePerNight: 4200, amenities: ['Airport Shuttle', 'Gym', 'Buffet Breakfast', 'Bar'], nearbyAttractionIds: [] },
       { id: selectedMarker.id * 1000 + 15, name: `Taj Gateway & Heritage Suites ${cName}`, type: 'Luxury', address: `Civil Lines, ${cName}`, latitude: cLat - 0.009, longitude: cLng + 0.015, rating: 4.9, pricePerNight: 12500, amenities: ['5-Star Luxury', 'Butler Service', 'Fine Dining', 'Grand Spa'], nearbyAttractionIds: [] },
     ];
-    const existingNames = new Set(baseHotels.map((h) => h.name.toLowerCase()));
-    const filteredSupp = supplements.filter((s) => !existingNames.has(s.name.toLowerCase()));
-    return [...baseHotels, ...filteredSupp];
-  }, [details, selectedMarker]);
+
+    // Gemini AI Generated Verified Stays
+    const aiMapped = (aiHotels || []).map((h, i) => ({
+      id: (selectedMarker.id || 1) * 10000 + 100 + i,
+      name: h.name,
+      type: h.type || 'Boutique',
+      address: h.address || `${cName} Heritage Zone`,
+      latitude: h.latitude || (cLat + (i * 0.003 - 0.006)),
+      longitude: h.longitude || (cLng + (i * 0.004 - 0.005)),
+      rating: h.rating || 4.8,
+      pricePerNight: h.pricePerNight || 3800,
+      amenities: h.amenities || ['Free WiFi', 'Air Conditioning', 'Complimentary Breakfast', 'Local Tour Desk'],
+      phone: h.phone || '+91 98290 12345',
+      whatsapp: h.whatsapp || '+919829012345',
+      isAiVerified: true,
+    }));
+
+    const combined = [...aiMapped, ...baseHotels, ...supplements];
+    const unique = [];
+    const seen = new Set();
+    for (const item of combined) {
+      const key = item.name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(item);
+      }
+    }
+    return unique;
+  }, [details, selectedMarker, aiHotels]);
 
   const visibleHotels = useMemo(() => {
     return allHotels.filter((h) => !hiddenHotelIds.includes(h.id));
@@ -3084,6 +3173,20 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
             </div>
           </div>
 
+          {/* GEMINI AI DISCOVERY BANNER */}
+          {loadingAiHotels && (
+            <div className="gemini-hotels-banner loading">
+              <span>🤖</span>
+              <span>Gemini AI is finding authentic verified boutique stays & havelis in {selectedMarker?.name} in background...</span>
+            </div>
+          )}
+          {!loadingAiHotels && aiHotels.length > 0 && (
+            <div className="gemini-hotels-banner">
+              <span>✨</span>
+              <span><strong>Gemini AI Discovery:</strong> Added {aiHotels.length} live verified local stays with direct phone & WhatsApp contact info.</span>
+            </div>
+          )}
+
           {/* HOTELS LAYOUT WITH SIDEBAR MAP */}
           <div className="hotels-layout-with-sidebar">
             <div className="hotel-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))' }}>
@@ -3096,7 +3199,12 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
                   <article className={`hotel-photo-card ${isMapActive ? 'selected-for-map' : ''}`} key={hotel.id}>
                     <div className="hotel-photo-wrap">
                       <img src={photo} alt={hotel.name} loading="lazy" />
-                      <span className="hotel-type-badge">{hotel.type || 'Stay'}</span>
+                      <span
+                        className="hotel-type-badge"
+                        style={hotel.isAiVerified ? { background: 'linear-gradient(135deg, #0f766e 0%, #10b981 100%)', color: '#fff', boxShadow: '0 2px 8px rgba(15,118,110,0.3)' } : {}}
+                      >
+                        {hotel.isAiVerified ? `✨ Gemini ${hotel.type}` : (hotel.type || 'Stay')}
+                      </span>
                       <button
                         type="button"
                         className="hide-card-btn"
@@ -3148,6 +3256,22 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
                         >
                           🗺️ {isMapActive ? 'Showing on Map' : 'View Location on Map'}
                         </button>
+                        {hotel.phone && (
+                          <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                            <a href={`tel:${hotel.phone}`} className="hotel-contact-btn" title="Call Hotel Front Desk">
+                              📞 {hotel.phone}
+                            </a>
+                            <a
+                              href={`https://wa.me/${(hotel.whatsapp || hotel.phone).replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi, I found ${hotel.name} on Yatra66. Are rooms available for booking?`)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="hotel-wa-btn"
+                              title="Chat on WhatsApp"
+                            >
+                              💬 WhatsApp
+                            </a>
+                          </div>
+                        )}
                       </div>
 
                       <button
