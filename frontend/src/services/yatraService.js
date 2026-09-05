@@ -2820,6 +2820,20 @@ function saveStoredReviews(revs) {
 
 export const yatraApi = {
   async getCities(search = '', state = '', theme = '', minBudget = null, maxBudget = null) {
+    try {
+      const qParams = new URLSearchParams();
+      if (search) qParams.set('search', search);
+      if (state) qParams.set('state', state);
+      if (theme && theme !== 'all') qParams.set('theme', theme);
+      if (maxBudget) qParams.set('maxBudget', maxBudget);
+      const url = `/api/cities${qParams.toString() ? `?${qParams.toString()}` : ''}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch {}
+
     await delay(60);
     return CITIES_MASTER.filter((city) => {
       const q = (search || '').toLowerCase().trim();
@@ -2837,14 +2851,30 @@ export const yatraApi = {
   },
 
   async getCity(cityId) {
+    try {
+      const res = await fetch(`/api/cities/${cityId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.id) return data;
+      }
+    } catch {}
+
     const city = CITIES_MASTER.find((c) => c.id === Number(cityId));
     if (!city) throw new Error(`City ${cityId} does not exist`);
     return city;
   },
 
   async getCityDetails(cityId) {
-    await delay(120);
     const id = Number(cityId);
+    try {
+      const res = await fetch(`/api/cities/${id}/details`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.city) return data;
+      }
+    } catch {}
+
+    await delay(120);
     const city = CITIES_MASTER.find((c) => c.id === id);
     if (!city) throw new Error(`City ${cityId} does not exist`);
 
@@ -3342,11 +3372,33 @@ export const yatraApi = {
   },
 
   async getBookings() {
+    try {
+      const res = await fetch('/api/bookings');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch {}
+
     await delay(80);
     return getStoredBookings();
   },
 
   async createBooking(bookingData) {
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+      if (res.ok) {
+        const created = await res.json();
+        const existing = getStoredBookings();
+        saveStoredBookings([created, ...existing]);
+        return created;
+      }
+    } catch {}
+
     await delay(150);
     const existing = getStoredBookings();
     const bookingId = `YTR-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -3386,6 +3438,21 @@ export const yatraApi = {
   },
 
   async cancelBooking(bookingId) {
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const cancelled = await res.json();
+        const existing = getStoredBookings();
+        const updated = existing.map((b) =>
+          b.bookingId === bookingId ? { ...b, status: 'CANCELLED' } : b
+        );
+        saveStoredBookings(updated);
+        return cancelled;
+      }
+    } catch {}
+
     await delay(120);
     const existing = getStoredBookings();
     const updated = existing.map((b) =>
@@ -3397,6 +3464,15 @@ export const yatraApi = {
   },
 
   async getReviews(cityId = null) {
+    try {
+      const query = cityId ? `?cityId=${cityId}` : '';
+      const res = await fetch(`/api/reviews${query}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch {}
+
     await delay(60);
     const all = getStoredReviews();
     if (cityId) return all.filter((r) => r.cityId === Number(cityId));
@@ -3404,6 +3480,20 @@ export const yatraApi = {
   },
 
   async addReview(reviewData) {
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewData)
+      });
+      if (res.ok) {
+        const created = await res.json();
+        const existing = getStoredReviews();
+        saveStoredReviews([created, ...existing]);
+        return created;
+      }
+    } catch {}
+
     await delay(120);
     const existing = getStoredReviews();
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -3432,6 +3522,50 @@ export const yatraApi = {
     }
 
     return newReview;
+  },
+
+  async signIn(userData) {
+    try {
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      if (res.ok) {
+        const user = await res.json();
+        try {
+          localStorage.setItem('yatra_user', JSON.stringify(user));
+        } catch {}
+        return user;
+      }
+    } catch {}
+
+    const fallbackUser = {
+      name: userData.name || (userData.email ? userData.email.split('@')[0] : 'Traveler'),
+      email: userData.email || 'traveler@yatra.in',
+      authProvider: userData.authProvider || 'email',
+      city: userData.city || 'Jaipur',
+      interest: userData.interest || 'Heritage',
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    };
+    try {
+      localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
+    } catch {}
+    return fallbackUser;
+  },
+
+  async getUserProfile(email) {
+    try {
+      const res = await fetch(`/api/auth/user?email=${encodeURIComponent(email)}`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {}
+    try {
+      const raw = localStorage.getItem('yatra_user');
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return null;
   },
 
   async getWeather(cityId) {

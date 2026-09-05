@@ -2,12 +2,16 @@
   "name": "yatra-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Yatra - 100% Pure JavaScript React Travel Platform",
+  "type": "module",
+  "description": "Yatra - 100% Pure JavaScript React Travel Platform with Cloudflare Worker & D1 Database",
   "scripts": {
     "dev": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "preview": "npm --prefix frontend run preview",
-    "start": "npm --prefix frontend run dev"
+    "start": "npm --prefix frontend run dev",
+    "worker:dev": "wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply yatra-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply yatra-db --remote"
   }
-}
+}

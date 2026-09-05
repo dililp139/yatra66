@@ -439,8 +439,18 @@ function App() {
     }
   }
 
-  function submitSignup(event) {
+  async function submitSignup(event) {
     event.preventDefault();
+    try {
+      const savedUser = await yatraApi.signIn({
+        name: signup.name,
+        email: signup.email,
+        city: signup.city,
+        interest: signup.interest,
+        authProvider: 'email'
+      });
+      setUser(savedUser);
+    } catch {}
     setSignupSaved(true);
   }
 
@@ -3958,16 +3968,21 @@ function AuthModal({ onClose, setUser, user }) {
   const [_password, setPassword] = useState('');
   const [successNotice, setSuccessNotice] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
     const userData = {
       name: mode === 'register' ? (name.trim() || 'Traveler') : (user?.name || email.split('@')[0]),
       email: email.trim(),
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      authProvider: 'email',
     };
-    setUser(userData);
-    localStorage.setItem('yatra_user', JSON.stringify(userData));
+    try {
+      const saved = await yatraApi.signIn(userData);
+      setUser(saved);
+    } catch {
+      setUser(userData);
+      localStorage.setItem('yatra_user', JSON.stringify(userData));
+    }
     setSuccessNotice(true);
     setTimeout(() => {
       setSuccessNotice(false);
@@ -3975,14 +3990,19 @@ function AuthModal({ onClose, setUser, user }) {
     }, 900);
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     const userData = {
       name: 'Dilip Kumar',
       email: 'dilip@google.com',
-      joinedDate: 'Sep 2026',
+      authProvider: 'google',
     };
-    setUser(userData);
-    localStorage.setItem('yatra_user', JSON.stringify(userData));
+    try {
+      const saved = await yatraApi.signIn(userData);
+      setUser(saved);
+    } catch {
+      setUser(userData);
+      localStorage.setItem('yatra_user', JSON.stringify(userData));
+    }
     onClose();
   };
 
