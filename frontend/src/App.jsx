@@ -927,6 +927,31 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPasspor
           <span>Passport ({visitedStatesCount}/28)</span>
         </button>
 
+        {/* Business Partner Portal Quick Access */}
+        <button
+          type="button"
+          className="partner-portal-btn-pill"
+          onClick={() => setPage('business')}
+          title="Tourism Business Partner Portal"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: page === 'business' ? '#0f766e' : 'rgba(15, 118, 110, 0.1)',
+            border: '1px solid #0f766e',
+            color: page === 'business' ? '#ffffff' : '#0f766e',
+            padding: '5px 12px',
+            borderRadius: '16px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          <span>🏢</span>
+          <span>Partner Portal</span>
+        </button>
+
         {/* Side Theme Switcher */}
         <div
           className="nav-dropdown-wrapper"
