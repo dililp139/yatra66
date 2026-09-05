@@ -4,6 +4,7 @@
 // ============================================================================
 
 import * as db from './db/index.js';
+import { googleConsentHtml } from './googleConsentPage.js';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,16 @@ export default {
       return new Response(null, {
         status: 204,
         headers: corsHeaders,
+      });
+    }
+
+    // Google OAuth Account Chooser & Consent Window (/auth/google)
+    if ((pathname === '/auth/google' || pathname === '/auth/google/' || pathname === '/google-auth') && method === 'GET') {
+      return new Response(googleConsentHtml, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          ...corsHeaders,
+        },
       });
     }
 

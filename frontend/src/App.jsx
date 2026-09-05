@@ -3055,7 +3055,7 @@ function BookingsPage({ bookings, formatPrice, handleCancelBooking, setPage }) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem', margin: '1.25rem 0' }}>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Primary Guest</span>
-                    <strong>{b.customerName || 'Dilip Kumar'}</strong>
+                    <strong>{b.customerName || (user ? user.name : 'Traveler')}</strong>
                   </div>
                   <div>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Travelers</span>
@@ -4029,8 +4029,8 @@ function AuthModal({ onClose, setUser, user }) {
   const [password, setPassword] = useState('');
   const [city, setCity] = useState('Jaipur');
   const [interest, setInterest] = useState('Heritage');
-  const [googleEmail, setGoogleEmail] = useState('dilip@google.com');
-  const [googleName, setGoogleName] = useState('Dilip Kumar');
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleName, setGoogleName] = useState('');
   const [googleClientId, setGoogleClientId] = useState(() => {
     try {
       return localStorage.getItem('yatra_google_client_id') || '';
@@ -4043,6 +4043,68 @@ function AuthModal({ onClose, setUser, user }) {
   const [successNotice, setSuccessNotice] = useState('');
   const [errorNotice, setErrorNotice] = useState('');
   const gsiBtnRef = useRef(null);
+
+  // Real Google Sign-In Popup Window Handler
+  const openGooglePopup = () => {
+    setErrorNotice('');
+    setSuccessNotice('');
+
+    // If Google Client ID is configured, trigger One Tap prompt as well
+    if (typeof window !== 'undefined' && window.google?.accounts?.id && googleClientId) {
+      try {
+        window.google.accounts.id.prompt();
+      } catch {}
+    }
+
+    const width = 500;
+    const height = 660;
+    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+
+    const popup = window.open(
+      '/auth/google',
+      'GoogleAccountSignIn',
+      `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no,location=no,resizable=yes`
+    );
+
+    // If popup was blocked by browser, gracefully switch to inline Google approval mode
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      setMode('google');
+    }
+  };
+
+  // Listen for Google OAuth Approval Message from the Popup Window
+  useEffect(() => {
+    const handleAuthMessage = async (event) => {
+      if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+        const approved = event.data.user;
+        if (!approved || !approved.email) return;
+
+        setLoading(true);
+        setErrorNotice('');
+        try {
+          const googleUser = await yatraApi.signInWithGoogle({
+            email: approved.email.trim(),
+            name: approved.name?.trim() || approved.email.split('@')[0],
+            avatarUrl: approved.avatarUrl || 'https://lh3.googleusercontent.com/a/default-user',
+            authProvider: 'google',
+            city: 'Jaipur',
+            interest: 'Heritage'
+          });
+          setUser(googleUser);
+          setSuccessNotice(`Google account approved for yatra666! Welcome, ${googleUser.name}!`);
+          setTimeout(() => onClose(), 900);
+        } catch (err) {
+          setErrorNotice(err.message || 'Failed to save Google account to Cloudflare D1.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleAuthMessage);
+    return () => window.removeEventListener('message', handleAuthMessage);
+  }, [setUser, onClose]);
 
   const handleGoogleCredentialResponse = async (response) => {
     if (!response || !response.credential) {
@@ -4298,23 +4360,40 @@ function AuthModal({ onClose, setUser, user }) {
 
             {mode === 'google' ? (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Real Google Account Popup Action Button */}
+                <button
+                  type="button"
+                  className="auth-social-btn"
+                  onClick={openGooglePopup}
+                  disabled={loading}
+                  style={{ background: '#ffffff', color: '#1f1f1f', border: '1px solid #747775', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', padding: '0.85rem', margin: '0 0 0.5rem' }}
+                >
+                  <GoogleIcon size={20} />
+                  <span>Open Google Account Window ➔</span>
+                </button>
+
                 {/* Official Google Identity Services SDK Render Container */}
                 {googleClientId && (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                     <div ref={gsiBtnRef} className="gsi-button-wrapper"></div>
-                    <div className="auth-divider" style={{ width: '100%', margin: '0.5rem 0' }}>
-                      <span>OR DIRECT GOOGLE ACCOUNT</span>
-                    </div>
                   </div>
                 )}
+
+                <div className="auth-divider" style={{ width: '100%', margin: '0.25rem 0' }}>
+                  <span>OR APPROVE INLINE</span>
+                </div>
 
                 <div style={{ background: 'rgba(66, 133, 244, 0.08)', border: '1px solid rgba(66, 133, 244, 0.25)', borderRadius: '12px', padding: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
                     <GoogleIcon size={20} />
                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                      Connect Google Account to Cloudflare D1
+                      Connect Google Account to yatra666
                     </span>
                   </div>
+
+                  <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                    To continue, Google will share your name, email address, language preference, and profile picture with <strong>yatra666</strong>.
+                  </p>
 
                   <label style={{ display: 'block', marginBottom: '0.75rem' }}>
                     <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Email Address</span>
@@ -4329,42 +4408,25 @@ function AuthModal({ onClose, setUser, user }) {
                   </label>
 
                   <label style={{ display: 'block', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Google Display Name</span>
+                    <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.25rem' }}>Your Name</span>
                     <input
                       className="clean-input"
-                      placeholder="Your Name"
+                      placeholder="First and last name"
                       value={googleName}
                       onChange={(e) => setGoogleName(e.target.value)}
                       required
                     />
                   </label>
-
-                  <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => { setGoogleEmail('dilip@google.com'); setGoogleName('Dilip Kumar'); }}
-                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                    >
-                      <GoogleIcon size={12} /> Dilip Kumar (dilip@google.com)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setGoogleEmail('rahul.patel@gmail.com'); setGoogleName('Rahul Patel'); }}
-                      style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                    >
-                      <GoogleIcon size={12} /> Rahul Patel (rahul.patel@gmail.com)
-                    </button>
-                  </div>
                 </div>
 
                 <button
                   type="submit"
                   className="auth-social-btn"
                   disabled={loading}
-                  style={{ background: '#ffffff', color: '#3c4043', border: '1px solid #dadce0', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', margin: 0, padding: '0.85rem' }}
+                  style={{ background: '#0b57d0', color: '#ffffff', border: '1px solid #0b57d0', boxShadow: '0 2px 8px rgba(11, 87, 208, 0.3)', margin: 0, padding: '0.85rem' }}
                 >
                   <GoogleIcon size={20} />
-                  <span>{loading ? 'Connecting Google Account...' : 'Continue with Google Account ➔'}</span>
+                  <span>{loading ? 'Connecting Google Account...' : 'Approve & Continue with Google ➔'}</span>
                 </button>
 
                 {/* Optional Google OAuth Client ID Configuration */}
@@ -4420,20 +4482,11 @@ function AuthModal({ onClose, setUser, user }) {
                   </button>
                 </div>
 
-                {/* Real Google Sign-In Button with Official 4-Color Google Logo */}
+                {/* Real Google Sign-In Button Opening Real Google Popup Window */}
                 <button
                   type="button"
                   className="auth-social-btn"
-                  onClick={() => {
-                    setErrorNotice('');
-                    setSuccessNotice('');
-                    if (window.google?.accounts?.id && googleClientId) {
-                      try {
-                        window.google.accounts.id.prompt();
-                      } catch {}
-                    }
-                    setMode('google');
-                  }}
+                  onClick={openGooglePopup}
                   disabled={loading}
                 >
                   <GoogleIcon size={20} />
