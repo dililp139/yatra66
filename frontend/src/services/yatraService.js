@@ -3,6 +3,23 @@
 // Replaces Spring Boot & Java backend entirely with zero feature or data loss.
 // ============================================================================
 
+import {
+  FIVE_CITIES_MVP,
+  HIDDEN_GEMS_DATA,
+  LOCAL_EXPERIENCES_DATA,
+  LOCAL_BUSINESSES_DATA,
+  TOURIST_EMERGENCY_DATA,
+  TRANSLATIONS,
+  SIH_STATS,
+  getHaversineDistanceKm,
+  optimizeRouteWaypoints,
+  calculateDetailedBudget,
+  submitBusinessEnquiry,
+  getStoredBusinessEnquiries,
+  registerLocalBusiness,
+  getCustomLocalBusinesses
+} from './sihData.js';
+
 export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371.0;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -3684,47 +3701,102 @@ export const yatraApi = {
       return 'Pleasant';
     };
 
+    const codeToIcon = (code) => {
+      if (code === 0) return '☀️';
+      if ([1, 2].includes(code)) return '⛅';
+      if (code === 3) return '☁️';
+      if ([45, 48].includes(code)) return '🌫️';
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧️';
+      if ([71, 73, 75].includes(code)) return '❄️';
+      if ([95, 96, 99].includes(code)) return '⛈️';
+      return '🌤️';
+    };
+
+    const getPackingTip = (temp, code) => {
+      if (temp < 15) return 'Carry thermal innerwear, heavy fleece jackets, woolen caps, and moisturizers.';
+      if (temp > 32) return 'Pack lightweight breathable linen/cotton clothes, UV sunglasses, sun hat, and high-SPF sunscreen.';
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code)) {
+        return 'Pack quick-dry fabrics, compact umbrella, waterproof backpack cover, and non-slip walking shoes.';
+      }
+      return 'Light cottons for the day, comfortable walking shoes for heritage monuments, and a light shawl for breezy evenings.';
+    };
+
     try {
       const res = await fetch(omUrl);
       if (res.ok) {
         const om = await res.json();
         const curr = om.current || {};
         const daily = om.daily || {};
+        const currentTemp = curr.temperature_2m ?? 26;
+        const feelsLike = curr.apparent_temperature ?? currentTemp;
+        const humidity = curr.relative_humidity_2m ?? 48;
+        const wind = curr.wind_speed_10m ?? 12;
+        const condText = codeToText(curr.weather_code ?? 0);
+        const icon = codeToIcon(curr.weather_code ?? 0);
+
+        const dailyForecasts = (daily.time || []).slice(0, 7).map((d, idx) => ({
+          date: d,
+          maxTemperature: daily.temperature_2m_max?.[idx] ?? 30,
+          minTemperature: daily.temperature_2m_min?.[idx] ?? 20,
+          maxTempC: daily.temperature_2m_max?.[idx] ?? 30,
+          minTempC: daily.temperature_2m_min?.[idx] ?? 20,
+          weatherCondition: codeToText(daily.weather_code?.[idx] ?? 0),
+          condition: codeToText(daily.weather_code?.[idx] ?? 0),
+          weatherIcon: codeToIcon(daily.weather_code?.[idx] ?? 0),
+          sunrise: daily.sunrise?.[idx] ? daily.sunrise[idx].slice(11, 16) : '06:15',
+          sunset: daily.sunset?.[idx] ? daily.sunset[idx].slice(11, 16) : '18:45'
+        }));
+
         return {
           cityId: city.id,
           cityName: city.name,
-          temperatureC: curr.temperature_2m ?? 26,
-          feelsLikeC: curr.apparent_temperature ?? curr.temperature_2m ?? 26,
-          humidityPercent: curr.relative_humidity_2m ?? 48,
-          windSpeedKmH: curr.wind_speed_10m ?? 12,
-          condition: codeToText(curr.weather_code),
-          sunrise: daily.sunrise?.[0] ? daily.sunrise[0].split('T')[1] : '06:12',
-          sunset: daily.sunset?.[0] ? daily.sunset[0].split('T')[1] : '18:45',
-          forecast: (daily.time || []).slice(0, 3).map((d, idx) => ({
-            date: d,
-            maxTempC: daily.temperature_2m_max?.[idx] ?? 30,
-            minTempC: daily.temperature_2m_min?.[idx] ?? 20,
-            condition: codeToText(daily.weather_code?.[idx])
-          }))
+          latitude: city.latitude,
+          longitude: city.longitude,
+          timezone: om.timezone || 'Asia/Kolkata',
+          currentTemperature: currentTemp,
+          temperatureC: currentTemp,
+          apparentTemperature: feelsLike,
+          feelsLikeC: feelsLike,
+          relativeHumidity: humidity,
+          humidityPercent: humidity,
+          windSpeed: wind,
+          windSpeedKmH: wind,
+          weatherCondition: condText,
+          condition: condText,
+          weatherIcon: icon,
+          packingTip: getPackingTip(currentTemp, curr.weather_code ?? 0),
+          dailyForecasts,
+          forecast: dailyForecasts
         };
       }
     } catch {}
 
+    const defaultForecasts = [
+      { date: 'Today', maxTemperature: 30, minTemperature: 21, maxTempC: 30, minTempC: 21, weatherCondition: 'Clear Sky', condition: 'Clear Sky', weatherIcon: '☀️', sunrise: '06:15', sunset: '18:42' },
+      { date: 'Tomorrow', maxTemperature: 29, minTemperature: 20, maxTempC: 29, minTempC: 20, weatherCondition: 'Partly Cloudy', condition: 'Partly Cloudy', weatherIcon: '⛅', sunrise: '06:16', sunset: '18:41' },
+      { date: 'Day 3', maxTemperature: 31, minTemperature: 22, maxTempC: 31, minTempC: 22, weatherCondition: 'Sunny & Pleasant', condition: 'Sunny & Pleasant', weatherIcon: '☀️', sunrise: '06:16', sunset: '18:40' }
+    ];
+
     return {
       cityId: city.id,
       cityName: city.name,
+      latitude: city.latitude,
+      longitude: city.longitude,
+      timezone: 'Asia/Kolkata',
+      currentTemperature: 27,
       temperatureC: 27,
+      apparentTemperature: 28,
       feelsLikeC: 28,
+      relativeHumidity: 46,
       humidityPercent: 46,
+      windSpeed: 14,
       windSpeedKmH: 14,
+      weatherCondition: 'Sunny & Pleasant',
       condition: 'Sunny & Pleasant',
-      sunrise: '06:15',
-      sunset: '18:42',
-      forecast: [
-        { date: 'Today', maxTempC: 30, minTempC: 21, condition: 'Clear Sky' },
-        { date: 'Tomorrow', maxTempC: 29, minTempC: 20, condition: 'Partly Cloudy' },
-        { date: 'Day 3', maxTempC: 31, minTempC: 22, condition: 'Sunny' }
-      ]
+      weatherIcon: '☀️',
+      packingTip: getPackingTip(27, 0),
+      dailyForecasts: defaultForecasts,
+      forecast: defaultForecasts
     };
   },
 
@@ -3762,7 +3834,82 @@ export const yatraApi = {
       pageUrl: `https://en.wikipedia.org/wiki/${cleanTitle}`,
       keyFacts: ['Celebrated destination in India', 'Attracts global and domestic travelers']
     };
+  },
+
+  // ============================================================================
+  // SMART INDIA HACKATHON (SIH) INTELLIGENT TOURISM SERVICE METHODS
+  // ============================================================================
+
+  getFiveCitiesMVP() {
+    return FIVE_CITIES_MVP;
+  },
+
+  getHiddenGems(cityId = null) {
+    if (!cityId) return HIDDEN_GEMS_DATA;
+    return HIDDEN_GEMS_DATA.filter((g) => g.nearCityId === Number(cityId));
+  },
+
+  getLocalExperiences(cityId = null) {
+    if (!cityId) return LOCAL_EXPERIENCES_DATA;
+    return LOCAL_EXPERIENCES_DATA.filter((exp) => exp.cityId === Number(cityId));
+  },
+
+  getLocalBusinesses(category = 'all', cityId = null) {
+    const custom = getCustomLocalBusinesses();
+    let all = [...custom, ...LOCAL_BUSINESSES_DATA];
+    if (category && category !== 'all') {
+      all = all.filter((b) => b.category === category);
+    }
+    if (cityId) {
+      all = all.filter((b) => b.cityId === Number(cityId));
+    }
+    return all;
+  },
+
+  getTouristSafety(city = null) {
+    return {
+      national: TOURIST_EMERGENCY_DATA.national,
+      cityInfo: city ? TOURIST_EMERGENCY_DATA.cities[city] || null : null
+    };
+  },
+
+  optimizeRoute(waypoints) {
+    return optimizeRouteWaypoints(waypoints);
+  },
+
+  calculateTripBudget(params) {
+    return calculateDetailedBudget(params);
+  },
+
+  submitEnquiry(enquiry) {
+    return submitBusinessEnquiry(enquiry);
+  },
+
+  getEnquiries() {
+    return getStoredBusinessEnquiries();
+  },
+
+  registerBusiness(data) {
+    return registerLocalBusiness(data);
   }
 };
 
+export {
+  FIVE_CITIES_MVP,
+  HIDDEN_GEMS_DATA,
+  LOCAL_EXPERIENCES_DATA,
+  LOCAL_BUSINESSES_DATA,
+  TOURIST_EMERGENCY_DATA,
+  TRANSLATIONS,
+  SIH_STATS,
+  getHaversineDistanceKm,
+  optimizeRouteWaypoints,
+  calculateDetailedBudget,
+  submitBusinessEnquiry,
+  getStoredBusinessEnquiries,
+  registerLocalBusiness,
+  getCustomLocalBusinesses
+};
+
 export default yatraApi;
+

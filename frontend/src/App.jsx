@@ -1,7 +1,60 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Component, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import './App.css';
 import yatraApi from './services/yatraService';
+import SihTripPlanner from './components/SihTripPlanner';
+import SihHiddenGems from './components/SihHiddenGems';
+import SihExperiences from './components/SihExperiences';
+import SihMarketplace from './components/SihMarketplace';
+import SihSafetyModal from './components/SihSafetyModal';
+import SihEnquiryModal from './components/SihEnquiryModal';
+import FloatingSafetyHelp from './components/FloatingSafetyHelp';
+import RentalServices from './components/RentalServices';
+import { FIVE_CITIES_MVP, TRANSLATIONS, SIH_STATS } from './services/sihData';
+
+function CreativeLogo({ size = 36 }) {
+  return (
+    <div className="creative-brand-logo">
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ flexShrink: 0, filter: 'drop-shadow(0 2px 8px rgba(245, 158, 11, 0.35))' }}
+      >
+        <defs>
+          <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F59E0B" />
+            <stop offset="50%" stopColor="#D97706" />
+            <stop offset="100%" stopColor="#B45309" />
+          </linearGradient>
+          <linearGradient id="logoEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#10B981" />
+            <stop offset="100%" stopColor="#047857" />
+          </linearGradient>
+          <linearGradient id="logoSwoosh" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#EA580C" />
+            <stop offset="100%" stopColor="#FBBF24" />
+          </linearGradient>
+        </defs>
+        {/* Outer Dotted Orbital Ring */}
+        <circle cx="24" cy="24" r="21" stroke="url(#logoGold)" strokeWidth="2" strokeDasharray="3 2" opacity="0.85" />
+        {/* Soaring Journey Arc */}
+        <path d="M8 32C12 16 24 10 40 12" stroke="url(#logoSwoosh)" strokeWidth="3.5" strokeLinecap="round" />
+        {/* 8-Point Compass Star */}
+        <polygon points="24,4 27,21 44,24 27,27 24,44 21,27 4,24 21,21" fill="url(#logoGold)" opacity="0.9" />
+        {/* Inner Jewel Core */}
+        <circle cx="24" cy="24" r="5" fill="url(#logoEmerald)" />
+        <circle cx="24" cy="24" r="2" fill="#FFFFFF" opacity="0.9" />
+      </svg>
+      <div className="brand-title-wrap">
+        <span className="brand-primary-text">Yatra 66</span>
+        <span className="brand-india-tag">yatra66.in</span>
+      </div>
+    </div>
+  );
+}
 
 function GoogleIcon({ size = 18, className = "" }) {
   return (
@@ -178,11 +231,32 @@ const DEFAULT_CURRENCIES = {
   currencySymbols: { INR: '₹', USD: '$', EUR: '€', GBP: '£', AUD: 'A$', AED: 'AED ', SGD: 'S$', CAD: 'C$', JPY: '¥' },
 };
 
-const VALID_PAGES = ['home', 'map', 'destinations', 'hotels', 'weather', 'explore', 'festivals', 'routes', 'planner', 'calendar', 'bookings', 'signup'];
+const VALID_PAGES = [
+  'home',
+  'map',
+  'destinations',
+  'hotels',
+  'weather',
+  'explore',
+  'festivals',
+  'routes',
+  'rentals',
+  'planner',
+  'calendar',
+  'bookings',
+  'signup',
+  'gems',
+  'experiences',
+  'marketplace',
+];
 
 function App() {
   const [page, setPage] = useHashPage();
   const [theme, setTheme] = useState(() => localStorage.getItem('yatra_theme') || 'light');
+  const [lang, setLang] = useState(() => localStorage.getItem('yatra_lang') || 'en');
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+  const [safetyModalOpen, setSafetyModalOpen] = useState(false);
+  const [enquiryModalBiz, setEnquiryModalBiz] = useState(null);
   const [cities, setCities] = useState(CITIES_DATA);
   const [selectedId, setSelectedId] = useState(1);
   const [details, setDetails] = useState(null);
@@ -531,6 +605,11 @@ function App() {
     hiddenHotelIds,
     onHideHotel: handleHideHotel,
     onUnhideAllHotels: handleUnhideAllHotels,
+    lang,
+    setLang,
+    t,
+    onOpenSafety: () => setSafetyModalOpen(true),
+    onOpenEnquiry: (biz) => setEnquiryModalBiz(biz),
   };
 
   return (
@@ -553,10 +632,29 @@ function App() {
       {page === 'explore' && <WikiExplorePage {...appState} />}
       {page === 'festivals' && <FestivalsPage {...appState} />}
       {page === 'routes' && <RoutesPage {...appState} />}
+      {page === 'rentals' && <RentalsPage {...appState} />}
       {page === 'planner' && <PlannerPage {...appState} />}
       {page === 'calendar' && <PersonalCalendarPage {...appState} />}
       {page === 'bookings' && <BookingsPage {...appState} />}
       {page === 'signup' && <SignupPage {...appState} />}
+      {page === 'gems' && <GemsPage {...appState} />}
+      {page === 'experiences' && <ExperiencesPage {...appState} />}
+      {page === 'marketplace' && <MarketplacePage {...appState} />}
+
+      {safetyModalOpen && (
+        <SihSafetyModal
+          onClose={() => setSafetyModalOpen(false)}
+          defaultCity={selectedMarker?.name || 'Jaipur'}
+        />
+      )}
+
+      {enquiryModalBiz && (
+        <SihEnquiryModal
+          business={enquiryModalBiz}
+          onClose={() => setEnquiryModalBiz(null)}
+          onSuccess={() => setBookingNotice(`Direct enquiry dispatched to ${enquiryModalBiz.name}! 🤝`)}
+        />
+      )}
 
       {authModalOpen && (
         <AuthModal
@@ -574,38 +672,59 @@ function App() {
           onConfirm={handleConfirmBooking}
         />
       )}
+
+      {/* Floating 24/7 Tourist Safety Help Action Widget */}
+      <FloatingSafetyHelp onOpenSafety={() => setSafetyModalOpen(true)} />
     </div>
   );
 }
 
-function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage, setTheme, theme, user }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+function Header({ currency, currencyData, lang = 'en', onOpenAuth, page, setCurrency, setLang, setPage, setTheme, theme, user }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
-  const closeTimerRef = useRef(null);
+  const menuTimerRef = useRef(null);
   const themeTimerRef = useRef(null);
 
-  // 4 Primary Options visible directly in the top bar
+  // 5 Primary Navigation Tabs visible directly in top bar
   const primaryNav = [
-    ['home', 'Home'],
-    ['map', 'Real Map'],
-    ['destinations', 'Destinations'],
-    ['hotels', 'Hotels & Cabs'],
+    ['home', lang === 'hi' ? 'मुख्य' : 'Home'],
+    ['destinations', lang === 'hi' ? 'गंतव्य' : 'Destinations'],
+    ['planner', lang === 'hi' ? '✨ प्लानर' : '✨ Plan Trip'],
+    ['rentals', lang === 'hi' ? '🚗 रेंटल' : '🚗 Rentals'],
+    ['marketplace', lang === 'hi' ? 'स्थानीय' : 'Support Local'],
   ];
 
-  // Remaining options revealed inside the pop-up hover menu
-  const moreServices = [
-    { id: 'weather', icon: '🌤️', title: 'Live Weather', desc: 'Real-time weather across India' },
-    { id: 'explore', icon: '📚', title: 'Monuments Guide', desc: 'History and landmark insights' },
-    { id: 'festivals', icon: '🎉', title: 'Festivals Calendar', desc: 'Indian cultural events and dates' },
-    { id: 'routes', icon: '🚆', title: 'Transit Routes', desc: 'Flights, trains, buses and cabs' },
-    { id: 'planner', icon: '🗺️', title: 'Smart Trip Planner', desc: 'Custom daily plan and budget' },
-    { id: 'calendar', icon: '📅', title: 'Personal Calendar', desc: 'Trip dates, bookings and notes' },
-    { id: 'bookings', icon: '🎟️', title: 'My Bookings', desc: 'Confirmed vouchers and boarding passes' },
-    { id: 'signup', icon: '👤', title: 'Traveler Profile', desc: 'Preferences and account details' },
+  // 3-Section Clean Services Menu
+  const menuSections = [
+    {
+      title: lang === 'hi' ? '🏛️ भारत खोजें' : '🏛️ Explore India',
+      items: [
+        { id: 'destinations', icon: '📍', title: lang === 'hi' ? 'गंतव्य सूची' : 'Top Destinations', desc: '24 Curated heritage hubs' },
+        { id: 'map', icon: '🗺️', title: lang === 'hi' ? 'मानचित्र' : 'Interactive Map', desc: 'Pan & explore India pins' },
+        { id: 'gems', icon: '💎', title: lang === 'hi' ? 'छिपे हुए रत्न' : 'Hidden Gems', desc: 'Quiet & decongested sites' },
+        { id: 'explore', icon: '📚', title: lang === 'hi' ? 'स्मारक गाइड' : 'Monuments Guide', desc: 'Landmark histories & tips' },
+        { id: 'festivals', icon: '🎉', title: lang === 'hi' ? 'सांस्कृतिक उत्सव' : 'Festival Calendar', desc: 'Living cultural celebrations' },
+      ],
+    },
+    {
+      title: lang === 'hi' ? '🚆 यात्रा व परिवहन' : '🚆 Travel & Transit',
+      items: [
+        { id: 'planner', icon: '✨', title: lang === 'hi' ? 'ट्रिप प्लानर' : 'Smart Trip Planner', desc: 'Multi-day AI route engine' },
+        { id: 'routes', icon: '🚆', title: lang === 'hi' ? 'परिवहन मार्ग' : 'Transit Routes', desc: 'Flights, trains, buses, cabs' },
+        { id: 'rentals', icon: '🚗', title: lang === 'hi' ? 'वाहन रेंटल' : 'Rental Services', desc: 'Self-drive cars, bikes, EVs' },
+        { id: 'weather', icon: '🌤️', title: lang === 'hi' ? 'मौसम पूर्वानुमान' : 'Weather Forecast', desc: 'Climate outlook & packing' },
+      ],
+    },
+    {
+      title: lang === 'hi' ? '🏨 बुकिंग व स्थानीय' : '🏨 Bookings & Stays',
+      items: [
+        { id: 'hotels', icon: '🏨', title: lang === 'hi' ? 'होटल व रिसॉर्ट' : 'Hotels & Stays', desc: 'Verified havelis & stays' },
+        { id: 'marketplace', icon: '🤝', title: lang === 'hi' ? 'स्थानीय व्यापार' : 'Support Local', desc: '0% commission marketplace' },
+        { id: 'experiences', icon: '🎨', title: lang === 'hi' ? 'कारीगर अनुभव' : 'Artisan Masterclasses', desc: 'Immersive cultural workshops' },
+        { id: 'bookings', icon: '🎟️', title: lang === 'hi' ? 'मेरी बुकिंग' : 'My Bookings', desc: 'Confirmed vouchers & tickets' },
+      ],
+    },
   ];
-
-  const activeMoreService = moreServices.find((s) => s.id === page);
-  const isMoreActive = Boolean(activeMoreService);
 
   const themesList = [
     { id: 'light', label: '⚪ Light White', desc: 'Modern pearl minimalism' },
@@ -614,15 +733,15 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
     { id: 'emerald', label: '🌿 Emerald Nature', desc: 'Crisp botanical Kerala mint' },
   ];
 
-  const handleDropdownEnter = () => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    setDropdownOpen(true);
+  const handleMenuEnter = () => {
+    if (menuTimerRef.current) clearTimeout(menuTimerRef.current);
+    setMenuOpen(true);
   };
 
-  const handleDropdownLeave = () => {
-    closeTimerRef.current = setTimeout(() => {
-      setDropdownOpen(false);
-    }, 450);
+  const handleMenuLeave = () => {
+    menuTimerRef.current = setTimeout(() => {
+      setMenuOpen(false);
+    }, 380);
   };
 
   const handleThemeEnter = () => {
@@ -633,68 +752,81 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
   const handleThemeLeave = () => {
     themeTimerRef.current = setTimeout(() => {
       setThemeOpen(false);
-    }, 450);
+    }, 380);
   };
 
   return (
     <header className="topbar">
-      <button className="brand" type="button" onClick={() => setPage('home')} aria-label="Yatra home">
-        <span className="brand-mark">Y</span>
-        <div className="brand-title-wrap">
-          <span>Yatra</span>
-          <span className="brand-india-tag">India</span>
-        </div>
+      <button className="brand" type="button" onClick={() => setPage('home')} aria-label="Yatra 66 Home">
+        <CreativeLogo size={36} />
       </button>
 
       <nav className="nav-links" aria-label="Primary">
-        {/* 4 Primary Navigation Tabs */}
         {primaryNav.map(([id, label]) => (
           <button className={page === id ? 'active' : ''} key={id} type="button" onClick={() => setPage(id)}>
             {label}
           </button>
         ))}
 
-        {/* Hover Pop-Up Bar with Smooth Graceful Delay */}
+        {/* 3-Section Clean Services Mega-Menu */}
         <div
           className="nav-dropdown-wrapper"
-          onMouseEnter={handleDropdownEnter}
-          onMouseLeave={handleDropdownLeave}
+          onMouseEnter={handleMenuEnter}
+          onMouseLeave={handleMenuLeave}
         >
           <button
             type="button"
-            className={`nav-dropdown-btn ${isMoreActive ? 'active' : ''}`}
-            onClick={() => setDropdownOpen((prev) => !prev)}
+            className="nav-dropdown-btn"
+            onClick={() => setMenuOpen((prev) => !prev)}
             aria-haspopup="true"
-            aria-expanded={dropdownOpen}
+            aria-expanded={menuOpen}
           >
-            <span>{activeMoreService ? activeMoreService.title : 'More Services'}</span>
-            <span style={{ fontSize: '0.7rem', marginLeft: '4px' }}>▼</span>
+            <span>{lang === 'hi' ? '☰ सेवाएं' : '☰ Menu'}</span>
+            <span style={{ fontSize: '0.65rem', marginLeft: '3px' }}>▼</span>
           </button>
 
-          <div className={`nav-popup-menu ${dropdownOpen ? 'show' : ''}`}>
-            {moreServices.map((service) => (
-              <button
-                key={service.id}
-                type="button"
-                className={`popup-menu-item ${page === service.id ? 'active' : ''}`}
-                onClick={() => {
-                  setPage(service.id);
-                  setDropdownOpen(false);
-                }}
-              >
-                <span className="popup-item-icon">{service.icon}</span>
-                <div className="popup-item-text">
-                  <span className="popup-item-title">{service.title}</span>
-                  <span className="popup-item-desc">{service.desc}</span>
-                </div>
-              </button>
+          <div className={`nav-mega-menu ${menuOpen ? 'show' : ''}`}>
+            {menuSections.map((sec, sIdx) => (
+              <div key={sIdx} className="mega-menu-section">
+                <span className="mega-section-header">{sec.title}</span>
+                {sec.items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`mega-menu-item ${page === item.id ? 'active' : ''}`}
+                    onClick={() => {
+                      setPage(item.id);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <span className="mega-item-icon">{item.icon}</span>
+                    <div>
+                      <span className="mega-item-title">{item.title}</span>
+                      <span className="mega-item-desc">{item.desc}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         </div>
       </nav>
 
       <div className="header-controls">
-        {/* Side Theme Switcher with Hover/Click Dropdown */}
+        {/* Compact Multilingual Toggle */}
+        {setLang && (
+          <button
+            type="button"
+            className="lang-toggle-btn"
+            onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
+            title="Switch Language / भाषा बदलें"
+            style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+          >
+            {lang === 'en' ? '🇮🇳 हिन्दी' : '🇬🇧 EN'}
+          </button>
+        )}
+
+        {/* Side Theme Switcher */}
         <div
           className="nav-dropdown-wrapper"
           onMouseEnter={handleThemeEnter}
@@ -707,12 +839,12 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
             aria-haspopup="true"
             aria-expanded={themeOpen}
             title="Switch Theme"
+            style={{ padding: '6px 10px' }}
           >
-            <span>🎨 Theme</span>
-            <span style={{ fontSize: '0.7rem', marginLeft: '3px' }}>▼</span>
+            <span>🎨</span>
           </button>
 
-          <div className={`nav-popup-menu ${themeOpen ? 'show' : ''}`} style={{ minWidth: '220px' }}>
+          <div className={`nav-popup-menu ${themeOpen ? 'show' : ''}`} style={{ minWidth: '200px' }}>
             {themesList.map((t) => (
               <button
                 key={t.id}
@@ -732,7 +864,7 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
           </div>
         </div>
 
-        {/* Currency Selector */}
+        {/* Compact Currency Selector */}
         <div className="currency-selector" title="Choose Currency">
           <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
             {Object.keys(currencyData.rates || {}).map((curr) => (
@@ -742,11 +874,6 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
             ))}
           </select>
         </div>
-
-        <span className="api-pill live">
-          <span className="pulse-dot"></span>
-          Live
-        </span>
 
         {/* Top-Right User Sign In / Account Button */}
         {user ? (
@@ -768,7 +895,7 @@ function Header({ currency, currencyData, onOpenAuth, page, setCurrency, setPage
         ) : (
           <button type="button" className="header-auth-btn" onClick={onOpenAuth}>
             <span>👤</span>
-            <span>Sign In / Register</span>
+            <span>Sign In</span>
           </button>
         )}
       </div>
@@ -1034,14 +1161,246 @@ function HotelLocationSidebarMap({ cityName, cityCoords, hotel }) {
   );
 }
 
-function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = [], onHideCity, onUnhideAllCities, setPage, setSelectedId }) {
+function RentalsPage(props) {
+  return (
+    <RentalServices
+      cities={props.cities}
+      formatPrice={props.formatPrice}
+      onOpenBooking={props.handleOpenBooking}
+    />
+  );
+}
+
+const TOP_TOURIST_PLACES = [
+  {
+    id: 'attr-amber-fort',
+    name: 'Amber Fort & Palace',
+    cityName: 'Jaipur',
+    cityId: 1,
+    state: 'Rajasthan',
+    category: 'Forts & Palaces',
+    catId: 'forts',
+    image: 'https://images.unsplash.com/photo-1609947017136-9e224e5dfd6d?w=800',
+    rating: 4.9,
+    reviews: 1420,
+    entryFee: 100,
+    duration: '3-4 Hours',
+    bestTime: '08:00 AM - 11:00 AM',
+    description: 'Hilltop Rajput fortress with ornate Sheesh Mahal (Mirror Palace) overlooking Maota Lake.',
+    tags: ['UNESCO Heritage', 'Mirror Palace', 'Elephant Trail'],
+  },
+  {
+    id: 'attr-taj-mahal',
+    name: 'Taj Mahal',
+    cityName: 'Agra',
+    cityId: 2,
+    state: 'Uttar Pradesh',
+    category: 'UNESCO Wonders',
+    catId: 'unesco',
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800',
+    rating: 5.0,
+    reviews: 4800,
+    entryFee: 250,
+    duration: '2-3 Hours',
+    bestTime: 'Sunrise (06:00 AM)',
+    description: 'Ivory-white marble mausoleum on the Yamuna riverbank, an eternal monument of universal love.',
+    tags: ['World Wonder', 'Mughal Architecture', 'UNESCO'],
+  },
+  {
+    id: 'attr-hawa-mahal',
+    name: 'Hawa Mahal (Palace of Winds)',
+    cityName: 'Jaipur',
+    cityId: 1,
+    state: 'Rajasthan',
+    category: 'Forts & Palaces',
+    catId: 'forts',
+    image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800',
+    rating: 4.8,
+    reviews: 980,
+    entryFee: 50,
+    duration: '1-2 Hours',
+    bestTime: 'Morning / Golden Hour',
+    description: 'Five-storey pink sandstone honeycomb facade with 953 jharokhas capturing royal breezes.',
+    tags: ['Pink City', 'Iconic Facade', 'Heritage'],
+  },
+  {
+    id: 'attr-gateway-india',
+    name: 'Gateway of India',
+    cityName: 'Mumbai',
+    cityId: 4,
+    state: 'Maharashtra',
+    category: 'Coastal & Lakes',
+    catId: 'coastal',
+    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800',
+    rating: 4.8,
+    reviews: 2150,
+    entryFee: 0,
+    duration: '1-2 Hours',
+    bestTime: 'Sunset / Evening',
+    description: 'Colonial basalt triumphal arch overlooking Mumbai Harbour and the Arabian Sea.',
+    tags: ['Mumbai Harbour', 'Colonial Landmark', 'Sea View'],
+  },
+  {
+    id: 'attr-golden-temple',
+    name: 'Golden Temple (Harmandir Sahib)',
+    cityName: 'Amritsar',
+    cityId: 9,
+    state: 'Punjab',
+    category: 'Temples & Spiritual',
+    catId: 'spiritual',
+    image: 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=800',
+    rating: 5.0,
+    reviews: 3600,
+    entryFee: 0,
+    duration: '3-4 Hours',
+    bestTime: 'Evening Illumination / 24 hrs',
+    description: 'Spiritual sanctuary gilded in pure gold with serene holy sarovar waters and 24/7 community langar.',
+    tags: ['Spiritual Peace', 'Golden Architecture', 'Holy Sarovar'],
+  },
+  {
+    id: 'attr-qutub-minar',
+    name: 'Qutub Minar',
+    cityName: 'Delhi',
+    cityId: 3,
+    state: 'Delhi',
+    category: 'UNESCO Wonders',
+    catId: 'unesco',
+    image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800',
+    rating: 4.8,
+    reviews: 1890,
+    entryFee: 40,
+    duration: '2 Hours',
+    bestTime: '10:00 AM - 04:00 PM',
+    description: '73-meter towering fluted minaret built of red sandstone and marble, dating to 1192 AD.',
+    tags: ['UNESCO Heritage', 'Ancient Inscriptions', 'Iron Pillar'],
+  },
+  {
+    id: 'attr-red-fort',
+    name: 'Red Fort (Lal Qila)',
+    cityName: 'Delhi',
+    cityId: 3,
+    state: 'Delhi',
+    category: 'Forts & Palaces',
+    catId: 'forts',
+    image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800',
+    rating: 4.7,
+    reviews: 2450,
+    entryFee: 35,
+    duration: '2-3 Hours',
+    bestTime: '09:00 AM - 12:00 PM',
+    description: 'Historic seat of the Mughal Empire with massive red sandstone ramparts and imperial pavilions.',
+    tags: ['Mughal Citadel', 'Lahori Gate', 'Sound & Light'],
+  },
+  {
+    id: 'attr-lake-pichola',
+    name: 'Lake Pichola & City Palace',
+    cityName: 'Udaipur',
+    cityId: 5,
+    state: 'Rajasthan',
+    category: 'Coastal & Lakes',
+    catId: 'coastal',
+    image: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800',
+    rating: 4.9,
+    reviews: 1320,
+    entryFee: 300,
+    duration: '3 Hours',
+    bestTime: 'Sunset Boat Cruise',
+    description: 'Romantic artificial freshwater lake set against the Aravallis with floating marble palaces.',
+    tags: ['Lake Palace', 'Jag Mandir', 'Sunset Cruise'],
+  },
+  {
+    id: 'attr-dashashwamedh',
+    name: 'Dashashwamedh Ghat & Ganga Aarti',
+    cityName: 'Varanasi',
+    cityId: 6,
+    state: 'Uttar Pradesh',
+    category: 'Temples & Spiritual',
+    catId: 'spiritual',
+    image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800',
+    rating: 4.9,
+    reviews: 1980,
+    entryFee: 0,
+    duration: '2 Hours',
+    bestTime: '06:30 PM (Evening Aarti)',
+    description: 'Oldest ghat on the Ganges renowned for deeply atmospheric choreographies of fire, cymbals, and incense.',
+    tags: ['Evening Aarti', 'Holy Ganges', 'Sacred Rituals'],
+  },
+  {
+    id: 'attr-pangong-tso',
+    name: 'Pangong Tso High Altitude Lake',
+    cityName: 'Leh Ladakh',
+    cityId: 16,
+    state: 'Ladakh',
+    category: 'Hills & Nature',
+    catId: 'nature',
+    image: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800',
+    rating: 5.0,
+    reviews: 860,
+    entryFee: 0,
+    duration: 'Full Day',
+    bestTime: 'June to September',
+    description: 'Endorheic saltwater lake at 4,225m altitude changing colors from crystal turquoise to deep cobalt blue.',
+    tags: ['Himalayan Lake', 'High Altitude', 'Stargazing'],
+  },
+  {
+    id: 'attr-solang-valley',
+    name: 'Solang Valley & Rohtang Pass',
+    cityName: 'Manali',
+    cityId: 10,
+    state: 'Himachal Pradesh',
+    category: 'Hills & Nature',
+    catId: 'nature',
+    image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800',
+    rating: 4.8,
+    reviews: 1420,
+    entryFee: 0,
+    duration: 'Half Day',
+    bestTime: 'Morning / Snow Season',
+    description: 'Alpine side valley offering paragliding, zorbing, snow quad biking, and panoramic Himalayan vistas.',
+    tags: ['Snow Adventure', 'Paragliding', 'Himalayas'],
+  },
+  {
+    id: 'attr-bom-jesus',
+    name: 'Basilica of Bom Jesus',
+    cityName: 'Goa',
+    cityId: 7,
+    state: 'Goa',
+    category: 'UNESCO Wonders',
+    catId: 'unesco',
+    image: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=800',
+    rating: 4.8,
+    reviews: 1100,
+    entryFee: 0,
+    duration: '1-2 Hours',
+    bestTime: '09:00 AM - 01:00 PM',
+    description: 'Portuguese baroque church housing the sacred relics of St. Francis Xavier, a UNESCO monument.',
+    tags: ['Old Goa', 'Portuguese Baroque', 'UNESCO'],
+  },
+];
+
+function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = [], lang = 'en', onHideCity, onOpenEnquiry, onOpenSafety, onUnhideAllCities, setPage, setSelectedId }) {
   const [dockQuery, setDockQuery] = useState('');
   const [dockSeason, setDockSeason] = useState('all');
   const [dockTheme, setDockTheme] = useState('all');
+  const [attrCategory, setAttrCategory] = useState('all');
+  const [attrQuery, setAttrQuery] = useState('');
 
   const visibleDestinations = useMemo(() => {
     return cities.filter((c) => !hiddenCityIds.includes(c.id));
   }, [cities, hiddenCityIds]);
+
+  const filteredAttractions = useMemo(() => {
+    return TOP_TOURIST_PLACES.filter((p) => {
+      const matchCat = attrCategory === 'all' || p.catId === attrCategory;
+      const matchQuery =
+        !attrQuery.trim() ||
+        p.name.toLowerCase().includes(attrQuery.trim().toLowerCase()) ||
+        p.cityName.toLowerCase().includes(attrQuery.trim().toLowerCase()) ||
+        p.state.toLowerCase().includes(attrQuery.trim().toLowerCase()) ||
+        p.tags.some((t) => t.toLowerCase().includes(attrQuery.trim().toLowerCase()));
+      return matchCat && matchQuery;
+    });
+  }, [attrCategory, attrQuery]);
 
   const handleDockSearch = () => {
     if (dockQuery.trim()) {
@@ -1059,50 +1418,52 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
     <section className="page hero-page-container">
       <div className="hero-page">
         <div className="hero-copy">
-          <p className="eyebrow">✨ All-India Premier Travel Platform</p>
-          <h1>Experience the Soul of Incredible India</h1>
+          <p className="eyebrow">✨ {lang === 'hi' ? 'स्मार्ट पर्यटन इकोसिस्टम' : 'Intelligent Indian Tourism Ecosystem'}</p>
+          <h1>{lang === 'hi' ? 'भारत की खोज करें। बेहतर यात्रा करें।' : 'Experience the Soul of Incredible India'}</h1>
           <p className="hero-text">
-            Discover royal desert fortresses, misty Himalayan summits, tranquil Kerala backwaters, and sacred Ganges riverfronts. Featuring live satellite weather, verified heritage stays, instant Ola & Uber GPS fare calculations, and AI trip planning.
+            {lang === 'hi'
+              ? 'गंतव्य खोजें, व्यक्तिगत यात्रा योजना बनाएं, अनछुए ऐतिहासिक स्थलों का अनुभव करें और स्थानीय पर्यटन व्यवसायों से सीधे 0% कमीशन पर जुड़ें।'
+              : 'Discover royal desert fortresses, misty Himalayan summits, tranquil Kerala backwaters, and sacred riverfronts. Featuring AI route optimization, hotspot decongestion, and direct 0% commission local marketplace.'}
           </p>
 
           {/* UNIVERSAL TRAVEL SEARCH DOCK */}
           <div className="universal-search-dock">
             <div className="search-dock-col">
-              <span className="search-dock-label">📍 Destination</span>
+              <span className="search-dock-label">📍 {lang === 'hi' ? 'गंतव्य' : 'Destination'}</span>
               <input
                 className="search-dock-input"
-                placeholder="Where in India do you want to explore?"
+                placeholder={lang === 'hi' ? 'आप भारत में कहाँ घूमना चाहते हैं?' : 'Where in India do you want to explore?'}
                 value={dockQuery}
                 onChange={(e) => setDockQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleDockSearch()}
               />
             </div>
             <div className="search-dock-col">
-              <span className="search-dock-label">🗓️ Best Season</span>
+              <span className="search-dock-label">🗓️ {lang === 'hi' ? 'मौसम' : 'Best Season'}</span>
               <select
                 className="search-dock-select"
                 value={dockSeason}
                 onChange={(e) => setDockSeason(e.target.value)}
               >
-                <option value="all">Any Travel Season</option>
-                <option value="winter">Winter (Oct to Mar)</option>
-                <option value="summer">Summer (Apr to Jun)</option>
-                <option value="monsoon">Monsoon (Jul to Sep)</option>
+                <option value="all">{lang === 'hi' ? 'सभी मौसम' : 'Any Travel Season'}</option>
+                <option value="winter">{lang === 'hi' ? 'सर्दी (अक्टूबर - मार्च)' : 'Winter (Oct to Mar)'}</option>
+                <option value="summer">{lang === 'hi' ? 'गर्मी (अप्रैल - जून)' : 'Summer (Apr to Jun)'}</option>
+                <option value="monsoon">{lang === 'hi' ? 'मानसून (जुलाई - सितंबर)' : 'Monsoon (Jul to Sep)'}</option>
               </select>
             </div>
             <div className="search-dock-col">
-              <span className="search-dock-label">🧭 Experience Vibe</span>
+              <span className="search-dock-label">🧭 {lang === 'hi' ? 'अनुभव शैली' : 'Experience Vibe'}</span>
               <select
                 className="search-dock-select"
                 value={dockTheme}
                 onChange={(e) => setDockTheme(e.target.value)}
               >
-                <option value="all">All Experiences</option>
-                <option value="heritage">Royal Palaces & Forts</option>
-                <option value="beaches">Beaches & Coastal</option>
-                <option value="mountains">Himalayan Peaks</option>
-                <option value="spiritual">Ghats & Sacred Temples</option>
-                <option value="lakes">Lakes & Backwaters</option>
+                <option value="all">{lang === 'hi' ? 'सभी अनुभव' : 'All Experiences'}</option>
+                <option value="heritage">{lang === 'hi' ? 'किले और महल' : 'Royal Palaces & Forts'}</option>
+                <option value="beaches">{lang === 'hi' ? 'समुद्र तट' : 'Beaches & Coastal'}</option>
+                <option value="mountains">{lang === 'hi' ? 'हिमालयी वादियां' : 'Himalayan Peaks'}</option>
+                <option value="spiritual">{lang === 'hi' ? 'घाट और मंदिर' : 'Ghats & Sacred Temples'}</option>
+                <option value="lakes">{lang === 'hi' ? 'झीलें और बैकवाटर' : 'Lakes & Backwaters'}</option>
               </select>
             </div>
             <button
@@ -1111,15 +1472,15 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
               onClick={handleDockSearch}
               aria-label="Search Destinations"
             >
-              <span>Explore</span>
+              <span>{lang === 'hi' ? 'खोजें' : 'Explore'}</span>
               <span>➔</span>
             </button>
           </div>
 
           {/* QUICK EXPLORE PILLS */}
           <div className="quick-explore-pills">
-            <span className="quick-pills-label">Trending Now:</span>
-            {['Jaipur', 'Goa', 'Leh Ladakh', 'Varanasi', 'Kochi', 'Manali', 'Udaipur', 'Darjeeling', 'Amritsar', 'Hampi'].map((q) => (
+            <span className="quick-pills-label">{lang === 'hi' ? 'चर्चित गंतव्य:' : 'Trending Now:'}</span>
+            {['Jaipur', 'Agra', 'Delhi', 'Mumbai', 'Goa', 'Varanasi', 'Kochi', 'Manali', 'Udaipur', 'Amritsar'].map((q) => (
               <button
                 key={q}
                 type="button"
@@ -1137,10 +1498,62 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             ))}
           </div>
 
-          <div className="hero-actions">
-            <button className="primary-action" type="button" onClick={() => setPage('destinations')}>Browse 24 Cities</button>
-            <button className="secondary-action" type="button" onClick={() => setPage('map')}>Interactive Map</button>
-            <button className="secondary-action" type="button" onClick={() => setPage('hotels')}>Hotels & Cabs</button>
+          {/* QUICK ACTION LAUNCHPAD */}
+          <div className="sih-quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+            <div className="sih-action-card" onClick={() => setPage('planner')}>
+              <span className="sih-action-icon">✨</span>
+              <div className="sih-action-title">
+                <span>{lang === 'hi' ? 'स्मार्ट प्लानर' : 'Plan My Trip'}</span>
+                <span>➔</span>
+              </div>
+              <p className="sih-action-desc">
+                {lang === 'hi' ? 'बजट और रुचि अनुसार व्यक्तिगत योजना' : 'Multi-day itineraries & route optimization'}
+              </p>
+            </div>
+
+            <div className="sih-action-card" onClick={() => setPage('destinations')}>
+              <span className="sih-action-icon">🏛️</span>
+              <div className="sih-action-title">
+                <span>{lang === 'hi' ? 'गंतव्य खोजें' : 'Explore Destinations'}</span>
+                <span>➔</span>
+              </div>
+              <p className="sih-action-desc">
+                {lang === 'hi' ? 'विरासत, पहाड़, समुद्र तट और पावन तीर्थ' : 'Royal forts, hill stations & beaches'}
+              </p>
+            </div>
+
+            <div className="sih-action-card" onClick={() => setPage('rentals')}>
+              <span className="sih-action-icon">🚗</span>
+              <div className="sih-action-title">
+                <span>{lang === 'hi' ? 'वाहन रेंटल' : 'Rentals Fleet'}</span>
+                <span>➔</span>
+              </div>
+              <p className="sih-action-desc">
+                {lang === 'hi' ? 'कार, बाइक, स्कूटर और ईवी रेंटल' : 'Self-drive cars, Royal Enfields & EVs'}
+              </p>
+            </div>
+
+            <div className="sih-action-card" onClick={() => setPage('gems')}>
+              <span className="sih-action-icon">🌿</span>
+              <div className="sih-action-title">
+                <span>{lang === 'hi' ? 'छिपे हुए रत्न' : 'Hidden Gems'}</span>
+                <span>➔</span>
+              </div>
+              <p className="sih-action-desc">
+                {lang === 'hi' ? 'शांत व ऐतिहासिक धरोहरें' : 'Offbeat stepwells & craft villages'}
+              </p>
+            </div>
+
+            <div className="sih-action-card" onClick={() => setPage('marketplace')}>
+              <span className="sih-action-icon">🤝</span>
+              <div className="sih-action-title">
+                <span>{lang === 'hi' ? 'स्थानीय व्यापार' : 'Support Local'}</span>
+                <span>➔</span>
+              </div>
+              <p className="sih-action-desc">
+                {lang === 'hi' ? 'होमस्टे व गाइड से सीधा संपर्क' : 'Homestays, guides & artisans (0% fee)'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -1158,46 +1571,27 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           <article className="mini-dashboard glass-panel">
             <div className="stat-card">
               <strong>{visibleDestinations.length}</strong>
-              <span>Live Destinations</span>
+              <span>Destinations</span>
             </div>
             <div className="stat-card">
-              <strong>100%</strong>
-              <span>Instant Engine</span>
+              <strong>0%</strong>
+              <span>OTA Commission</span>
             </div>
           </article>
         </div>
       </div>
 
-      {/* HERO LIVE STATS STRIP */}
+      {/* HERO SIH LIVE IMPACT BENCHMARK STRIP */}
       <div className="hero-stats-strip">
-        <div className="hero-stat-box">
-          <span className="hero-stat-icon">🏛️</span>
-          <div>
-            <div className="hero-stat-number">{cities.length}</div>
-            <div className="hero-stat-label">Curated Indian Destinations</div>
+        {SIH_STATS.map((stat, i) => (
+          <div key={i} className="hero-stat-box">
+            <span className="hero-stat-icon">{stat.icon}</span>
+            <div>
+              <div className="hero-stat-number">{stat.value}</div>
+              <div className="hero-stat-label">{stat.label}</div>
+            </div>
           </div>
-        </div>
-        <div className="hero-stat-box">
-          <span className="hero-stat-icon">🏨</span>
-          <div>
-            <div className="hero-stat-number">50+</div>
-            <div className="hero-stat-label">Verified Stays & Hostels</div>
-          </div>
-        </div>
-        <div className="hero-stat-box">
-          <span className="hero-stat-icon">🚖</span>
-          <div>
-            <div className="hero-stat-number">Live GPS</div>
-            <div className="hero-stat-label">Ola & Uber Fare Estimator</div>
-          </div>
-        </div>
-        <div className="hero-stat-box">
-          <span className="hero-stat-icon">⚡</span>
-          <div>
-            <div className="hero-stat-number">100%</div>
-            <div className="hero-stat-label">Zero-Latency Client Engine</div>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* SLIDING PHOTO CAROUSEL ANIMATION */}
@@ -1296,6 +1690,395 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           })}
         </div>
       </div>
+
+      {/* MUST-VISIT TOURIST PLACES & ICONIC ATTRACTIONS */}
+      <div className="home-attractions-section" style={{ margin: '3.5rem 0' }}>
+        <div className="home-section-header">
+          <div>
+            <span className="card-tag" style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#ea580c', fontWeight: 800 }}>
+              🏛️ All-India Iconic Tourist Attractions
+            </span>
+            <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)' }}>
+              {lang === 'hi' ? 'भारत के प्रसिद्ध पर्यटन स्थल एवं स्मारक' : 'Famous Tourist Places Across India'}
+            </h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+              {lang === 'hi'
+                ? 'किले, महल, पवित्र तीर्थ, सुंदर झीलें और यूनेस्को विश्व धरोहर स्थल — दर्शन समय, प्रवेश शुल्क व सीधी योजना।'
+                : 'Forts, palaces, sacred ghats, pristine lakes, and UNESCO world wonders with entry fees, timings, and instant trip planning.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Showing {filteredAttractions.length} of {TOP_TOURIST_PLACES.length} places
+            </span>
+          </div>
+        </div>
+
+        {/* Filter controls bar */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', margin: '1.25rem 0 1.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {[
+              { id: 'all', label: 'All Places' },
+              { id: 'forts', label: '🏰 Forts & Palaces' },
+              { id: 'spiritual', label: '🛕 Temples & Spiritual' },
+              { id: 'unesco', label: '✨ UNESCO Wonders' },
+              { id: 'nature', label: '🏔️ Hills & Nature' },
+              { id: 'coastal', label: '🌊 Coastal & Lakes' },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={`quick-pill-tag ${attrCategory === cat.id ? 'active' : ''}`}
+                style={{
+                  background: attrCategory === cat.id ? 'var(--brand-primary, #0f766e)' : 'var(--bg-surface-elevated, #f1f5f9)',
+                  color: attrCategory === cat.id ? '#ffffff' : 'var(--text-main)',
+                  borderColor: attrCategory === cat.id ? 'var(--brand-primary, #0f766e)' : 'transparent',
+                  fontWeight: attrCategory === cat.id ? 700 : 500,
+                  cursor: 'pointer',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  border: '1px solid',
+                  fontSize: '0.825rem',
+                  transition: 'all 0.15s ease'
+                }}
+                onClick={() => setAttrCategory(cat.id)}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ position: 'relative', minWidth: '240px', flex: '0 1 300px' }}>
+            <input
+              type="text"
+              placeholder="Search place, city or tag..."
+              value={attrQuery}
+              onChange={(e) => setAttrQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 12px 8px 32px',
+                borderRadius: '20px',
+                border: '1px solid var(--border-color, #cbd5e1)',
+                background: 'var(--bg-surface, #ffffff)',
+                color: 'var(--text-main)',
+                fontSize: '0.85rem'
+              }}
+            />
+            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, fontSize: '0.85rem' }}>🔍</span>
+            {attrQuery && (
+              <button
+                type="button"
+                onClick={() => setAttrQuery('')}
+                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.85rem' }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Tourist places cards grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          {filteredAttractions.map((place) => (
+            <article
+              key={place.id}
+              className="destination-photo-card"
+              style={{ display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-surface, #ffffff)', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}
+            >
+              <div className="card-image-wrap" style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
+                <img
+                  src={place.image}
+                  alt={place.name}
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <span className="card-region-badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(15,23,42,0.75)', color: '#ffffff', padding: '3px 9px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 600 }}>
+                  📍 {place.cityName}, {place.state}
+                </span>
+                <span className="card-rating-badge" style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(255,255,255,0.92)', color: '#0f172a', padding: '3px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  ⭐ {place.rating} ({place.reviews})
+                </span>
+                <span style={{ position: 'absolute', bottom: '8px', left: '10px', background: 'rgba(15,118,110,0.9)', color: '#ffffff', padding: '3px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 600 }}>
+                  ⏱️ {place.duration}
+                </span>
+              </div>
+
+              <div className="card-body" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px', marginBottom: '0.25rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.3 }}>{place.name}</h3>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.35rem 0 0.65rem', lineHeight: 1.45 }}>
+                    {place.description}
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '0.85rem' }}>
+                    {place.tags.map((t, idx) => (
+                      <span key={idx} style={{ fontSize: '0.7rem', padding: '2px 7px', background: 'var(--bg-surface-elevated, #f1f5f9)', color: 'var(--text-muted)', borderRadius: '4px' }}>
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', marginBottom: '0.85rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Best Timing:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{place.bestTime}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Entry Fee:</span>
+                      <strong style={{ color: place.entryFee === 0 ? '#059669' : '#0f766e' }}>
+                        {place.entryFee === 0 ? 'Free Entry' : `₹${place.entryFee} / person`}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color, #e2e8f0)' }}>
+                  <button
+                    type="button"
+                    className="primary-action"
+                    style={{ flex: 1, padding: '7px 10px', fontSize: '0.8rem', borderRadius: '8px' }}
+                    onClick={() => {
+                      if (place.cityId) setSelectedId(place.cityId);
+                      setPage('planner');
+                    }}
+                  >
+                    ✨ Plan Trip ➔
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    style={{ padding: '7px 12px', fontSize: '0.8rem', borderRadius: '8px' }}
+                    onClick={() => {
+                      if (place.cityId) setSelectedId(place.cityId);
+                      setPage('destinations');
+                    }}
+                  >
+                    View City
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* 5-CITY PREMIER MVP SPOTLIGHT */}
+      <div className="sih-mvp-section">
+        <div className="section-header-row" style={{ marginBottom: '1.25rem' }}>
+          <div>
+            <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+              ⭐ Premier 5-City Golden Corridor MVP
+            </span>
+            <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)' }}>
+              {lang === 'hi' ? 'भारत के 5 प्रमुख स्वर्णिम गंतव्य' : "Explore India's Premier Golden Corridor"}
+            </h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+              {lang === 'hi'
+                ? 'गहन यात्रा विवरण, सटीक आवागमन हिसाब और प्रमाणित स्थानीय भागीदार — जयपुर, आगरा, दिल्ली, मुंबई और गोवा के लिए।'
+                : "Deep route sequencing, accurate travel budget calculators, and vetted local partners for India's 5 premier travel hubs."}
+            </p>
+          </div>
+        </div>
+
+        <div className="sih-mvp-grid">
+          {FIVE_CITIES_MVP.map((mvpCity) => (
+            <article key={mvpCity.id} className="sih-mvp-card">
+              <div className="sih-mvp-img-wrap">
+                <img src={mvpCity.heroImage} alt={mvpCity.name} loading="lazy" />
+                <span style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(15, 23, 42, 0.8)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  📍 {mvpCity.state}
+                </span>
+                <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#059669', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
+                  🌿 {mvpCity.sustainabilityScore}% Eco
+                </span>
+                <span style={{ position: 'absolute', bottom: '8px', left: '12px', background: 'rgba(255,255,255,0.92)', color: '#0f172a', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  ⏱️ {mvpCity.recommendedDuration}
+                </span>
+              </div>
+
+              <div className="sih-mvp-content">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>{mvpCity.name}</h3>
+                  <span style={{ fontWeight: 800, color: '#f59e0b', fontSize: '0.85rem' }}>⭐ {mvpCity.rating}</span>
+                </div>
+                <p style={{ margin: '0 0 0.85rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45, flex: 1 }}>
+                  {mvpCity.tagline}
+                </p>
+
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.775rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'hi' ? 'सर्वश्रेष्ठ मौसम:' : 'Best Season:'}</span>
+                    <strong>{mvpCity.bestSeason}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'hi' ? 'अनुमानित दैनिक खर्च:' : 'Estimated Daily:'}</span>
+                    <strong style={{ color: '#0f766e' }}>{formatPrice(mvpCity.startingBudgetInr)} / person</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="primary-action"
+                    style={{ flex: 1, padding: '8px', fontSize: '0.825rem' }}
+                    onClick={() => {
+                      setSelectedId(mvpCity.id);
+                      setPage('planner');
+                    }}
+                  >
+                    ✨ {lang === 'hi' ? 'प्लान बनाएं' : 'Plan Trip'} ➔
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    style={{ padding: '8px 12px', fontSize: '0.825rem' }}
+                    onClick={() => {
+                      setSelectedId(mvpCity.id);
+                      setPage('destinations');
+                    }}
+                  >
+                    {lang === 'hi' ? 'विस्तार' : 'Explore'}
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION: GO BEYOND THE FAMOUS (HIDDEN GEMS) */}
+      <div style={{ margin: '3.5rem 0' }}>
+        <SihHiddenGems
+          onPlanForCity={(cityName) => {
+            const matched = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+            if (matched) setSelectedId(matched.id);
+            setPage('planner');
+          }}
+        />
+      </div>
+
+      {/* SECTION: EXPERIENCE REAL INDIA (LOCAL EXPERIENCES) */}
+      <div style={{ margin: '3.5rem 0' }}>
+        <SihExperiences
+          onEnquire={(biz) => onOpenEnquiry && onOpenEnquiry(biz)}
+        />
+      </div>
+
+      {/* SECTION: SUPPORT LOCAL TOURISM MARKETPLACE */}
+      <div style={{ margin: '3.5rem 0' }}>
+        <SihMarketplace
+          onEnquire={(biz) => onOpenEnquiry && onOpenEnquiry(biz)}
+        />
+      </div>
+
+      {/* WHY CHOOSE YATRA 66 */}
+      <div className="sih-why-section">
+        <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 2rem' }}>
+          <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+            🚀 Integrated Tourism Ecosystem
+          </span>
+          <h2 style={{ fontSize: '1.9rem', margin: '0.5rem 0 0.35rem', color: 'var(--text-main)' }}>
+            Why Travelers & Local Businesses Choose Yatra 66
+          </h2>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+            A unified solution that boosts Indian tourism, local hotels, guides, and artisans through smart innovation.
+          </p>
+        </div>
+
+        <div className="sih-why-grid">
+          <div className="sih-why-card">
+            <span className="sih-why-icon">🧳</span>
+            <div className="sih-why-title">For Travelers</div>
+            <p className="sih-why-text">
+              Zero guesswork: personalized multi-day itineraries with AI transparency, nearest-neighbor route distance optimization that saves 40%+ travel time, and clear breakdown of transport, food, and stay expenses.
+            </p>
+          </div>
+
+          <div className="sih-why-card">
+            <span className="sih-why-icon">🏡</span>
+            <div className="sih-why-title">For Local Businesses</div>
+            <p className="sih-why-text">
+              Equal digital visibility: zero listing fees and 0% predatory OTA commission. Travelers connect directly with verified homestays, licensed local guides, and village artisan cooperatives via WhatsApp & phone.
+            </p>
+          </div>
+
+          <div className="sih-why-card">
+            <span className="sih-why-icon">🌿</span>
+            <div className="sih-why-title">For Sustainable Tourism</div>
+            <p className="sih-why-text">
+              Hotspot decongestion: proactive promotion of secret architectural stepwells, quiet heritage hamlets, and rural craft hubs to distribute tourist footfall evenly and preserve fragile heritage ecosystems.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* STARTUP & TOURISM ECOSYSTEM FOOTER */}
+      <footer className="sih-startup-footer">
+        <div className="sih-footer-inner">
+          <div className="sih-footer-brand">
+            <h3>
+              <span className="brand-mark" style={{ width: '28px', height: '28px', fontSize: '14px' }}>Y</span>
+              <span>Yatra 66</span>
+            </h3>
+            <p>
+              An intelligent tourism ecosystem empowering Indian travelers and local tourism businesses through AI discovery, smart route optimization, and direct zero-commission connections.
+            </p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 700 }}>
+                🇮🇳 Made in India
+              </span>
+              <span className="card-tag" style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#ea580c', fontWeight: 700 }}>
+                ⚡ Next-Gen Tourism
+              </span>
+              <span className="card-tag" style={{ background: 'rgba(225, 29, 72, 0.12)', color: '#e11d48', fontWeight: 700, cursor: 'pointer' }} onClick={onOpenSafety}>
+                📞 24/7 Helpline 112 / 1363
+              </span>
+            </div>
+          </div>
+
+          <div className="sih-footer-col">
+            <h4>Explore</h4>
+            <ul>
+              <li><button type="button" onClick={() => setPage('destinations')}>Top Destinations</button></li>
+              <li><button type="button" onClick={() => setPage('planner')}>✨ Smart Trip Planner</button></li>
+              <li><button type="button" onClick={() => setPage('rentals')}>🚗 Vehicle Rentals</button></li>
+              <li><button type="button" onClick={() => setPage('gems')}>🌿 Hidden Gems</button></li>
+              <li><button type="button" onClick={() => setPage('experiences')}>🎨 Cultural Experiences</button></li>
+              <li><button type="button" onClick={() => setPage('hotels')}>Hotels & Cabs</button></li>
+            </ul>
+          </div>
+
+          <div className="sih-footer-col">
+            <h4>Local Marketplace</h4>
+            <ul>
+              <li><button type="button" onClick={() => setPage('marketplace')}>Support Local Directory</button></li>
+              <li><button type="button" onClick={() => setPage('marketplace')}>Register Local Business</button></li>
+              <li><button type="button" onClick={() => setPage('marketplace')}>Verified Homestays</button></li>
+              <li><button type="button" onClick={() => setPage('marketplace')}>Licensed Tour Guides</button></li>
+              <li><button type="button" onClick={() => setPage('map')}>Interactive Map</button></li>
+            </ul>
+          </div>
+
+          <div className="sih-footer-col">
+            <h4>Safety & Helplines</h4>
+            <ul>
+              <li><a href="tel:112" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>🚨 National Emergency: 112</a></li>
+              <li><a href="tel:1363" style={{ color: '#0f766e', fontWeight: 700, textDecoration: 'none' }}>ℹ️ Tourist Helpline: 1363</a></li>
+              <li><a href="tel:108" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>🚑 Ambulance: 108</a></li>
+              <li><a href="tel:1091" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>🛡️ Women Helpline: 1091</a></li>
+              <li><button type="button" onClick={onOpenSafety} style={{ color: '#0f766e', fontWeight: 700 }}>Open Safety Hub ➔</button></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="sih-footer-bottom">
+          <div>&copy; 2026 Yatra 66 (yatra66.in) • National Tourism Platform</div>
+          <div>Bridging travelers and local businesses with 0% commission</div>
+        </div>
+      </footer>
     </section>
   );
 }
@@ -1634,8 +2417,8 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
   return (
     <section className="page weather-page">
       <PageTitle
-        eyebrow="Live Climate & Atmosphere"
-        title="Live Weather Forecast & Packing Guide"
+        eyebrow="Climate & Atmosphere Forecast"
+        title="Weather Forecast & Packing Guide"
         text="Check real-time temperatures, 7-day outlook, and seasonal packing tips for any destination across India."
       />
 
@@ -1664,7 +2447,7 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
                       <span className="suggestion-state-name">, {s.admin1 || 'India'}</span>
                     </div>
                     <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700 }}>
-                      Get Live Weather ➔
+                      View Weather ➔
                     </span>
                   </div>
                 ))}
@@ -1716,7 +2499,7 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
       </div>
 
       {loading ? (
-        <BullyLoader message={`Connecting to live weather satellites for ${city.name}...`} />
+        <BullyLoader message={`Fetching atmospheric & satellite forecast for ${city.name}...`} />
       ) : weather ? (
         <div className="weather-bento-grid">
           {/* HERO BENTO CARD */}
@@ -1725,11 +2508,11 @@ function WeatherPage({ cities, onAddLiveCity, selectedId, setSelectedId }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <span className="live-tag">
-                    {weather.isLiveExternalData ? '🟢 Live Satellite Sync' : '🟡 Regional Climate'}
+                    {weather.isLiveExternalData ? '🟢 Satellite Sync Active' : '🟡 Regional Climate'}
                   </span>
                   <h2 style={{ fontSize: '2rem', fontWeight: 800, margin: '0.4rem 0 0.2rem' }}>{weather.cityName}</h2>
                   <p className="coords" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Coordinates: {weather.latitude.toFixed(2)}°N, {weather.longitude.toFixed(2)}°E • {weather.timezone}
+                    Coordinates: {Number(weather.latitude || 26.91).toFixed(2)}°N, {Number(weather.longitude || 75.78).toFixed(2)}°E • {weather.timezone || 'Asia/Kolkata'}
                   </p>
                 </div>
                 <div style={{ fontSize: '3.5rem', lineHeight: 1 }}>{weather.weatherIcon}</div>
@@ -2590,12 +3373,16 @@ function HotelsPage({ details, formatPrice, handleOpenBooking, hiddenHotelIds = 
 function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
   const [originId, setOriginId] = useState(1);
   const [destId, setDestId] = useState(2);
+  const [modeFilter, setModeFilter] = useState('ALL');
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchRoute() {
-      if (originId === destId) return;
+      if (originId === destId) {
+        setRouteData(null);
+        return;
+      }
       setLoading(true);
       try {
         const data = await yatraApi.getTransitRoutes(originId, destId);
@@ -2610,15 +3397,17 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
 
       const oCity = cities.find((c) => c.id === originId) || cities[0];
       const dCity = cities.find((c) => c.id === destId) || cities[1];
+      const dist = 260;
       setRouteData({
         originCityName: oCity.name,
         destinationCityName: dCity.name,
-        straightDistanceKm: 240,
+        straightDistanceKm: dist,
         recommendedOption: 'TRAIN (Vande Bharat Express)',
         options: [
-          { mode: 'TRAIN', title: 'Indian Railways Vande Bharat', operatorOrType: 'Executive & Chair Car', durationFormatted: '3h 45m', estimatedFareInr: 850, frequency: 'Daily 4 departures', highlights: ['Scenic countryside', 'Reserved meals'], carbonKg: 12 },
-          { mode: 'BUS', title: 'Intercity AC Volvo Sleeper', operatorOrType: 'Multi-Axle Semi Sleeper', durationFormatted: '5h 15m', estimatedFareInr: 650, frequency: 'Frequent schedules', highlights: ['Reclining berths', 'Free water'], carbonKg: 18 },
-          { mode: 'CAB', title: 'Highway Outstation Chauffeur', operatorOrType: 'Sedan / SUV', durationFormatted: '4h 10m', estimatedFareInr: 4200, frequency: 'Door-to-door on demand', highlights: ['Flexible stopovers', 'Toll included'], carbonKg: 32 },
+          { mode: 'FLIGHT', title: 'Domestic Airline Flight', operatorOrType: 'IndiGo / Air India Non-Stop', durationFormatted: '1h 15m', estimatedFareInr: 3400, frequency: 'Daily 6 flights', highlights: ['Fastest commute', '15kg baggage included', 'Cabin snack'], carbonKg: 42 },
+          { mode: 'TRAIN', title: 'Indian Railways Vande Bharat', operatorOrType: 'Executive & AC Chair Car', durationFormatted: '3h 45m', estimatedFareInr: 850, frequency: 'Daily 4 departures', highlights: ['Scenic countryside', 'Complimentary meals', 'Spacious seats'], carbonKg: 12 },
+          { mode: 'BUS', title: 'Intercity AC Volvo Sleeper', operatorOrType: 'Multi-Axle Semi Sleeper', durationFormatted: '5h 15m', estimatedFareInr: 650, frequency: 'Frequent schedules', highlights: ['Reclining berths', 'Free mineral water', 'City center pickup'], carbonKg: 18 },
+          { mode: 'CAB', title: 'Highway Outstation Chauffeur', operatorOrType: 'Sedan / Ertiga SUV', durationFormatted: '4h 10m', estimatedFareInr: 3800, frequency: 'Door-to-door on demand', highlights: ['Flexible stopovers at dhabas', 'Toll & taxes included', 'Doorstep pickup'], carbonKg: 32 },
         ],
       });
       setLoading(false);
@@ -2626,14 +3415,23 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
     fetchRoute();
   }, [originId, destId, cities]);
 
+  const filteredOptions = useMemo(() => {
+    if (!routeData?.options) return [];
+    if (modeFilter === 'ALL') return routeData.options;
+    return routeData.options.filter((opt) => opt.mode.toUpperCase() === modeFilter);
+  }, [routeData, modeFilter]);
+
+  const sameCity = originId === destId;
+
   return (
     <section className="page routes-page">
       <PageTitle
-        eyebrow="Travel Across India"
-        title="Flights, Trains, Buses & Cabs"
-        text="Compare travel times, estimated fares, and book the most convenient route between any two cities."
+        eyebrow="Transit & Connectivity"
+        title="Flights, Trains, Buses & Highway Cabs"
+        text="Compare travel times, estimated fares, carbon emissions, and book verified transit routes between any two Indian cities."
       />
 
+      {/* ROUTE SELECTOR DOCK */}
       <div className="route-selectors glass-panel">
         <label>
           <span>From Origin:</span>
@@ -2642,7 +3440,14 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
           </select>
         </label>
 
-        <button type="button" className="swap-btn" onClick={() => { const temp = originId; setOriginId(destId); setDestId(temp); }}>⇄</button>
+        <button
+          type="button"
+          className="swap-btn"
+          title="Swap Origin and Destination"
+          onClick={() => { const temp = originId; setOriginId(destId); setDestId(temp); }}
+        >
+          ⇄
+        </button>
 
         <label>
           <span>To Destination:</span>
@@ -2652,49 +3457,135 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
         </label>
       </div>
 
-      {loading ? (
-        <BullyLoader message="Calculating optimal transit routes, trains & flight schedules..." />
-      ) : routeData ? (
-        <div>
-          <div className="route-summary-bar glass-panel">
-            <div>
-              <strong>{routeData.originCityName} ➔ {routeData.destinationCityName}</strong>
-              <span className="distance-tag">~{Math.round(routeData.straightDistanceKm * 1.25)} km route</span>
-            </div>
-            <span className="recommendation-badge">⭐ Recommended: {routeData.recommendedOption}</span>
-          </div>
-
-          <div className="transit-options-grid">
-            {routeData.options?.map((opt, idx) => (
-              <article key={idx} className="transit-card glass-panel">
-                <div className="transit-header">
-                  <span className="transit-mode-badge">{opt.mode}</span>
-                  <span className="carbon-tag">🌱 {opt.carbonKg} kg CO₂</span>
-                </div>
-                <h3>{opt.title}</h3>
-                <p className="operator">{opt.operatorOrType}</p>
-                <div className="transit-price-row">
-                  <div>
-                    <span className="fare-label">Estimated Fare</span>
-                    <strong>{formatPrice(opt.estimatedFareInr)}</strong>
-                  </div>
-                  <div>
-                    <span className="fare-label">Duration</span>
-                    <strong className="duration">{opt.durationFormatted}</strong>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="book-transit-btn"
-                  onClick={() => handleOpenBooking('transit', `${opt.mode}: ${routeData.originCityName} to ${routeData.destinationCityName}`, opt.estimatedFareInr, destId, routeData.destinationCityName)}
-                >
-                  Reserve {opt.mode}
-                </button>
-              </article>
+      {sameCity ? (
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '2.5rem', margin: '1.5rem 0', borderRadius: '16px' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔄</div>
+          <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem' }}>Origin & Destination Are the Same</h3>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '480px', margin: '0 auto 1.25rem', fontSize: '0.9rem' }}>
+            Please select two different cities to compare transit travel times, flight tickets, train schedules, and outstation cabs.
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {cities.filter((c) => c.id !== originId).slice(0, 4).map((alt) => (
+              <button
+                key={alt.id}
+                type="button"
+                className="secondary-action"
+                style={{ padding: '6px 14px', fontSize: '0.825rem' }}
+                onClick={() => setDestId(alt.id)}
+              >
+                Travel to {alt.name} ➔
+              </button>
             ))}
           </div>
         </div>
-      ) : null}
+      ) : (
+        <>
+          {/* TRANSIT MODE FILTER TABS */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', margin: '1.25rem 0' }}>
+            {[
+              { id: 'ALL', label: 'All Modes' },
+              { id: 'FLIGHT', label: '✈️ Flights' },
+              { id: 'TRAIN', label: '🚆 Trains' },
+              { id: 'BUS', label: '🚌 Buses' },
+              { id: 'CAB', label: '🚖 Highway Cabs' },
+            ].map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`quick-pill-tag ${modeFilter === m.id ? 'active' : ''}`}
+                style={{
+                  background: modeFilter === m.id ? 'var(--brand-primary, #0f766e)' : 'var(--bg-surface-elevated, #f1f5f9)',
+                  color: modeFilter === m.id ? '#ffffff' : 'var(--text-main)',
+                  fontWeight: modeFilter === m.id ? 700 : 500,
+                  border: '1px solid',
+                  borderColor: modeFilter === m.id ? 'var(--brand-primary, #0f766e)' : 'transparent',
+                  padding: '6px 16px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '0.825rem',
+                }}
+                onClick={() => setModeFilter(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          {loading ? (
+            <BullyLoader message="Calculating optimal transit routes, trains & flight schedules..." />
+          ) : routeData ? (
+            <div>
+              <div className="route-summary-bar glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <strong style={{ fontSize: '1.1rem' }}>{routeData.originCityName} ➔ {routeData.destinationCityName}</strong>
+                  <span className="distance-tag" style={{ marginLeft: '0.75rem', background: 'var(--bg-surface-elevated, #e2e8f0)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.75rem' }}>
+                    ~{Math.round(routeData.straightDistanceKm * 1.25)} km route
+                  </span>
+                </div>
+                <span className="recommendation-badge" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>
+                  ⭐ Recommended: {routeData.recommendedOption}
+                </span>
+              </div>
+
+              {filteredOptions.length === 0 ? (
+                <div className="glass-panel" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                  No transit options found for the selected mode filter. Try selecting <strong>"All Modes"</strong>.
+                </div>
+              ) : (
+                <div className="transit-options-grid">
+                  {filteredOptions.map((opt, idx) => {
+                    const modeIcon = opt.mode === 'FLIGHT' ? '✈️' : opt.mode === 'TRAIN' ? '🚆' : opt.mode === 'BUS' ? '🚌' : '🚖';
+                    return (
+                      <article key={idx} className="transit-card glass-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div className="transit-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <span className="transit-mode-badge" style={{ fontWeight: 800, fontSize: '0.8rem' }}>
+                              {modeIcon} {opt.mode}
+                            </span>
+                            <span className="carbon-tag" style={{ fontSize: '0.75rem', background: '#ecfdf5', color: '#065f46', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                              🌱 {opt.carbonKg} kg CO₂
+                            </span>
+                          </div>
+                          <h3 style={{ margin: '0.25rem 0', fontSize: '1.1rem' }}>{opt.title}</h3>
+                          <p className="operator" style={{ color: 'var(--text-muted)', fontSize: '0.825rem', margin: '0 0 0.75rem' }}>{opt.operatorOrType}</p>
+                          
+                          <div className="transit-price-row" style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.65rem 0.85rem', borderRadius: '10px', marginBottom: '0.75rem' }}>
+                            <div>
+                              <span className="fare-label" style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>Estimated Fare</span>
+                              <strong style={{ fontSize: '1.05rem', color: '#0f766e' }}>{formatPrice(opt.estimatedFareInr)}</strong>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <span className="fare-label" style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>Duration</span>
+                              <strong className="duration" style={{ fontSize: '1.05rem' }}>{opt.durationFormatted}</strong>
+                            </div>
+                          </div>
+
+                          {opt.highlights && (
+                            <ul style={{ margin: '0 0 0.85rem', paddingLeft: '1.2rem', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                              {opt.highlights.map((h, hIdx) => (
+                                <li key={hIdx}>{h}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="book-transit-btn"
+                          style={{ width: '100%', padding: '9px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}
+                          onClick={() => handleOpenBooking('transit', `${opt.mode}: ${routeData.originCityName} to ${routeData.destinationCityName}`, opt.estimatedFareInr, destId, routeData.destinationCityName)}
+                        >
+                          Reserve {opt.mode} ➔
+                        </button>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }
@@ -2702,88 +3593,272 @@ function RoutesPage({ cities, formatPrice, handleOpenBooking }) {
 // -------------------------------------------------------------
 // FESTIVALS PAGE
 // -------------------------------------------------------------
+const MASTER_FESTIVALS = [
+  {
+    id: 'fest-diwali',
+    name: 'Diwali (Deepavali)',
+    subtitle: 'Festival of Lights & Universal Harmony',
+    date: '2026-11-01',
+    month: 'November',
+    category: 'Spiritual',
+    image: 'https://images.unsplash.com/photo-1576400883215-7083980b6197?w=800',
+    culturalSignificance: 'Millions of glowing clay diyas illuminate riverside ghats and temples, celebrating the victory of light over spiritual darkness.',
+    topCitiesToCelebrate: ['Varanasi', 'Jaipur', 'Delhi', 'Ayodhya'],
+    travelAdvice: 'Book riverfront ghat hotels at least 45 days in advance; attend evening aarti early to secure viewing spots.',
+  },
+  {
+    id: 'fest-holi',
+    name: 'Holi (Festival of Colors)',
+    subtitle: 'Celebration of Spring, Love & Joy',
+    date: '2026-03-25',
+    month: 'March',
+    category: 'Cultural',
+    image: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800',
+    culturalSignificance: 'Streets transform into joyous seas of organic gulal color powders, traditional folk dhol drums, and delicious festive sweets.',
+    topCitiesToCelebrate: ['Jaipur', 'Udaipur', 'Varanasi', 'Mathura'],
+    travelAdvice: 'Wear white cotton clothing and use certified herbal eco-friendly colors. Palace celebrations in Udaipur require reservations.',
+  },
+  {
+    id: 'fest-onam',
+    name: 'Onam Harvest Festival',
+    subtitle: 'Grand 10-Day Kerala Carnival',
+    date: '2026-09-05',
+    month: 'September',
+    category: 'Harvest',
+    image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800',
+    culturalSignificance: 'Traditional Vallam Kali snake boat races roar across backwaters, accompanied by intricate floral carpet art (Pookkalam) and grand Onasadya banquets.',
+    topCitiesToCelebrate: ['Kochi', 'Alleppey', 'Trivandrum'],
+    travelAdvice: 'Book backwater houseboats and Nehru Trophy race pavilion seats well in advance for the best vantage point.',
+  },
+  {
+    id: 'fest-durga-puja',
+    name: 'Durga Puja Carnival',
+    subtitle: 'UNESCO Intangible Cultural Heritage',
+    date: '2026-10-20',
+    month: 'October',
+    category: 'UNESCO Heritage',
+    image: 'https://images.unsplash.com/photo-1601614002636-f6d0f5080ce3?w=800',
+    culturalSignificance: 'The world’s largest open-air art gallery featuring thousands of magnificent illuminated architectural pandals, dhak drums, and culinary walks.',
+    topCitiesToCelebrate: ['Kolkata', 'Delhi'],
+    travelAdvice: 'Plan pandal-hopping tours between midnight and dawn to avoid midday queues; take the metro for easy transit.',
+  },
+  {
+    id: 'fest-ganesh',
+    name: 'Ganesh Chaturthi',
+    subtitle: 'Grand Maharashtra Devotional Festival',
+    date: '2026-09-18',
+    month: 'September',
+    category: 'Spiritual',
+    image: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=800',
+    culturalSignificance: 'Massive artistic clay idols, energetic dhol-tasha drum squads, and spectacular Arabian Sea beach immersion processions.',
+    topCitiesToCelebrate: ['Mumbai', 'Pune'],
+    travelAdvice: 'Witness the iconic Lalbaugcha Raja pandal and join sunset processions along Marine Drive and Girgaon Chowpatty.',
+  },
+  {
+    id: 'fest-pushkar',
+    name: 'Pushkar Camel & Cultural Fair',
+    subtitle: 'Desert Folk Carnival & Sacred Lake Pilgrimage',
+    date: '2026-11-20',
+    month: 'November',
+    category: 'Cultural',
+    image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
+    culturalSignificance: 'One of the world’s largest camel and horse gatherings with colorful Rajasthani folk dances, turban-tying contests, and desert hot air ballooning.',
+    topCitiesToCelebrate: ['Jaipur', 'Pushkar'],
+    travelAdvice: 'Combine Pushkar with a Jaipur or Udaipur itinerary; book luxury desert tent stays ahead of the Kartik Purnima full moon.',
+  },
+  {
+    id: 'fest-rann-utsav',
+    name: 'Rann Utsav (White Desert)',
+    subtitle: 'Moonlit Salt Desert Cultural Extravaganza',
+    date: '2026-12-15',
+    month: 'December',
+    category: 'Cultural',
+    image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800',
+    culturalSignificance: 'The boundless white salt desert under shimmering full moons comes alive with Gujarati folk music, Kutchi mirror embroidery, and tent cities.',
+    topCitiesToCelebrate: ['Kutch', 'Ahmedabad'],
+    travelAdvice: 'Visit during full moon nights for surreal desert glow; permits are arranged at Dhordo checkpoints.',
+  },
+  {
+    id: 'fest-hemis',
+    name: 'Hemis Monastery Festival',
+    subtitle: 'Sacred Himalayan Masked Cham Dance',
+    date: '2026-06-25',
+    month: 'June',
+    category: 'Spiritual',
+    image: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800',
+    culturalSignificance: 'Tibetan Buddhist monks perform mystical sacred Cham dances in elaborate silk costumes and fearsome masks to the resonance of long horns.',
+    topCitiesToCelebrate: ['Leh Ladakh'],
+    travelAdvice: 'Acclimatize in Leh for 48 hours before traveling; arrive at Hemis Monastery courtyard by 8:30 AM for seated views.',
+  },
+  {
+    id: 'fest-pongal',
+    name: 'Pongal Harvest Thanksgiving',
+    subtitle: 'Four-Day Tamil Solar Harvest Festival',
+    date: '2026-01-14',
+    month: 'January',
+    category: 'Harvest',
+    image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800',
+    culturalSignificance: 'Clay pots boiling over with sweet rice, sugarcane stalks, colorful kolam floor art, and heartfelt thanksgiving to cattle and nature.',
+    topCitiesToCelebrate: ['Chennai', 'Madurai'],
+    travelAdvice: 'Sample freshly cooked Sakkarai Pongal at local heritage homes; experience village celebrations around Madurai.',
+  },
+  {
+    id: 'fest-goa-carnival',
+    name: 'Goa Carnival',
+    subtitle: 'Vibrant Coastal Float & Music Extravaganza',
+    date: '2026-02-14',
+    month: 'February',
+    category: 'Carnival',
+    image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800',
+    culturalSignificance: 'A 500-year-old tradition led by King Momo featuring flamboyant street floats, masked dancers, live Konkani brass bands, and beach parties.',
+    topCitiesToCelebrate: ['Goa'],
+    travelAdvice: 'Panaji and Margao host the prime float parades on Saturday and Sunday afternoons; reserve beach shacks early.',
+  },
+];
+
 function FestivalsPage({ cities, setPage, setSelectedId }) {
-  const [festivals, setFestivals] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filterMonth, setFilterMonth] = useState('all');
+  const [filterCat, setFilterCat] = useState('all');
 
-  useEffect(() => {
-    async function loadFestivals() {
-      setLoading(true);
-      try {
-        const data = await yatraApi.getFestivals(2026);
-        if (data) {
-          setFestivals(data);
-          setLoading(false);
-          return;
-        }
-      } catch {
-        // fallback
-      }
+  const months = ['all', 'January', 'February', 'March', 'June', 'September', 'October', 'November', 'December'];
 
-      // Default curated festivals
-      setFestivals([
-        { name: 'Diwali (Festival of Lights)', date: '2026-11-01', month: 'November', category: 'Spiritual', culturalSignificance: 'Millions of earthen diyas, illuminated riverfronts, and sweets.', topCitiesToCelebrate: ['Varanasi', 'Jaipur'], travelAdvice: 'Book riverfront ghat stays in advance.' },
-        { name: 'Holi (Festival of Colors)', date: '2026-03-25', month: 'March', category: 'Cultural', culturalSignificance: 'Celebration of spring, organic color powders, and folk dances.', topCitiesToCelebrate: ['Jaipur', 'Udaipur'], travelAdvice: 'Enjoy royal palace ceremonies.' },
-        { name: 'Onam Harvest Festival', date: '2026-09-05', month: 'September', category: 'Harvest', culturalSignificance: 'Snake boat races and floral carpets (Pookalam).', topCitiesToCelebrate: ['Kochi'], travelAdvice: 'Book backwater cruises early.' },
-        { name: 'Durga Puja Carnival', date: '2026-10-20', month: 'October', category: 'UNESCO Heritage', culturalSignificance: 'Thousands of illuminated public art pandals and feasts.', topCitiesToCelebrate: ['Kolkata', 'Delhi'], travelAdvice: 'Do midnight pandal walks.' },
-        { name: 'Ganesh Chaturthi', date: '2026-09-18', month: 'September', category: 'Spiritual', culturalSignificance: 'Towering idols and ocean beach drum processions.', topCitiesToCelebrate: ['Mumbai'], travelAdvice: 'Watch Chowpatty beach processions.' },
-      ]);
-      setLoading(false);
-    }
-    loadFestivals();
-  }, []);
-
-  const months = ['all', ...Array.from(new Set(festivals.map((f) => f.month))).filter(Boolean)];
-  const filtered = filterMonth === 'all' ? festivals : festivals.filter((f) => f.month === filterMonth);
+  const filtered = useMemo(() => {
+    return MASTER_FESTIVALS.filter((f) => {
+      const matchMonth = filterMonth === 'all' || f.month === filterMonth;
+      const matchCat = filterCat === 'all' || f.category === filterCat;
+      return matchMonth && matchCat;
+    });
+  }, [filterMonth, filterCat]);
 
   return (
     <section className="page festivals-page">
       <PageTitle
-        eyebrow="Living Culture & Heritage"
-        title="Indian Festivals & Cultural Celebrations"
-        text="Discover India's vibrant festival calendar, celebration dates, top destinations, and travel tips."
+        eyebrow="Living Heritage & Culture"
+        title="Indian Festivals & Cultural Calendar 2026"
+        text="Experience India's most vibrant celebrations, harvest festivals, illuminated riverfronts, and sacred desert carnivals."
       />
 
-      <div className="festival-filter-bar glass-panel">
-        <span>Filter by Month:</span>
-        <div className="month-pills">
-          {months.map((m) => (
+      {/* FILTER BAR */}
+      <div className="festival-filter-bar glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <strong style={{ fontSize: '0.85rem', marginRight: '0.5rem' }}>Category:</strong>
+          {[
+            { id: 'all', label: 'All Festivals' },
+            { id: 'Spiritual', label: '🪔 Spiritual & Divine' },
+            { id: 'Cultural', label: '🎨 Arts & Folk' },
+            { id: 'Harvest', label: '🌾 Harvest Thanksgiving' },
+            { id: 'UNESCO Heritage', label: '✨ UNESCO Heritage' },
+            { id: 'Carnival', label: '🎭 Coastal Carnival' },
+          ].map((cat) => (
             <button
-              key={m}
+              key={cat.id}
               type="button"
-              className={filterMonth === m ? 'active' : ''}
-              onClick={() => setFilterMonth(m)}
+              className={`quick-pill-tag ${filterCat === cat.id ? 'active' : ''}`}
+              style={{
+                background: filterCat === cat.id ? 'var(--brand-primary, #0f766e)' : 'var(--bg-surface-elevated, #f1f5f9)',
+                color: filterCat === cat.id ? '#ffffff' : 'var(--text-main)',
+                fontWeight: filterCat === cat.id ? 700 : 500,
+                border: '1px solid',
+                borderColor: filterCat === cat.id ? 'var(--brand-primary, #0f766e)' : 'transparent',
+                padding: '5px 14px',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+              }}
+              onClick={() => setFilterCat(cat.id)}
             >
-              {m === 'all' ? 'All Months' : m}
+              {cat.label}
             </button>
           ))}
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderTop: '1px solid var(--border-color, #e2e8f0)', paddingTop: '0.75rem' }}>
+          <strong style={{ fontSize: '0.85rem', marginRight: '0.5rem' }}>Month:</strong>
+          <div className="month-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+            {months.map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={filterMonth === m ? 'active' : ''}
+                style={{
+                  background: filterMonth === m ? '#ea580c' : 'var(--bg-surface-elevated, #f1f5f9)',
+                  color: filterMonth === m ? '#ffffff' : 'var(--text-main)',
+                  fontWeight: filterMonth === m ? 700 : 500,
+                  border: 'none',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '0.775rem',
+                }}
+                onClick={() => setFilterMonth(m)}
+              >
+                {m === 'all' ? 'All Months' : m}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {loading ? (
-        <BullyLoader message="Loading India's living cultural & festive celebrations..." />
-      ) : (
-        <div className="festivals-grid">
-          {filtered.map((fest, idx) => (
-            <article key={idx} className="festival-card glass-panel">
-              <div className="fest-top">
-                <span className="fest-date">📅 {fest.date}</span>
-                <span className="fest-category">{fest.category}</span>
-              </div>
-              <h3>{fest.name}</h3>
-              <p className="fest-significance">{fest.culturalSignificance}</p>
-              <div className="fest-cities">
-                <strong>Best Cities:</strong>
-                <div className="tag-row">
-                  {fest.topCitiesToCelebrate?.map((cName, cIdx) => (
-                    <span key={cIdx} className="city-tag">{cName}</span>
-                  ))}
+      {/* FESTIVALS GRID */}
+      <div className="festivals-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+        {filtered.map((fest) => (
+          <article key={fest.id} className="festival-card festival-vibrant-card glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '16px', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-surface, #ffffff)' }}>
+            <div className="festival-card-img-wrap" style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
+              <img
+                src={fest.image}
+                alt={fest.name}
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <span className="festival-date-badge" style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(15,23,42,0.85)', color: '#ffffff', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
+                📅 {fest.date}
+              </span>
+              <span style={{ position: 'absolute', top: '10px', right: '10px', background: '#0f766e', color: '#ffffff', padding: '3px 9px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+                {fest.category}
+              </span>
+            </div>
+
+            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ margin: '0 0 0.2rem', fontSize: '1.15rem', color: 'var(--text-main)' }}>{fest.name}</h3>
+                <p style={{ margin: '0 0 0.65rem', fontSize: '0.8rem', color: '#ea580c', fontWeight: 600 }}>{fest.subtitle}</p>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 0.85rem' }}>
+                  {fest.culturalSignificance}
+                </p>
+
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.75rem', marginBottom: '0.85rem' }}>
+                  <strong style={{ display: 'block', color: 'var(--text-main)', marginBottom: '0.25rem' }}>💡 Travel Advisory:</strong>
+                  <span style={{ color: 'var(--text-muted)', lineHeight: 1.4 }}>{fest.travelAdvice}</span>
+                </div>
+
+                <div className="fest-cities" style={{ marginBottom: '1rem' }}>
+                  <strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Top Places to Celebrate:</strong>
+                  <div className="tag-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    {fest.topCitiesToCelebrate?.map((cName, cIdx) => (
+                      <span
+                        key={cIdx}
+                        className="city-tag"
+                        style={{ fontSize: '0.72rem', padding: '2px 8px', background: 'var(--bg-surface-elevated, #e2e8f0)', borderRadius: '6px', color: 'var(--text-main)', cursor: 'pointer' }}
+                        onClick={() => {
+                          const targetCity = cities?.find((c) => cName.toLowerCase().includes(c.name.toLowerCase()));
+                          if (targetCity) {
+                            setSelectedId(targetCity.id);
+                            setPage('destinations');
+                          }
+                        }}
+                      >
+                        📍 {cName}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
+
               <button
                 type="button"
-                className="fest-plan-btn"
+                className="primary-action fest-plan-btn"
+                style={{ width: '100%', padding: '9px', fontSize: '0.825rem', borderRadius: '8px' }}
                 onClick={() => {
                   const targetCity = cities?.find((c) =>
                     fest.topCitiesToCelebrate?.some((tc) => tc.toLowerCase().includes(c.name.toLowerCase()))
@@ -2792,12 +3867,12 @@ function FestivalsPage({ cities, setPage, setSelectedId }) {
                   setPage('planner');
                 }}
               >
-                Plan Trip for this Festival
+                ✨ Plan Trip for this Festival ➔
               </button>
-            </article>
-          ))}
-        </div>
-      )}
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -2805,7 +3880,346 @@ function FestivalsPage({ cities, setPage, setSelectedId }) {
 // -------------------------------------------------------------
 // DESTINATIONS, PLANNER, BOOKINGS, SIGNUP & MODAL
 // -------------------------------------------------------------
-function DestinationsPage({ cities, city, details, formatPrice, handleAddReview, hiddenCityIds = [], onHideCity, onUnhideAllCities, selectedId, selectedMarker, setSelectedId }) {
+const CITY_FAST_FACTS = {
+  Jaipur: {
+    idealDays: '2 - 3 Days',
+    language: 'Hindi, Rajasthani, English',
+    airport: 'Jaipur International Airport (JAI) • 12 km',
+    railway: 'Jaipur Junction (JP) • Central',
+    topDishes: ['Dal Baati Churma', 'Pyaaz Kachori', 'Ghevar', 'Laal Maas', 'Ker Sangri'],
+    dayTrips: ['Nahargarh Fort Sunset & Padao', 'Chand Baori Stepwell (Abhaneri)', 'Samode Palace Heritage Trek', 'Pushkar Holy Lake & Dunes'],
+    photos: [
+      { name: 'Amber Fort', url: 'https://images.unsplash.com/photo-1609947017136-9e224e5dfd6d?w=800', tag: 'UNESCO Citadel' },
+      { name: 'Hawa Mahal', url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', tag: 'Palace of Winds' },
+      { name: 'City Palace Jaipur', url: 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800', tag: 'Royal Residence' },
+      { name: 'Jal Mahal', url: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?w=800', tag: 'Water Palace' },
+    ],
+  },
+  Agra: {
+    idealDays: '1 - 2 Days',
+    language: 'Hindi, Urdu, English',
+    airport: 'Agra Airport (AGR) / IGI Delhi (DEL)',
+    railway: 'Agra Cantt (AGC) • High-speed Gatimaan',
+    topDishes: ['Agra Petha (Angoori & Kesar)', 'Bedmi Poori with Aloo', 'Mughlai Biryani', 'Crispy Jalebi'],
+    dayTrips: ['Fatehpur Sikri UNESCO Imperial Complex', 'Keoladeo Bird Sanctuary (Bharatpur)', 'Mathura & Vrindavan Temples'],
+    photos: [
+      { name: 'Taj Mahal', url: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800', tag: 'Wonder of the World' },
+      { name: 'Agra Fort', url: 'https://images.unsplash.com/photo-1608958435020-e8a7109ba809?w=800', tag: 'Mughal Fortress' },
+      { name: 'Mehtab Bagh', url: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800', tag: 'Yamuna River Sunset' },
+      { name: 'Tomb of I’timad-ud-Daulah', url: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?w=800', tag: 'Baby Taj' },
+    ],
+  },
+  Delhi: {
+    idealDays: '3 - 4 Days',
+    language: 'Hindi, Punjabi, English, Urdu',
+    airport: 'Indira Gandhi International Airport (DEL)',
+    railway: 'New Delhi (NDLS) / Nizamuddin (NZM)',
+    topDishes: ['Butter Chicken', 'Old Delhi Chaat & Chole Bhature', 'Parathas at Chandni Chowk', 'Rabri Falooda'],
+    dayTrips: ['Neemrana Fort Palace & Zipline', 'Sultanpur National Park Bird Watching', 'Kurukshetra Heritage & Sarovar'],
+    photos: [
+      { name: 'India Gate', url: 'https://images.unsplash.com/photo-1592635196078-9fdc757f27f4?w=800', tag: 'War Memorial' },
+      { name: 'Qutub Minar', url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800', tag: 'Victory Minaret' },
+      { name: 'Red Fort', url: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800', tag: 'Historic Citadel' },
+      { name: 'Humayun’s Tomb', url: 'https://images.unsplash.com/photo-1585135497273-1a86b09fe70e?w=800', tag: 'Persian Garden Tomb' },
+    ],
+  },
+  Mumbai: {
+    idealDays: '3 - 4 Days',
+    language: 'Marathi, Hindi, Gujarati, English',
+    airport: 'Chhatrapati Shivaji Maharaj Airport (BOM)',
+    railway: 'Chhatrapati Shivaji Maharaj Terminus (CSMT)',
+    topDishes: ['Vada Pav', 'Pav Bhaji at Juhu Beach', 'Bombay Duck Fry', 'Parsi Bun Maska Chai'],
+    dayTrips: ['Elephanta Island Caves by Coastal Ferry', 'Lonavala & Khandala Western Ghats', 'Alibaug Coastal Forts & Beaches'],
+    photos: [
+      { name: 'Gateway of India', url: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800', tag: 'Harbour Landmark' },
+      { name: 'Marine Drive', url: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=800', tag: 'Queen’s Necklace' },
+      { name: 'Elephanta Caves', url: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800', tag: 'Rock-Cut Temples' },
+      { name: 'Bandra-Worli Sea Link', url: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800', tag: 'Cable-Stayed Bridge' },
+    ],
+  },
+  Udaipur: {
+    idealDays: '2 - 3 Days',
+    language: 'Hindi, Mewari, Rajasthani',
+    airport: 'Maharana Pratap Airport (UDR) • 22 km',
+    railway: 'Udaipur City Railway Station (UDZ)',
+    topDishes: ['Gatte ki Sabzi', 'Ker Sangri', 'Dal Baati Churma', 'Mawa Kachori'],
+    dayTrips: ['Kumbhalgarh Fort & Great Wall of India', 'Ranakpur Marble Jain Temples', 'Chittorgarh UNESCO Fortress Citadel'],
+    photos: [
+      { name: 'City Palace Udaipur', url: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?w=800', tag: 'Lakefront Palace' },
+      { name: 'Lake Pichola', url: 'https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?w=800', tag: 'Romantic Waters' },
+      { name: 'Jag Mandir', url: 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800', tag: 'Island Palace' },
+      { name: 'Saheliyon-ki-Bari', url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', tag: 'Courtyard of Maidens' },
+    ],
+  },
+  Varanasi: {
+    idealDays: '2 - 3 Days',
+    language: 'Hindi, Bhojpuri, Sanskrit',
+    airport: 'Lal Bahadur Shastri Airport (VNS) • 25 km',
+    railway: 'Varanasi Junction (BSB) / Banaras (BSBS)',
+    topDishes: ['Kachori Sabzi & Jalebi', 'Banarasi Meetha Paan', 'Malaiyo (Frothy Cream)', 'Thandai with Kesar'],
+    dayTrips: ['Sarnath Deer Park (Buddha’s Sermon)', 'Chunar Fort Overlooking Ganga', 'Ramnagar Palace & Museum'],
+    photos: [
+      { name: 'Dashashwamedh Ghat', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800', tag: 'Grand Evening Aarti' },
+      { name: 'Kashi Vishwanath', url: 'https://images.unsplash.com/photo-1627894483216-2138af692e32?w=800', tag: 'Golden Temple of Shiva' },
+      { name: 'Assi Ghat Sunrise', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800', tag: 'Subah-e-Banaras' },
+      { name: 'Ganga Boat Ride', url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', tag: 'Sacred River Trail' },
+    ],
+  },
+  Goa: {
+    idealDays: '4 - 5 Days',
+    language: 'Konkani, English, Hindi, Portuguese',
+    airport: 'Dabolim Airport (GOI) / Manohar Mopa (GOX)',
+    railway: 'Madgaon Junction (MAO) / Thivim (THVM)',
+    topDishes: ['Goan Fish Curry Thali', 'Pork Vindaloo', 'Bebinca Layer Cake', 'Prawn Balchao'],
+    dayTrips: ['Dudhsagar Waterfall Jungle Trek', 'Ponda Spice Plantations & Lunch', 'Divar Island Cycling & Heritage Village'],
+    photos: [
+      { name: 'Baga Beach', url: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800', tag: 'Coastal Promenade' },
+      { name: 'Basilica of Bom Jesus', url: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=800', tag: 'Baroque UNESCO Church' },
+      { name: 'Fort Aguada', url: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800', tag: 'Portuguese Sea Fortress' },
+      { name: 'Fontainhas Latin Quarter', url: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', tag: 'Colonial Heritage Villas' },
+    ],
+  },
+  Kochi: {
+    idealDays: '2 - 3 Days',
+    language: 'Malayalam, English, Tamil',
+    airport: 'Cochin International Airport (COK) • Solar Powered',
+    railway: 'Ernakulam Junction (ERS)',
+    topDishes: ['Appam with Veg/Chicken Stew', 'Karimeen Pollichathu', 'Traditional Kerala Sadya', 'Malabar Parotta'],
+    dayTrips: ['Alleppey Houseboat Backwaters Cruise', 'Munnar Misty Tea Hills', 'Athirappilly Waterfalls (Indian Niagara)'],
+    photos: [
+      { name: 'Fort Kochi', url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800', tag: 'Colonial Spice Port' },
+      { name: 'Chinese Fishing Nets', url: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800', tag: 'Cantilevered Sea Nets' },
+      { name: 'Mattancherry Palace', url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800', tag: 'Dutch Murals & History' },
+      { name: 'Kerala Backwaters', url: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?w=800', tag: 'Coconut Lagoon Waters' },
+    ],
+  },
+  Amritsar: {
+    idealDays: '2 Days',
+    language: 'Punjabi, Hindi, English',
+    airport: 'Sri Guru Ram Dass Jee International Airport (ATQ)',
+    railway: 'Amritsar Junction (ASR)',
+    topDishes: ['Amritsari Kulcha with Chole', 'Golden Temple Guru Ka Langar', 'Makki Roti & Sarson Saag', 'Kesar Da Dhaba Dal'],
+    dayTrips: ['Wagah Indo-Pak Beating Retreat', 'Harike Pattan Wetland Sanctuary', 'Partition Museum Historic Walk'],
+    photos: [
+      { name: 'Golden Temple', url: 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=800', tag: 'Harmandir Sahib' },
+      { name: 'Wagah Border', url: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=800', tag: 'Patriotic Border Ceremony' },
+      { name: 'Jallianwala Bagh', url: 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=800', tag: 'National Freedom Memorial' },
+      { name: 'Gobindgarh Fort', url: 'https://images.unsplash.com/photo-1588096344356-9b552697ff97?w=800', tag: 'Sikh Military Citadel' },
+    ],
+  },
+  Manali: {
+    idealDays: '3 - 5 Days',
+    language: 'Hindi, Pahari, English',
+    airport: 'Kullu Manali Airport, Bhuntar (KUU) • 50 km',
+    railway: 'Chandigarh Junction (CDG) • Scenic drive',
+    topDishes: ['Siddu with Pure Ghee', 'Kullu Trout Fish Fry', 'Tudkiya Bhat', 'Chana Madra'],
+    dayTrips: ['Atal Tunnel & Sissu Valley Lahaul', 'Rohtang Pass Snow Crest & Glaciers', 'Kasol & Manikaran Parvati Valley'],
+    photos: [
+      { name: 'Solang Valley', url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', tag: 'Alpine Adventure Hub' },
+      { name: 'Hadimba Temple', url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=800', tag: 'Cedar Forest Pagoda' },
+      { name: 'Jogini Waterfall', url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', tag: 'Vashisht Pine Trail' },
+      { name: 'Rohtang Pass', url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800', tag: '13,058 ft Mountain Pass' },
+    ],
+  },
+  Rishikesh: {
+    idealDays: '2 - 3 Days',
+    language: 'Hindi, Garhwali, English',
+    airport: 'Jolly Grant Airport Dehradun (DED) • 21 km',
+    railway: 'Yog Nagari Rishikesh (YNRK)',
+    topDishes: ['Garhwali Kafuli & Bhatt ki Dal', 'Ayurvedic Sattvic Thali', 'Alu ke Gutke', 'Ginger Lemon Honey Tea'],
+    dayTrips: ['Shivpuri River Rafting Rapids', 'Haridwar Har Ki Pauri Ganga Aarti', 'Devprayag River Confluence'],
+    photos: [
+      { name: 'Ram Jhula & Laxman Jhula', url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', tag: 'Iconic Suspension Bridges' },
+      { name: 'Triveni Ghat', url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', tag: 'Maha Aarti at Dusk' },
+      { name: 'Beatles Ashram', url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', tag: 'Transcendental Meditation' },
+      { name: 'Ganga Beach Shivpuri', url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800', tag: 'White Sand River Banks' },
+    ],
+  },
+  Bengaluru: {
+    idealDays: '2 - 3 Days',
+    language: 'Kannada, English, Tamil, Telugu, Hindi',
+    airport: 'Kempegowda International Airport (BLR)',
+    railway: 'KSR Bengaluru (SBC) / Yesvantpur (YPR)',
+    topDishes: ['Crispy Benne Dosa', 'Bisi Bele Bath', 'Filter Kaapi at CTR & MTR', 'Mysore Pak'],
+    dayTrips: ['Nandi Hills Panoramic Sunrise', 'Ramanagara Silk City & Sholay Rocks', 'Bannerghatta Biological Safari'],
+    photos: [
+      { name: 'Bangalore Palace', url: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', tag: 'Tudor-Style Royal Estate' },
+      { name: 'Lalbagh Botanical Garden', url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800', tag: 'Historic Glass House' },
+      { name: 'Cubbon Park', url: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', tag: 'Green Lung of City' },
+      { name: 'Vidhana Soudha', url: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800', tag: 'Neo-Dravidian Architecture' },
+    ],
+  },
+  Hampi: {
+    idealDays: '2 - 3 Days',
+    language: 'Kannada, Telugu, English',
+    airport: 'Jindal Vidyanagar (VDY) • 38 km / Hubli (HBX)',
+    railway: 'Hosapete Junction (HPT) • 13 km',
+    topDishes: ['North Karnataka Jowar Roti Oota', 'Mango Tree Banana Flower Curry', 'Filter Coffee', 'Holige Sweet Flatbread'],
+    dayTrips: ['Anegundi Monkey Kingdom & Citadels', 'Sanapur Lake Coracle Ride & Bouldering', 'Badami Cave Temples & Pattadakal'],
+    photos: [
+      { name: 'Virupaksha Temple', url: 'https://images.unsplash.com/photo-1600100397608-f010f443a9fb?w=800', tag: 'Living 7th-Century Sanctuary' },
+      { name: 'Stone Chariot & Vijaya Vittala', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', tag: 'Musical Pillars & Chariot' },
+      { name: 'Matanga Hill Sunrise', url: 'https://images.unsplash.com/photo-1600100397608-f010f443a9fb?w=800', tag: '360° Boulder Viewpoint' },
+      { name: 'Lotus Mahal', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', tag: 'Indo-Islamic Royal Enclosure' },
+    ],
+  },
+  Darjeeling: {
+    idealDays: '3 - 4 Days',
+    language: 'Nepali, Bengali, Hindi, English',
+    airport: 'Bagdogra Airport (IXB) • 70 km scenic hill drive',
+    railway: 'New Jalpaiguri (NJP) / Darjeeling Toy Train',
+    topDishes: ['Steamed Pork/Veg Momos with Dalle Chilli', 'Thukpa Noodle Broth', 'Darjeeling First Flush Tea', 'Chhurpi Yak Cheese'],
+    dayTrips: ['Mirik Lake & Orange Orchards', 'Kalimpong Flower Nurseries & Monasteries', 'Sandakphu Singalila Trek'],
+    photos: [
+      { name: 'Tiger Hill Sunrise', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', tag: 'Kanchenjunga Golden Peaks' },
+      { name: 'Batasia Loop', url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', tag: 'UNESCO Toy Train Spiral' },
+      { name: 'Happy Valley Tea Estate', url: 'https://images.unsplash.com/photo-1576487248805-cf45f6bcc67f?w=800', tag: 'Emerald Tea Plantation' },
+      { name: 'Japanese Peace Pagoda', url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800', tag: 'Spiritual Stupa on Hills' },
+    ],
+  },
+  Shimla: {
+    idealDays: '2 - 3 Days',
+    language: 'Hindi, Pahari, Punjabi, English',
+    airport: 'Shimla Airport Jubbarhatti (SLV) / Chandigarh (IXC)',
+    railway: 'Shimla Toy Train Station / Kalka (KLK)',
+    topDishes: ['Dhaam Festive Platter', 'Madra Chickpeas in Spiced Yogurt', 'Babru Stuffed Puri', 'Fresh Apple Cider'],
+    dayTrips: ['Kufri Snow Point & Nature Park', 'Mashobra Pine Canopy & Craignano Park', 'Chail Highest Cricket Ground'],
+    photos: [
+      { name: 'The Ridge & Mall Road', url: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', tag: 'Colonial Promenade' },
+      { name: 'Christ Church', url: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', tag: 'Neo-Gothic Stained Glass' },
+      { name: 'Jakhoo Hill & Temple', url: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?w=800', tag: 'Highest Peak of Shimla' },
+      { name: 'Kufri Snow View', url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800', tag: 'Alpine Winter Wonderland' },
+    ],
+  },
+  'Leh Ladakh': {
+    idealDays: '5 - 7 Days',
+    language: 'Ladakhi, Tibetan, Hindi, English',
+    airport: 'Kushok Bakula Rimpochee Airport (IXL) • 3,256 m',
+    railway: 'Jammu Tawi (JAT) • Road traverse required',
+    topDishes: ['Thukpa & Tingmo Steamed Buns', 'Butter Yak Tea (Gur Gur Chai)', 'Chhurpe Yak Cheese Soup', 'Skyu Pasta Stew'],
+    dayTrips: ['Khardung La Pass (17,982 ft Mountain Crest)', 'Nubra Valley Hunder Double-Humped Camels', 'Magnetic Hill & Sangam Confluence'],
+    photos: [
+      { name: 'Pangong Tso Lake', url: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800', tag: 'Color-Shifting High Lake' },
+      { name: 'Thiksey Monastery', url: 'https://images.unsplash.com/photo-1566438480900-0609be27a4be?w=800', tag: 'Mini Potala of Ladakh' },
+      { name: 'Nubra Valley Dunes', url: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?w=800', tag: 'Cold Desert Sands' },
+      { name: 'Shanti Stupa', url: 'https://images.unsplash.com/photo-1566438480900-0609be27a4be?w=800', tag: 'Peace Stupa Sunset Lookout' },
+    ],
+  },
+  Mysore: {
+    idealDays: '2 Days',
+    language: 'Kannada, Tamil, Telugu, English',
+    airport: 'Mysore Airport Mandakalli (MYQ) / Bengaluru (BLR)',
+    railway: 'Mysuru Junction (MYS)',
+    topDishes: ['Mysore Masala Dosa', 'Authentic Mysore Pak Melt-in-Mouth', 'Mysore Bonda', 'Chiroti Sweet'],
+    dayTrips: ['Srirangapatna Tipu Sultan Fort', 'Somnathpur Hoysala Temple', 'Ranganathittu Bird Sanctuary Boating'],
+    photos: [
+      { name: 'Mysore Palace', url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', tag: 'Illuminated Amba Vilas' },
+      { name: 'Chamundi Hill', url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800', tag: 'Nandi Bull & Goddess Temple' },
+      { name: 'Brindavan Gardens', url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', tag: 'Musical Lighted Fountains' },
+      { name: 'St. Philomena’s Cathedral', url: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=800', tag: 'Gothic Twin Spires' },
+    ],
+  },
+  Srinagar: {
+    idealDays: '3 - 4 Days',
+    language: 'Kashmiri, Urdu, Hindi, English',
+    airport: 'Sheikh ul-Alam International Airport (SXR)',
+    railway: 'Srinagar Railway Station (SINA) / Jammu Tawi',
+    topDishes: ['Kashmiri Wazwan Rogan Josh', 'Gushtaba & Rista', 'Saffron Kahwa with Almonds', 'Modur Pulao'],
+    dayTrips: ['Gulmarg Gondola & Ski Slopes', 'Pahalgam Betaab Valley & Lidder River', 'Sonamarg Thajiwas Glacier'],
+    photos: [
+      { name: 'Dal Lake Shikara', url: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800', tag: 'Floating Gardens & Houseboats' },
+      { name: 'Shalimar Bagh', url: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800', tag: 'Mughal Terraced Gardens' },
+      { name: 'Nishat Bagh', url: 'https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=800', tag: 'Garden of Bliss on Dal Shore' },
+      { name: 'Pari Mahal', url: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800', tag: 'Palace of Fairies' },
+    ],
+  },
+  Pondicherry: {
+    idealDays: '2 - 3 Days',
+    language: 'Tamil, French, English, Telugu',
+    airport: 'Puducherry Airport (PNY) / Chennai (MAA)',
+    railway: 'Puducherry Railway Station (PDY)',
+    topDishes: ['French Croissants & Quiche', 'Creole Fish Curry', 'Wood-Fired Neapolitan Pizza', 'Filter Coffee'],
+    dayTrips: ['Auroville Township & Matrimandir', 'Paradise Beach Ferry Island', 'Pichavaram Mangrove Boating Trail'],
+    photos: [
+      { name: 'White Town French Quarter', url: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', tag: 'Mustard Colonial Villas' },
+      { name: 'Auroville Matrimandir', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800', tag: 'Golden Meditation Dome' },
+      { name: 'Promenade Beach', url: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', tag: 'Seafront Rock Walkway' },
+      { name: 'Serenity Beach', url: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?w=800', tag: 'Surfing & Waves' },
+    ],
+  },
+  Hyderabad: {
+    idealDays: '2 - 3 Days',
+    language: 'Telugu, Urdu, Hindi, English',
+    airport: 'Rajiv Gandhi International Airport (HYD)',
+    railway: 'Secunderabad (SC) / Hyderabad Deccan (HYB)',
+    topDishes: ['Hyderabadi Dum Biryani', 'Mutton Haleem with Pure Ghee', 'Double Ka Meetha', 'Irani Chai with Osmania Biscuits'],
+    dayTrips: ['Ramoji Film City Studio Tour', 'Golconda Sound & Light Citadel', 'Ananthagiri Hills Trekking'],
+    photos: [
+      { name: 'Charminar', url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=800', tag: 'Four Minarets Monument' },
+      { name: 'Golconda Fort', url: 'https://images.unsplash.com/photo-1598890777032-bde835ba27c2?w=800', tag: 'Acoustic Diamond Fortress' },
+      { name: 'Chowmahalla Palace', url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=800', tag: 'Seat of Asaf Jahi Nizams' },
+      { name: 'Hussain Sagar Lake', url: 'https://images.unsplash.com/photo-1605649487212-47bdab064df8?w=800', tag: 'Monolithic Buddha Island' },
+    ],
+  },
+  Kolkata: {
+    idealDays: '3 - 4 Days',
+    language: 'Bengali, Hindi, English',
+    airport: 'Netaji Subhash Chandra Bose Airport (CCU)',
+    railway: 'Howrah Junction (HWH) / Sealdah (SDAH)',
+    topDishes: ['Kolkata Kathi Roll', 'Ilish Macher Jhol Mustard Fish', 'Warm Rosogolla & Mishti Doi', 'Kolkata Mutton Biryani with Aloo'],
+    dayTrips: ['Sundarbans Mangrove Tiger Safari', 'Bishnupur Terracotta Temples', 'Belur Math & Dakshineswar Ferry'],
+    photos: [
+      { name: 'Victoria Memorial', url: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', tag: 'White Marble Monument' },
+      { name: 'Howrah Bridge', url: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', tag: 'Cantilever Over Hooghly' },
+      { name: 'Dakshineswar Kali Temple', url: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', tag: 'Sacred Navaratna Temple' },
+      { name: 'Park Street & Vintage Tram', url: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=800', tag: 'Colonial Heritage Street' },
+    ],
+  },
+  Jodhpur: {
+    idealDays: '2 Days',
+    language: 'Hindi, Marwari, Rajasthani, English',
+    airport: 'Jodhpur Airport (JDH) • 5 km',
+    railway: 'Jodhpur Junction (JU)',
+    topDishes: ['Mawa Kachori with Chashni', 'Spicy Mirchi Bada', 'Makhaniya Lassi', 'Ker Sangri Ro Saag'],
+    dayTrips: ['Bishnoi Village Safari & Wildlife', 'Osian Thar Desert Dunes & Temples', 'Mandore Ancient Capital Cenotaphs'],
+    photos: [
+      { name: 'Mehrangarh Fort', url: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', tag: 'Sun City Mighty Citadel' },
+      { name: 'Jaswant Thada', url: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', tag: 'White Marble Cenotaph' },
+      { name: 'Umaid Bhawan Palace', url: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', tag: 'Art Deco Royal Residence' },
+      { name: 'Blue City Alleys', url: 'https://images.unsplash.com/photo-1568849676085-51415703900f?w=800', tag: 'Indigo Brahmin Quarters' },
+    ],
+  },
+  Ooty: {
+    idealDays: '2 - 3 Days',
+    language: 'Tamil, Badaga, Malayalam, English',
+    airport: 'Coimbatore International Airport (CJB) • 88 km',
+    railway: 'Udhagamandalam Railway Station (UAM) / Toy Train',
+    topDishes: ['Nilgiri Homemade Dark Chocolates', 'Ooty Varkey Bakery Crisps', 'Fresh High-Grown Nilgiri Tea', 'South Indian Filter Coffee'],
+    dayTrips: ['Coonoor Sim’s Park & Dolphin Nose', 'Pykara Lake & Waterfalls Boating', 'Mudumalai Tiger Reserve Safari'],
+    photos: [
+      { name: 'Nilgiri Mountain Railway', url: 'https://images.unsplash.com/photo-1574063413132-355dbfd83e25?w=800', tag: 'UNESCO Steam Toy Train' },
+      { name: 'Ooty Lake', url: 'https://images.unsplash.com/photo-1574063413132-355dbfd83e25?w=800', tag: 'Eucalyptus Boating Waters' },
+      { name: 'Botanical Gardens', url: 'https://images.unsplash.com/photo-1574063413132-355dbfd83e25?w=800', tag: 'Exotic Terraced Flora' },
+      { name: 'Doddabetta Peak', url: 'https://images.unsplash.com/photo-1574063413132-355dbfd83e25?w=800', tag: 'Highest Peak in Nilgiris' },
+    ],
+  },
+  Shillong: {
+    idealDays: '3 - 4 Days',
+    language: 'Khasi, English, Garo, Hindi',
+    airport: 'Shillong Airport Umroi (SHL) • 30 km / Guwahati (GAU)',
+    railway: 'Guwahati Railway Station (GHY) • 100 km scenic highway',
+    topDishes: ['Jadoh Rice with Local Herbs', 'Dohneiiong Pork in Black Sesame', 'Tungrymbai Fermented Delicacy', 'Steamed Momos with Bamboo Shoots'],
+    dayTrips: ['Cherrapunji Nohkalikai Falls & Caves', 'Mawlynnong Cleanest Village in Asia', 'Dawki Umngot Crystal Clear River'],
+    photos: [
+      { name: 'Nohkalikai Falls', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', tag: 'India’s Tallest Plunge Waterfall' },
+      { name: 'Umiam Lake', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', tag: 'Barapani Serene Reservoir' },
+      { name: 'Elephant Falls', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800', tag: 'Three-Tier Cascading Falls' },
+      { name: 'Living Root Bridges', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', tag: 'Bio-Engineered Ficus Bridges' },
+    ],
+  },
+};
+
+function DestinationsPage({ cities, city, details, formatPrice, handleAddReview, hiddenCityIds = [], onHideCity, onUnhideAllCities, selectedId, selectedMarker, setSelectedId, setPage }) {
   const places = details?.famousPlaces || [];
   const tips = details?.travelTips || [];
   const reviews = details?.reviews || [];
@@ -2816,6 +4230,11 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
 
   const [reviewForm, setReviewForm] = useState({ travelerName: '', rating: 5, comment: '', travelMonth: 'October' });
   const [submittedNotice, setSubmittedNotice] = useState(false);
+
+  const facts = CITY_FAST_FACTS[city.name] || CITY_FAST_FACTS.Jaipur;
+  const cityPhotos = facts?.photos || [
+    { name: city.name, url: CITY_PHOTOS[city.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800', tag: 'Iconic View' }
+  ];
 
   function onSubmitReview(e) {
     e.preventDefault();
@@ -2831,8 +4250,8 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
 
   return (
     <section className="page destinations-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <PageTitle eyebrow="Destination Overview" title={`${city.name}, ${city.state}`} text={city.description} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.5rem' }}>
+        <PageTitle eyebrow="Destination Overview & Heritage Insights" title={`${city.name}, ${city.state}`} text={city.description} />
         <button
           type="button"
           className="hide-card-btn"
@@ -2871,6 +4290,188 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
           ))}
         </div>
       )}
+
+      {/* FEATURE 1: INTERACTIVE DESTINATION HERO SHOWCASE & QUICK ACTIONS (Requirement 13) */}
+      <div className="destination-hero-card">
+        <div className="destination-hero-img-wrap">
+          <img
+            src={CITY_PHOTOS[city.name] || 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200'}
+            alt={city.name}
+            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200'; }}
+          />
+          <div className="destination-hero-gradient">
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+              <span style={{ background: '#0f766e', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800 }}>
+                📍 {city.state} • {city.region || 'India'}
+              </span>
+              <span style={{ background: 'rgba(245, 158, 11, 0.95)', color: '#0f172a', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800 }}>
+                ⭐ {city.rating || 4.8} / 5.0 (Score: {city.popularityScore || 95}/100)
+              </span>
+              <span style={{ background: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(8px)', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 }}>
+                ⏱️ Ideal: {facts.idealDays || '2-3 Days'}
+              </span>
+            </div>
+            <h1 style={{ margin: '0 0 0.4rem', fontSize: '2.4rem', fontWeight: 800, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>
+              {city.name}
+            </h1>
+            <p style={{ margin: 0, fontSize: '1rem', maxWidth: '750px', opacity: 0.95, textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>
+              {city.description}
+            </p>
+          </div>
+        </div>
+
+        {/* QUICK ACTION TOOLBAR */}
+        <div className="destination-quick-actions">
+          <button
+            type="button"
+            className="dest-action-pill primary"
+            onClick={() => {
+              setSelectedId(city.id);
+              if (setPage) setPage('planner');
+            }}
+          >
+            <span>✨ Plan Trip to {city.name}</span>
+          </button>
+          <button
+            type="button"
+            className="dest-action-pill"
+            onClick={() => {
+              setSelectedId(city.id);
+              if (setPage) setPage('rentals');
+            }}
+          >
+            <span>🚗 Rental Services</span>
+          </button>
+          <button
+            type="button"
+            className="dest-action-pill"
+            onClick={() => {
+              setSelectedId(city.id);
+              if (setPage) setPage('hotels');
+            }}
+          >
+            <span>🏨 Hotels & Stays</span>
+          </button>
+          <button
+            type="button"
+            className="dest-action-pill"
+            onClick={() => {
+              setSelectedId(city.id);
+              if (setPage) setPage('weather');
+            }}
+          >
+            <span>⛅ Live Weather</span>
+          </button>
+          <button
+            type="button"
+            className="dest-action-pill"
+            onClick={() => {
+              setSelectedId(city.id);
+              if (setPage) setPage('map');
+            }}
+          >
+            <span>🗺️ Interactive Map</span>
+          </button>
+        </div>
+      </div>
+
+      {/* FEATURE 2: DEDICATED LANDMARK PHOTO GALLERY (Requirement 17) */}
+      <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '18px', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <div>
+            <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+              📸 Curated Landmark Gallery • {city.name}
+            </span>
+            <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.35rem', color: 'var(--text-main)' }}>
+              Iconic Monuments & Scenic Sights of {city.name}
+            </h3>
+          </div>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            High-Definition Photographic Sights
+          </span>
+        </div>
+
+        <div className="landmark-photo-grid">
+          {cityPhotos.map((item, idx) => (
+            <div key={idx} className="landmark-photo-item">
+              <img
+                src={item.url}
+                alt={item.name}
+                loading="lazy"
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+              />
+              <div className="landmark-photo-caption">
+                <span style={{ fontSize: '0.725rem', background: 'rgba(15, 118, 110, 0.85)', padding: '2px 8px', borderRadius: '10px', display: 'inline-block', marginBottom: '4px', fontWeight: 700 }}>
+                  {item.tag}
+                </span>
+                <strong style={{ fontSize: '0.95rem', display: 'block', color: 'white', textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
+                  {item.name}
+                </strong>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FEATURE 3: TRAVEL INTELLIGENCE & FAST FACTS (Requirement 13) */}
+      <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '18px', marginBottom: '2rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <span className="card-tag" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706', fontWeight: 800 }}>
+            🧭 Travel Intelligence & Fast Facts
+          </span>
+          <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.35rem', color: 'var(--text-main)' }}>
+            Essential Logistics for {city.name}
+          </h3>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>✈️ Nearest Airport</span>
+            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{facts.airport || 'Domestic / International Airport'}</strong>
+          </div>
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>🚆 Central Railway</span>
+            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{facts.railway || 'Main City Rail Junction'}</strong>
+          </div>
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>🗣️ Spoken Languages</span>
+            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{facts.language || 'Hindi, English'}</strong>
+          </div>
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>☀️ Best Season to Visit</span>
+            <strong style={{ fontSize: '0.95rem', color: '#b45309' }}>{city.bestSeason || 'October to March'}</strong>
+          </div>
+        </div>
+
+        {/* FAMOUS LOCAL FOODS & DAY TRIPS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <h4 style={{ margin: '0 0 0.65rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-main)' }}>
+              <span>🍛</span> Famous Local Foods & Specialties
+            </h4>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {(facts.topDishes || ['Local Thali', 'Street Delicacies']).map((dish, idx) => (
+                <span key={idx} style={{ background: 'var(--bg-surface, #ffffff)', border: '1px solid var(--border, #cbd5e1)', padding: '4px 10px', borderRadius: '14px', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  {dish}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)' }}>
+            <h4 style={{ margin: '0 0 0.65rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-main)' }}>
+              <span>🚗</span> Popular Day Trips & Excursions
+            </h4>
+            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              {(facts.dayTrips || ['Heritage Fortress Excursion', 'Scenic Countryside Tour']).map((dt, idx) => (
+                <li key={idx} style={{ marginBottom: '2px' }}>
+                  <strong style={{ color: 'var(--text-main)' }}>{dt}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {/* SLIDING PHOTO CAROUSEL ANIMATION */}
       <DestinationsCarousel cities={visibleCities} onSelectCity={setSelectedId} />
@@ -3006,6 +4607,27 @@ function DestinationsPage({ cities, city, details, formatPrice, handleAddReview,
         </div>
 
         <aside className="side-panel">
+          {/* FAST FACTS SUMMARY WIDGET */}
+          <div className="glass-panel" style={{ padding: '1.25rem', borderRadius: '14px', marginBottom: '1.25rem', border: '1px solid var(--border)' }}>
+            <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+              ⚡ Quick Overview
+            </span>
+            <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <div>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Ideal Stay</span>
+                <strong>{facts.idealDays || '2-3 Days'}</strong>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Spoken Dialects</span>
+                <strong>{facts.language || 'Hindi, English'}</strong>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Top Delicacy</span>
+                <strong>{facts.topDishes?.[0] || 'Local Thali'}</strong>
+              </div>
+            </div>
+          </div>
+
           <p className="eyebrow">Travel Tips</p>
           {tips.map((tip) => (
             <article className="tip-row" key={tip.id}>
@@ -3103,7 +4725,7 @@ function BookingsPage({ bookings, formatPrice, handleCancelBooking, setPage }) {
   );
 }
 
-const CITY_FOOD_RECOMMENDATIONS = {
+const _CITY_FOOD_RECOMMENDATIONS = {
   Jaipur: 'Authentic Rajasthani Dal Baati Churma, Pyaaz Kachori & Royal Ghevar at LMB Johari Bazaar',
   Agra: 'Traditional Agra Petha, Bedmi Puri breakfast & authentic Mughlai Biryani near Taj Ganj',
   Delhi: 'Crispy Old Delhi Chole Bhature, Chandni Chowk Parathas & Kulfi Falooda',
@@ -3130,330 +4752,52 @@ const CITY_FOOD_RECOMMENDATIONS = {
   Shillong: 'Khasi Jadoh rice, smoked pork with bamboo shoot & local Meghalayan honey tea',
 };
 
-function PlannerPage({ city, details, formatPrice, handleAddMilestone, handleOpenBooking, planner }) {
-  const [travelStyle, setTravelStyle] = useState('Cultural Heritage');
-  const [groupProfile, setGroupProfile] = useState('Couple / Pair');
-  const [travelPace, setTravelPace] = useState('Balanced');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [activeDayTab, setActiveDayTab] = useState('all');
-  const [calendarNotice, setCalendarNotice] = useState(null);
-  const places = details?.famousPlaces || [];
-
-  const STYLES = [
-    { id: 'Cultural Heritage', emoji: '🏛️' },
-    { id: 'Budget Backpacker', emoji: '🎒' },
-    { id: 'Adventure & Nature', emoji: '🧗' },
-    { id: 'Spiritual & Relaxed', emoji: '🧘' },
-    { id: 'Royal Luxury', emoji: '👑' },
-  ];
-
-  const GROUPS = [
-    { id: 'Solo Traveler', emoji: '🎒' },
-    { id: 'Couple / Pair', emoji: '💑' },
-    { id: 'Family with Kids', emoji: '👨‍👩‍👧' },
-    { id: 'Friends Group', emoji: '🎉' },
-  ];
-
-  const PACES = [
-    { id: 'Relaxed', emoji: '☕', desc: '1-2 sights/day' },
-    { id: 'Balanced', emoji: '⚖️', desc: '2-3 sights/day' },
-    { id: 'Fast-Paced', emoji: '⚡', desc: 'Full-day sprint' },
-  ];
-
-  const handlePlanSubmit = (e) => {
-    e.preventDefault();
-    setIsGenerating(true);
-    setTimeout(() => {
-      planner.createTripPlan(e);
-      setIsGenerating(false);
-      setActiveDayTab('all');
-    }, 750);
-  };
-
-  const displayedItinerary = useMemo(() => {
-    if (!planner.tripPlan?.itinerary) return [];
-    if (activeDayTab === 'all') return planner.tripPlan.itinerary;
-    return planner.tripPlan.itinerary.filter((d) => d.day === activeDayTab);
-  }, [planner.tripPlan, activeDayTab]);
-
-  const handleAddPlanToCalendar = () => {
-    if (!planner.tripPlan?.itinerary || !handleAddMilestone) return;
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 7); // Schedule 1 week ahead
-    planner.tripPlan.itinerary.forEach((day, idx) => {
-      const d = new Date(startDate);
-      d.setDate(startDate.getDate() + idx);
-      const dateStr = d.toISOString().split('T')[0];
-      const landmark = places[(day.day - 1) % places.length];
-      handleAddMilestone({
-        date: dateStr,
-        title: `Day ${day.day}: ${day.title} (${landmark ? landmark.name : city.name})`,
-        city: city.name,
-      });
-    });
-    setCalendarNotice(`Added ${planner.tripPlan.itinerary.length} days to your Personal Calendar! 📅`);
-    setTimeout(() => setCalendarNotice(null), 5000);
-  };
-
-  const totalCost = planner.tripPlan?.totalEstimatedCost || (city.estimatedDailyBudget || 4200) * (planner.days || 3) * (planner.travelers || 2);
-  const stayCost = Math.round(totalCost * 0.45);
-  const foodCost = Math.round(totalCost * 0.25);
-  const sightCost = Math.round(totalCost * 0.15);
-  const cabCost = Math.round(totalCost * 0.15);
-
-  const localFood = CITY_FOOD_RECOMMENDATIONS[city.name] || 'Authentic local cuisine, regional specialties & renowned sweet bazaars';
-
+function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpenBooking }) {
   return (
-    <section className="page planner-page">
+    <section className="page planner-page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
       <PageTitle
-        eyebrow="Custom Daily Itineraries"
-        title={`Smart Trip Planner for ${city.name}`}
-        text="Choose your travel vibe, duration, group profile, and pace to generate a personalized day-by-day plan with top sights, dining, and estimated budget."
+        eyebrow="✨ SIH AI-Powered Innovation"
+        title="Smart Trip Planner & Route Optimizer"
+        text="Experience intelligent 6-step personalized itinerary planning, smart nearest-neighbor route distance minimization, live Leaflet waypoint mapping, and detailed expense calculations."
       />
 
-      {calendarNotice && (
-        <div className="global-toast" style={{ position: 'relative', top: 'auto', right: 'auto', marginBottom: '1.25rem' }}>
-          <span>🎉</span>
-          <p>{calendarNotice}</p>
-          <button type="button" onClick={() => setCalendarNotice(null)}>✕</button>
-        </div>
-      )}
+      <SihTripPlanner
+        cities={cities}
+        selectedCity={city?.name || 'Jaipur'}
+        formatPrice={formatPrice}
+        handleAddMilestone={handleAddMilestone}
+        handleOpenBooking={handleOpenBooking}
+      />
+    </section>
+  );
+}
 
-      <div className="ai-planner-card glass-panel">
-        <form onSubmit={handlePlanSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <label>
-              <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Trip Duration (Days)</span>
-              <input
-                type="number"
-                min="1"
-                max="30"
-                className="clean-input"
-                value={planner.days}
-                onChange={(e) => planner.setDays(Number(e.target.value))}
-              />
-            </label>
-            <label>
-              <span style={{ fontWeight: 700, fontSize: '0.875rem' }}>Number of Travelers</span>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                className="clean-input"
-                value={planner.travelers}
-                onChange={(e) => planner.setTravelers(Number(e.target.value))}
-              />
-            </label>
-          </div>
+function GemsPage({ cities, setPage, setSelectedId }) {
+  return (
+    <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+      <SihHiddenGems
+        onPlanForCity={(cityName) => {
+          const matched = (cities || []).find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+          if (matched) setSelectedId(matched.id);
+          setPage('planner');
+        }}
+      />
+    </section>
+  );
+}
 
-          <div style={{ marginBottom: '1.25rem' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.875rem', display: 'block', marginBottom: '0.45rem' }}>
-              Select Travel Style:
-            </span>
-            <div className="ai-style-chips">
-              {STYLES.map((st) => (
-                <button
-                  key={st.id}
-                  type="button"
-                  className={`ai-chip ${travelStyle === st.id ? 'active' : ''}`}
-                  onClick={() => setTravelStyle(st.id)}
-                >
-                  {st.emoji} {st.id}
-                </button>
-              ))}
-            </div>
-          </div>
+function ExperiencesPage({ onOpenEnquiry }) {
+  return (
+    <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+      <SihExperiences onEnquire={onOpenEnquiry} />
+    </section>
+  );
+}
 
-          <div style={{ marginBottom: '1.25rem' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.875rem', display: 'block', marginBottom: '0.45rem' }}>
-              Travel Group Profile:
-            </span>
-            <div className="ai-style-chips">
-              {GROUPS.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  className={`ai-chip ${groupProfile === g.id ? 'active' : ''}`}
-                  onClick={() => setGroupProfile(g.id)}
-                >
-                  {g.emoji} {g.id}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <span style={{ fontWeight: 700, fontSize: '0.875rem', display: 'block', marginBottom: '0.45rem' }}>
-              Travel Pace:
-            </span>
-            <div className="ai-style-chips">
-              {PACES.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`ai-chip ${travelPace === p.id ? 'active' : ''}`}
-                  onClick={() => setTravelPace(p.id)}
-                >
-                  {p.emoji} {p.id} <small style={{ opacity: 0.8 }}>({p.desc})</small>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button type="submit" className="primary-action" style={{ marginTop: '1.5rem', width: '100%', padding: '0.9rem' }}>
-            ⚡ Generate Smart Itinerary & Budget Plan
-          </button>
-        </form>
-      </div>
-
-      {isGenerating && (
-        <BullyLoader message={`AI is generating your personalized ${planner.days}-day itinerary & budget breakdown for ${city.name}...`} />
-      )}
-
-      <div className="plan-output glass-panel">
-        {planner.tripPlan ? (
-          <>
-            <div className="plan-header-row">
-              <div>
-                <p className="eyebrow">✨ Custom Planned • {travelStyle} • {groupProfile} • {travelPace} Pace</p>
-                <h2>{planner.tripPlan.cityName}: {formatPrice(planner.tripPlan.totalEstimatedCost)}</h2>
-                <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                  ☀️ Best Season: {city.bestSeason || 'Oct to Mar'} • Est. Daily: {formatPrice(city.estimatedDailyBudget || 4000)}/person
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className="secondary-action"
-                  onClick={handleAddPlanToCalendar}
-                  title="Add days to personal travel calendar"
-                >
-                  📅 Add to Personal Calendar
-                </button>
-                <button
-                  type="button"
-                  className="book-btn"
-                  onClick={() =>
-                    handleOpenBooking(
-                      'package',
-                      `${planner.tripPlan.days}-Day ${planner.tripPlan.cityName} (${travelStyle}) Tour Package`,
-                      planner.tripPlan.totalEstimatedCost,
-                      city.id,
-                      city.name
-                    )
-                  }
-                >
-                  Book Complete Tour Package ➔
-                </button>
-              </div>
-            </div>
-
-            {/* UPGRADED VISUAL BUDGET BREAKDOWN CARD */}
-            <div className="ai-budget-breakdown-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Estimated Budget Breakdown ({planner.days} Days • {planner.travelers} Travelers)</strong>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>
-                  Total: {formatPrice(totalCost)}
-                </span>
-              </div>
-
-              <div className="ai-budget-bars-stack">
-                <div className="ai-bar-stay" style={{ width: '45%' }} title={`Stays (45%): ${formatPrice(stayCost)}`}></div>
-                <div className="ai-bar-food" style={{ width: '25%' }} title={`Dining (25%): ${formatPrice(foodCost)}`}></div>
-                <div className="ai-bar-sight" style={{ width: '15%' }} title={`Sights (15%): ${formatPrice(sightCost)}`}></div>
-                <div className="ai-bar-cab" style={{ width: '15%' }} title={`Cabs (15%): ${formatPrice(cabCost)}`}></div>
-              </div>
-
-              <div className="ai-budget-legend">
-                <div className="ai-legend-item">
-                  <span className="ai-legend-dot" style={{ background: '#3b82f6' }}></span>
-                  <span>🏨 Stay (45%): <strong>{formatPrice(stayCost)}</strong></span>
-                </div>
-                <div className="ai-legend-item">
-                  <span className="ai-legend-dot" style={{ background: '#10b981' }}></span>
-                  <span>🍲 Food (25%): <strong>{formatPrice(foodCost)}</strong></span>
-                </div>
-                <div className="ai-legend-item">
-                  <span className="ai-legend-dot" style={{ background: '#f59e0b' }}></span>
-                  <span>🏛️ Passes (15%): <strong>{formatPrice(sightCost)}</strong></span>
-                </div>
-                <div className="ai-legend-item">
-                  <span className="ai-legend-dot" style={{ background: '#8b5cf6' }}></span>
-                  <span>🛺 Cabs (15%): <strong>{formatPrice(cabCost)}</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* LOCAL CULINARY RECOMMENDATION BANNER */}
-            <div style={{ padding: '0.85rem 1.25rem', background: 'rgba(234, 88, 12, 0.08)', borderRadius: '12px', borderLeft: '4px solid var(--primary)', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
-              <strong>🍲 Recommended Local Specialties in {city.name}:</strong>
-              <p style={{ margin: '0.25rem 0 0', color: 'var(--text)' }}>{localFood}</p>
-            </div>
-
-            {/* INTERACTIVE DAY TABS */}
-            <div className="day-tabs-row">
-              <button
-                type="button"
-                className={`day-tab-btn ${activeDayTab === 'all' ? 'active' : ''}`}
-                onClick={() => setActiveDayTab('all')}
-              >
-                ✨ Full Plan ({planner.tripPlan.itinerary.length} Days)
-              </button>
-              {planner.tripPlan.itinerary.map((d) => (
-                <button
-                  key={d.day}
-                  type="button"
-                  className={`day-tab-btn ${activeDayTab === d.day ? 'active' : ''}`}
-                  onClick={() => setActiveDayTab(d.day)}
-                >
-                  Day {d.day}
-                </button>
-              ))}
-            </div>
-
-            <div className="itinerary-list" style={{ marginTop: '1.25rem' }}>
-              {displayedItinerary.map((day) => {
-                const dayLandmark = places[(day.day - 1) % places.length];
-                return (
-                  <article key={day.day} className="itinerary-slot-card">
-                    <div className="itinerary-slot-header">
-                      <strong style={{ fontSize: '1.05rem', color: 'var(--text)' }}>Day {day.day}: {day.title}</strong>
-                      {dayLandmark && <span className="card-tag">🏛️ {dayLandmark.name}</span>}
-                    </div>
-
-                    <div style={{ margin: '0.75rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                        <span>🌅</span>
-                        <div>
-                          <strong>Morning:</strong> {day.morning?.join(', ') || `Explore ${dayLandmark?.name || 'historical landmarks'} during early golden hours.`}
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                        <span>☀️</span>
-                        <div>
-                          <strong>Afternoon:</strong> {day.afternoon?.join(', ') || `Traditional lunch nearby, followed by crafts & bazaars.`}
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
-                        <span>🌙</span>
-                        <div>
-                          <strong>Evening:</strong> {day.evening?.join(', ') || `Scenic sunset viewpoints, evening cultural aarti or peaceful promenade stroll.`}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="empty-plan">
-            <p>Select your days, group profile, and travel style above to generate a customized travel itinerary with budget breakdown.</p>
-          </div>
-        )}
-      </div>
+function MarketplacePage({ onOpenEnquiry }) {
+  return (
+    <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+      <SihMarketplace onEnquire={onOpenEnquiry} />
     </section>
   );
 }
@@ -4570,4 +5914,66 @@ function AuthModal({ onClose, setUser, user }) {
   );
 }
 
-export default App;
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Yatra 66 ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center', background: 'var(--bg-canvas, #f8fafc)', color: 'var(--text-main, #0f172a)' }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🧭</div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Travel Compass Recalibrating</h2>
+          <p style={{ color: 'var(--text-muted, #64748b)', maxWidth: '500px', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            A temporary display hitch occurred. Your bookings, itineraries, and settings are safely preserved.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              type="button"
+              className="primary-action"
+              style={{ padding: '0.75rem 1.5rem', borderRadius: '10px', fontWeight: 700 }}
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }}
+            >
+              🔄 Reload Experience
+            </button>
+            <button
+              type="button"
+              className="secondary-action"
+              style={{ padding: '0.75rem 1.5rem', borderRadius: '10px' }}
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.href = '/';
+              }}
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function AppWithErrorBoundary(props) {
+  return (
+    <ErrorBoundary>
+      <App {...props} />
+    </ErrorBoundary>
+  );
+}
+
+export default AppWithErrorBoundary;
