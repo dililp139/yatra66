@@ -674,6 +674,12 @@ function App() {
     onOpenEnquiry: (biz) => setEnquiryModalBiz(biz),
   };
 
+  // STANDALONE ISOLATED BUSINESS PARTNER EXTRANET WEBPAGE
+  // Completely isolated from consumer UI: no consumer headers, no traveler chatbots, no consumer modals
+  if (page === 'business') {
+    return <BusinessPartnerPortal setPage={setPage} />;
+  }
+
   return (
     <div className={`app-shell theme-${theme}`}>
       <Header {...appState} />
