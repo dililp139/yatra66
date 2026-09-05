@@ -186,6 +186,7 @@ export default function SihTripPlanner({
   const [aiPromptInput, setAiPromptInput] = useState('');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [aiModifiedThemes, setAiModifiedThemes] = useState({});
+  const [aiPlanData, setAiPlanData] = useState(null);
 
   // Active day viewing in Step 6
   const [activeDay, setActiveDay] = useState(1);
@@ -204,6 +205,22 @@ export default function SihTripPlanner({
 
   // Multi-day schedule calculation
   const multiDayPlan = useMemo(() => {
+    if (aiPlanData && Array.isArray(aiPlanData.days) && aiPlanData.days.length > 0) {
+      return aiPlanData.days.map((day, dIdx) => {
+        const dNum = day.dayNumber || dIdx + 1;
+        const customTheme = aiModifiedThemes[dNum] || day.theme || `Day ${dNum}: Curated Highlights`;
+        return {
+          dayNumber: dNum,
+          theme: customTheme,
+          waypoints: (day.waypoints || []).map((wp, idx) => ({
+            ...wp,
+            id: wp.id || `ai-${dNum}-${idx + 1}`,
+            sequenceOrder: wp.sequenceOrder || idx + 1,
+          })),
+        };
+      });
+    }
+
     const templates = MULTI_DAY_TEMPLATES[cityChoice] || MULTI_DAY_TEMPLATES.Jaipur;
     const plan = [];
     for (let d = 1; d <= durationDays; d++) {
@@ -221,7 +238,7 @@ export default function SihTripPlanner({
       });
     }
     return plan;
-  }, [cityChoice, durationDays, aiModifiedThemes]);
+  }, [cityChoice, durationDays, aiModifiedThemes, aiPlanData]);
 
   const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
 
@@ -283,16 +300,95 @@ export default function SihTripPlanner({
     );
   };
 
-  // AI Prompt Modification Handler (Requirement 18)
-  const handleAskAi = (promptText) => {
+  // AI Itinerary Synthesis Handler (Calls Gemini 3.6 Flash on Cloudflare Worker)
+  const handleGenerateItinerary = async () => {
+    setIsAiGenerating(true);
+    setToastNotice(`🤖 Consulting Gemini 3.6 Flash for ${cityChoice}...`);
+
+    try {
+      const res = await fetch('/api/ai/plan-trip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          city: cityChoice,
+          durationDays,
+          budgetTier,
+          customDailyBudget: budgetTier === 'custom' ? customDailyBudget : undefined,
+          travellers: totalTravellers,
+          adults,
+          children,
+          interests: selectedInterests,
+          pace,
+          customNotes: customTripNotes,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data && Array.isArray(data.days) && data.days.length > 0) {
+        setAiPlanData(data);
+        setActiveDay(1);
+        setCurrentStep(6);
+        setToastNotice(`✨ Gemini 3.6 synthesized your tailored ${durationDays}-day plan for ${cityChoice}!`);
+      } else {
+        throw new Error('Invalid itinerary format received');
+      }
+    } catch (err) {
+      console.warn('AI Trip Planner fallback:', err.message);
+      // Seamless local algorithmic engine fallback
+      setActiveDay(1);
+      setCurrentStep(6);
+      setToastNotice(`✨ Customized your ${durationDays}-day itinerary for ${cityChoice}!`);
+    } finally {
+      setIsAiGenerating(false);
+      setTimeout(() => setToastNotice(null), 5000);
+    }
+  };
+
+  // AI Prompt Modification Handler (Requirement 18 - Powered by Gemini 3.6)
+  const handleAskAi = async (promptText) => {
     const query = (promptText || aiPromptInput).trim();
     if (!query) return;
 
     setIsAiProcessing(true);
-    setTimeout(() => {
-      setIsAiProcessing(false);
-      const lower = query.toLowerCase();
+    setToastNotice(`🤖 Gemini 3.6 adapting Day ${activeDay}...`);
 
+    try {
+      const res = await fetch('/api/ai/modify-itinerary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          city: cityChoice,
+          activeDay,
+          query,
+          currentWaypoints: currentDayWaypoints,
+          pace,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data && Array.isArray(data.updatedWaypoints) && data.updatedWaypoints.length > 0) {
+        if (data.updatedTheme) {
+          setAiModifiedThemes((prev) => ({
+            ...prev,
+            [activeDay]: data.updatedTheme,
+          }));
+        }
+        setCurrentDayWaypoints(data.updatedWaypoints);
+        setToastNotice(`✨ ${data.explanation || 'Day ' + activeDay + ' updated!'}`);
+      } else {
+        throw new Error('No updated waypoints returned');
+      }
+    } catch (err) {
+      console.warn('AI Itinerary Modify fallback:', err.message);
+      const lower = query.toLowerCase();
       if (lower.includes('relax') || lower.includes('easy') || lower.includes('slow')) {
         setPace('Relaxed');
         setAiModifiedThemes((prev) => ({
@@ -348,9 +444,11 @@ export default function SihTripPlanner({
         }));
         setToastNotice(`✨ AI successfully applied: "${query}" to Day ${activeDay}!`);
       }
+    } finally {
+      setIsAiProcessing(false);
       setAiPromptInput('');
       setTimeout(() => setToastNotice(null), 5000);
-    }, 450);
+    }
   };
 
   const handleSaveTrip = () => {
@@ -960,7 +1058,7 @@ export default function SihTripPlanner({
             />
           </div>
 
-          {/* REDESIGNED PLAN TRIP CTA BUTTON (Requirement 14) */}
+          {/* REDESIGNED PLAN TRIP CTA BUTTON (Requirement 14 & Gemini Integration) */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button type="button" className="secondary-action" onClick={() => setCurrentStep(4)}>
               ← Back
@@ -969,19 +1067,13 @@ export default function SihTripPlanner({
               type="button"
               className="plan-trip-cta-btn"
               disabled={isAiGenerating}
-              onClick={() => {
-                setIsAiGenerating(true);
-                setTimeout(() => {
-                  setIsAiGenerating(false);
-                  setCurrentStep(6);
-                }, 550);
-              }}
+              onClick={handleGenerateItinerary}
               style={{ padding: '0.85rem 2.5rem', fontSize: '1.05rem', borderRadius: '12px' }}
             >
               {isAiGenerating ? (
                 <>
-                  <span>⏳</span>
-                  <span>Synthesizing AI Itinerary for {cityChoice}...</span>
+                  <span className="spinner-inline">⏳</span>
+                  <span>Synthesizing Gemini Itinerary for {cityChoice}...</span>
                 </>
               ) : (
                 <>
@@ -1074,7 +1166,7 @@ export default function SihTripPlanner({
                   <span>⚡</span> AI Crowd Density Forecast
                 </div>
                 <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-                  Morning departure at <strong>08:30 AM</strong> schedules primary heritage attractions before the peak tourist wave (11:30 AM - 02:30 PM), reducing queue delays by ~40-50 minutes.
+                  {aiPlanData?.crowdForecast || 'Morning departure at 08:30 AM schedules primary heritage attractions before the peak tourist wave (11:30 AM - 02:30 PM), reducing queue delays by ~40-50 minutes.'}
                 </p>
               </div>
 
@@ -1083,10 +1175,27 @@ export default function SihTripPlanner({
                   <span>⛅</span> Weather-Smart Scheduling
                 </div>
                 <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
-                  Daytime temperature forecast ~31°C. Indoor museum galleries, artisan workshops, and shaded dining scheduled between <strong>01:00 PM - 03:30 PM</strong> to dodge the afternoon sun.
+                  {aiPlanData?.weatherAdvice || 'Daytime temperature forecast ~31°C. Indoor museum galleries, artisan workshops, and shaded dining scheduled between 01:00 PM - 03:30 PM to dodge the afternoon sun.'}
                 </p>
               </div>
             </div>
+
+            {/* AI INSIDER HACKS (If provided by Gemini) */}
+            {aiPlanData?.insiderHacks && Array.isArray(aiPlanData.insiderHacks) && aiPlanData.insiderHacks.length > 0 && (
+              <div style={{ background: 'rgba(15, 118, 110, 0.05)', border: '1px solid rgba(15, 118, 110, 0.25)', borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', fontWeight: 800, color: '#0f766e', fontSize: '0.875rem' }}>
+                  <span>💡</span> Gemini Insider Travel Hacks for {cityChoice}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.5rem' }}>
+                  {aiPlanData.insiderHacks.map((hack, hIdx) => (
+                    <div key={hIdx} style={{ fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', gap: '6px', lineHeight: 1.4 }}>
+                      <span style={{ color: '#0f766e', fontWeight: 700 }}>•</span>
+                      <span>{hack}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* INTERACTIVE "ASK AI TO MODIFY ITINERARY" BAR (Requirement 18) */}
             <div style={{ background: 'var(--bg-surface, #ffffff)', padding: '1.25rem', borderRadius: '14px', border: '1px solid var(--border)' }}>

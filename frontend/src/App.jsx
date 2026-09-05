@@ -10,6 +10,7 @@ import SihSafetyModal from './components/SihSafetyModal';
 import SihEnquiryModal from './components/SihEnquiryModal';
 import FloatingSafetyHelp from './components/FloatingSafetyHelp';
 import RentalServices from './components/RentalServices';
+import YatraAiChatbot from './components/YatraAiChatbot';
 import { FIVE_CITIES_MVP, TRANSLATIONS, SIH_STATS } from './services/sihData';
 
 function CreativeLogo({ size = 36 }) {
@@ -675,6 +676,9 @@ function App() {
 
       {/* Floating 24/7 Tourist Safety Help Action Widget */}
       <FloatingSafetyHelp onOpenSafety={() => setSafetyModalOpen(true)} />
+
+      {/* Floating Yatra AI Travel Concierge Assistant (Gemini 3.6 Flash) */}
+      <YatraAiChatbot currentCity={selectedMarker?.name || 'Jaipur'} />
     </div>
   );
 }

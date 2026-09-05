@@ -5,6 +5,7 @@
 
 import * as db from './db/index.js';
 import { googleConsentHtml } from './googleConsentPage.js';
+import { generateAiTripPlan, modifyAiItinerary, chatWithAi } from './gemini.js';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -87,6 +88,37 @@ export default {
 
     // API Routes
     if (pathname.startsWith('/api/')) {
+      // --- AI & GEMINI TRAVEL INTELLIGENCE ROUTES ---
+      if (pathname.startsWith('/api/ai/')) {
+        try {
+          // POST /api/ai/plan-trip
+          if (pathname === '/api/ai/plan-trip' && method === 'POST') {
+            const body = await request.json();
+            const plan = await generateAiTripPlan(env, body);
+            return jsonResponse(plan);
+          }
+
+          // POST /api/ai/modify-itinerary
+          if (pathname === '/api/ai/modify-itinerary' && method === 'POST') {
+            const body = await request.json();
+            const mod = await modifyAiItinerary(env, body);
+            return jsonResponse(mod);
+          }
+
+          // POST /api/ai/chat
+          if (pathname === '/api/ai/chat' && method === 'POST') {
+            const body = await request.json();
+            const chatRes = await chatWithAi(env, body);
+            return jsonResponse(chatRes);
+          }
+
+          return errorResponse(`AI Route '${pathname}' with method '${method}' not found`, 404);
+        } catch (aiErr) {
+          console.error('Gemini AI API Error:', aiErr);
+          return errorResponse(`AI Engine Error: ${aiErr.message}`, 500);
+        }
+      }
+
       if (!env.DB) {
         return errorResponse('D1 Database binding (env.DB) is missing. Check wrangler.jsonc', 503);
       }
