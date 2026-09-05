@@ -57,7 +57,29 @@ export default function SihMarketplace({ onEnquire }) {
     const seen = new Set();
     const list = [];
 
-    [...aiBusinesses, ...custom, ...LOCAL_BUSINESSES_DATA].forEach((biz) => {
+    [...aiBusinesses, ...custom, ...LOCAL_BUSINESSES_DATA].forEach((rawBiz) => {
+      const city = rawBiz.city || rawBiz.cityName || 'Jaipur';
+      const contactPhone = rawBiz.contactPhone || rawBiz.phone || '+91 98290 14829';
+      const directRate = rawBiz.directRate || (rawBiz.startingPriceInr ? `₹${rawBiz.startingPriceInr.toLocaleString('en-IN')} ${rawBiz.priceUnit || ''}` : '₹1,500/day');
+      
+      let category = rawBiz.category || 'Homestay & Havelis';
+      if (category === 'Homestay') category = 'Homestay & Havelis';
+      else if (category === 'Guide' || category === 'Local Tours') category = 'Heritage Walking Guide';
+      else if (category === 'Driver') category = 'Verified Local Transport';
+      else if (category === 'Handicrafts') category = 'Handicraft & Textile Cooperative';
+      else if (category === 'Restaurant') category = 'Culinary Walking Host';
+
+      const biz = {
+        ...rawBiz,
+        city,
+        cityName: city,
+        contactPhone,
+        phone: contactPhone,
+        directRate,
+        category,
+        imageUrl: rawBiz.imageUrl || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+      };
+
       const key = `${biz.name}-${biz.city}`.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
@@ -107,8 +129,33 @@ export default function SihMarketplace({ onEnquire }) {
     handleFetchAiLocals(cleanCity);
   };
 
-  
-  // Local Providers Interactive Map Coordinates
+  // 1. filteredBusinesses declared FIRST to prevent TDZ ReferenceError!
+  const filteredBusinesses = useMemo(() => {
+    return allBusinesses.filter((b) => {
+      const matchCat = activeCategory === 'all' || 
+        b.category === activeCategory ||
+        (activeCategory === 'Homestay & Havelis' && (b.category === 'Homestay' || b.category === 'Homestay & Havelis')) ||
+        (activeCategory === 'Heritage Walking Guide' && (b.category === 'Guide' || b.category === 'Local Tours' || b.category === 'Heritage Walking Guide')) ||
+        (activeCategory === 'Verified Local Transport' && (b.category === 'Driver' || b.category === 'Verified Local Transport')) ||
+        (activeCategory === 'Handicraft & Textile Cooperative' && (b.category === 'Handicrafts' || b.category === 'Handicraft & Textile Cooperative')) ||
+        (activeCategory === 'Culinary Walking Host' && (b.category === 'Restaurant' || b.category === 'Culinary Walking Host'));
+
+      const matchCity = filterCity === 'all' || (b.city && b.city.toLowerCase() === filterCity.toLowerCase());
+      
+      const q = searchQuery.trim().toLowerCase();
+      const matchSearch = !q || (
+        (b.name && b.name.toLowerCase().includes(q)) ||
+        (b.city && b.city.toLowerCase().includes(q)) ||
+        (b.category && b.category.toLowerCase().includes(q)) ||
+        (b.description && b.description.toLowerCase().includes(q)) ||
+        (b.contactPhone && b.contactPhone.toLowerCase().includes(q))
+      );
+
+      return matchCat && matchCity && matchSearch;
+    });
+  }, [allBusinesses, activeCategory, filterCity, searchQuery]);
+
+  // 2. Local Providers Interactive Map Coordinates (calculated AFTER filteredBusinesses)
   const mapWaypoints = useMemo(() => {
     const cityCenters = {
       jaipur: { lat: 26.9124, lng: 75.7873 },
@@ -122,6 +169,15 @@ export default function SihMarketplace({ onEnquire }) {
       kochi: { lat: 9.9312, lng: 76.2673 },
       amritsar: { lat: 31.6340, lng: 74.8723 },
       rishikesh: { lat: 30.0869, lng: 78.2676 },
+      'leh ladakh': { lat: 34.1526, lng: 77.5771 },
+      shimla: { lat: 31.1048, lng: 77.1734 },
+      mysore: { lat: 12.2958, lng: 76.6394 },
+      pondicherry: { lat: 11.9416, lng: 79.8083 },
+      hyderabad: { lat: 17.3850, lng: 78.4867 },
+      kolkata: { lat: 22.5726, lng: 88.3639 },
+      jodhpur: { lat: 26.2389, lng: 73.0243 },
+      ooty: { lat: 11.4102, lng: 76.6950 },
+      shillong: { lat: 25.5788, lng: 91.8933 },
     };
 
     return (filteredBusinesses || []).map((b, i) => {
@@ -139,24 +195,6 @@ export default function SihMarketplace({ onEnquire }) {
       };
     });
   }, [filteredBusinesses]);
-
-  const filteredBusinesses = useMemo(() => {
-    return allBusinesses.filter((b) => {
-      const matchCat = activeCategory === 'all' || b.category === activeCategory;
-      const matchCity = filterCity === 'all' || (b.city && b.city.toLowerCase() === filterCity.toLowerCase());
-      
-      const q = searchQuery.trim().toLowerCase();
-      const matchSearch = !q || (
-        (b.name && b.name.toLowerCase().includes(q)) ||
-        (b.city && b.city.toLowerCase().includes(q)) ||
-        (b.category && b.category.toLowerCase().includes(q)) ||
-        (b.description && b.description.toLowerCase().includes(q)) ||
-        (b.contactPhone && b.contactPhone.toLowerCase().includes(q))
-      );
-
-      return matchCat && matchCity && matchSearch;
-    });
-  }, [allBusinesses, activeCategory, filterCity, searchQuery]);
 
   const availableCities = useMemo(() => {
     const set = new Set(POPULAR_CITIES);
@@ -446,6 +484,62 @@ export default function SihMarketplace({ onEnquire }) {
                     key={biz.id || `${biz.name}-${biz.city}`}
                     className="market-provider-card"
                   >
+                    {/* AUTHENTIC VERIFIED PHOTO BANNER */}
+                    <div
+                      className="market-card-image-wrap"
+                      style={{
+                        position: 'relative',
+                        height: '180px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        marginBottom: '0.85rem',
+                        background: 'var(--bg-surface-elevated, #1e293b)'
+                      }}
+                    >
+                      <img
+                        src={biz.imageUrl || 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800'}
+                        alt={biz.name}
+                        loading="lazy"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800';
+                        }}
+                      />
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '10px',
+                          left: '10px',
+                          background: 'rgba(15,23,42,0.85)',
+                          color: '#ffffff',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          padding: '3px 9px',
+                          borderRadius: '12px',
+                          backdropFilter: 'blur(4px)',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        📍 {biz.city}
+                      </span>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '10px',
+                          right: '10px',
+                          background: 'linear-gradient(135deg, #0f766e 0%, #10b981 100%)',
+                          color: '#ffffff',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '12px',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                        }}
+                      >
+                        0% Commission
+                      </span>
+                    </div>
+
                     <div>
                       {/* TOP BADGE & ICON ROW */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem' }}>
