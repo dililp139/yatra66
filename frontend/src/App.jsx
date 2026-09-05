@@ -302,6 +302,30 @@ const VALID_PAGES = [
 ];
 
 function App() {
+  // Gatekeeper Site Access Password ("OPENIT")
+  const [siteUnlocked, setSiteUnlocked] = useState(() => {
+    try {
+      return localStorage.getItem('yatra_site_access') === 'OPENIT';
+    } catch {
+      return false;
+    }
+  });
+  const [sitePasswordInput, setSitePasswordInput] = useState('');
+  const [sitePasswordError, setSitePasswordError] = useState('');
+
+  const handleUnlockSite = (e) => {
+    e.preventDefault();
+    if (sitePasswordInput === 'OPENIT') {
+      try {
+        localStorage.setItem('yatra_site_access', 'OPENIT');
+      } catch {}
+      setSiteUnlocked(true);
+      setSitePasswordError('');
+    } else {
+      setSitePasswordError('Incorrect password');
+    }
+  };
+
   const [page, setPage] = useHashPage();
   const [theme, setTheme] = useState(() => localStorage.getItem('yatra_theme') || 'light');
   const [lang, setLang] = useState(() => localStorage.getItem('yatra_lang') || 'en');
@@ -673,6 +697,26 @@ function App() {
     visitedStatesCount,
     onOpenEnquiry: (biz) => setEnquiryModalBiz(biz),
   };
+
+  // SITE ACCESS PASSWORD GUARD ("OPENIT")
+  if (!siteUnlocked) {
+    return (
+      <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
+        <h2>Enter Password to Access Site</h2>
+        <form onSubmit={handleUnlockSite}>
+          <input
+            type="password"
+            placeholder="Password"
+            value={sitePasswordInput}
+            onChange={(e) => setSitePasswordInput(e.target.value)}
+            autoFocus
+          />
+          <button type="submit">Submit</button>
+        </form>
+        {sitePasswordError && <p style={{ color: 'red' }}>{sitePasswordError}</p>}
+      </div>
+    );
+  }
 
   // STANDALONE ISOLATED BUSINESS PARTNER EXTRANET WEBPAGE
   // Completely isolated from consumer UI: no consumer headers, no traveler chatbots, no consumer modals
