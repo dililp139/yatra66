@@ -18,7 +18,7 @@ export default function SihHiddenGems({ onPlanForCity }) {
       <div className="section-header-row" style={{ marginBottom: '1.5rem' }}>
         <div>
           <span className="card-tag" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669', fontWeight: 800 }}>
-            🌿 SIH Sustainable Innovation: Hotspot Decongestion
+            🌿 Eco-Smart Tourism: Hotspot Decongestion
           </span>
           <h2 style={{ fontSize: '1.85rem', margin: '0.4rem 0 0.25rem', color: 'var(--text-main)' }}>
             Go Beyond the Famous.

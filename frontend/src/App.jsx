@@ -1376,6 +1376,28 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
   const [attrCategory, setAttrCategory] = useState('all');
   const [attrQuery, setAttrQuery] = useState('');
 
+  // Progressive loading for attractions on scroll (Requirement: load places on scroll to save data)
+  const [placesVisibleCount, setPlacesVisibleCount] = useState(6);
+  const loadMoreSentinelRef = useRef(null);
+
+  useEffect(() => {
+    setPlacesVisibleCount(6);
+  }, [attrCategory, attrQuery]);
+
+  useEffect(() => {
+    if (!loadMoreSentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setPlacesVisibleCount((prev) => Math.min(prev + 6, filteredAttractions.length));
+        }
+      },
+      { rootMargin: '250px' }
+    );
+    observer.observe(loadMoreSentinelRef.current);
+    return () => observer.disconnect();
+  }, [filteredAttractions.length]);
+
   // Smart City Search Bar State
   const [citySearchInput, setCitySearchInput] = useState('');
   const [isSearchingCity, setIsSearchingCity] = useState(false);
@@ -1428,6 +1450,10 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
       return matchCat && matchQuery;
     });
   }, [attrCategory, attrQuery]);
+
+  const displayedAttractions = useMemo(() => {
+    return filteredAttractions.slice(0, placesVisibleCount);
+  }, [filteredAttractions, placesVisibleCount]);
 
   return (
     <section className="page hero-page-container">
@@ -1708,7 +1734,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
         </div>
       </div>
 
-      {/* HERO SIH LIVE IMPACT BENCHMARK STRIP */}
+      {/* HERO YATRA LIVE IMPACT BENCHMARK STRIP */}
       <div className="hero-stats-strip">
         {SIH_STATS.map((stat, i) => (
           <div key={i} className="hero-stat-box">
@@ -1903,13 +1929,23 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           </div>
         </div>
 
-        {/* Tourist places cards grid */}
+        {/* Tourist places cards grid (Progressively loaded on scroll with entrance animation) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-          {filteredAttractions.map((place) => (
+          {displayedAttractions.map((place, idx) => (
             <article
               key={place.id}
-              className="destination-photo-card"
-              style={{ display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color, #e2e8f0)', background: 'var(--bg-surface, #ffffff)', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}
+              className="destination-photo-card progressive-place-card"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                border: '1px solid var(--border-color, #e2e8f0)',
+                background: 'var(--bg-surface, #ffffff)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                animation: 'fadeInUp 0.4s ease backwards',
+                animationDelay: `${(idx % 6) * 0.07}s`
+              }}
             >
               <div className="card-image-wrap" style={{ position: 'relative', height: '180px', overflow: 'hidden' }}>
                 <img
@@ -1989,6 +2025,35 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </article>
           ))}
         </div>
+
+        {/* PROGRESSIVE LOAD MORE BUTTON & SENTINEL (Scroll to save data) */}
+        {placesVisibleCount < filteredAttractions.length && (
+          <div style={{ textAlign: 'center', marginTop: '2.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              className="primary-action"
+              onClick={() => setPlacesVisibleCount((prev) => Math.min(prev + 6, filteredAttractions.length))}
+              style={{
+                padding: '12px 30px',
+                borderRadius: '30px',
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                boxShadow: '0 4px 18px rgba(15, 118, 110, 0.25)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              <span>✨ Load More Places ({filteredAttractions.length - placesVisibleCount} remaining)</span>
+              <span>⬇️</span>
+            </button>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Showing {displayedAttractions.length} of {filteredAttractions.length} places (Scroll down to load automatically)
+            </span>
+            <div ref={loadMoreSentinelRef} style={{ height: '24px', width: '100%' }} />
+          </div>
+        )}
       </div>
 
       {/* SECTION: GO BEYOND THE FAMOUS (HIDDEN GEMS) */}
@@ -4884,7 +4949,7 @@ function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpen
   return (
     <section className="page planner-page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
       <PageTitle
-        eyebrow="✨ SIH AI-Powered Innovation"
+        eyebrow="✨ Yatra AI-Powered Innovation"
         title="Smart Trip Planner & Route Optimizer"
         text="Experience intelligent 6-step personalized itinerary planning, smart nearest-neighbor route distance minimization, live Leaflet waypoint mapping, and detailed expense calculations."
       />

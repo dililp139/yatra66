@@ -2970,6 +2970,25 @@ export const yatraApi = {
     return null;
   },
 
+  async getAiLocals(cityName = 'Jaipur', category = 'all') {
+    try {
+      const res = await fetch('/api/ai/locals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cityName, category }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.businesses && Array.isArray(data.businesses) && data.businesses.length > 0) {
+          return data.businesses;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch AI locals from Gemini:', err);
+    }
+    return null;
+  },
+
   async compareHotelPrices(hotelName, cityName, basePriceInr = 4500, starRating = 4.7) {
     await delay(200);
     const safeBase = basePriceInr > 0 ? Number(basePriceInr) : 4500;

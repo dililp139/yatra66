@@ -6166,3 +6166,210 @@ body {
 .hotel-wa-btn:hover {
   opacity: 0.9;
 }
+
+
+/* ============================================================================
+   UNIVERSAL BUTTON STYLING & RESET (Requirement: style raw HTML buttons)
+   ============================================================================ */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+/* Any button lacking custom classes */
+button:not([class]):not(.brand):not(.logo) {
+  background: var(--bg-surface-elevated, #f1f5f9);
+  color: var(--text-main, #0f172a);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+}
+
+button:not([class]):hover {
+  background: var(--border-subtle, #e2e8f0);
+  border-color: var(--primary, #0f766e);
+  transform: translateY(-1px);
+}
+
+button:not([class]):active {
+  transform: translateY(0);
+}
+
+/* Footer links button styling */
+.sih-footer-col ul button,
+.sih-footer-col li button,
+footer button,
+.footer-col button,
+.footer-links button {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted, #94a3b8) !important;
+  padding: 5px 0 !important;
+  font-size: 0.85rem !important;
+  text-align: left;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: none !important;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.sih-footer-col ul button:hover,
+.sih-footer-col li button:hover,
+footer button:hover,
+.footer-col button:hover,
+.footer-links button:hover {
+  color: #0f766e !important;
+  text-decoration: underline;
+  transform: translateX(3px);
+}
+
+/* ============================================================================
+   PROGRESSIVE ENTRANCE ANIMATION (Requirement: load places by animation)
+   ============================================================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progressive-place-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.progressive-place-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================================================
+   DARK MODE COMPREHENSIVE TEXT & CARD VISIBILITY OVERRIDES
+   (Requirement: fix invisible text in dark mode)
+   ============================================================================ */
+.theme-dark body,
+.theme-dark .app-container {
+  color: #f8fafc;
+  background-color: #060911;
+}
+
+.theme-dark h1,
+.theme-dark h2,
+.theme-dark h3,
+.theme-dark h4,
+.theme-dark h5,
+.theme-dark h6 {
+  color: #f8fafc !important;
+}
+
+.theme-dark p,
+.theme-dark span:not([class*="badge"]):not([class*="tag"]):not([style*="color"]) {
+  color: inherit;
+}
+
+.theme-dark .glass-panel,
+.theme-dark .destination-photo-card,
+.theme-dark .city-preview-card,
+.theme-dark .hotel-card,
+.theme-dark .fact-item,
+.theme-dark .metric-box,
+.theme-dark .sih-action-card,
+.theme-dark .sih-why-card {
+  background: #0e1424 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.theme-dark .glass-panel h3,
+.theme-dark .destination-photo-card h3,
+.theme-dark .preview-city-title {
+  color: #f8fafc !important;
+}
+
+.theme-dark .clean-input,
+.theme-dark input:not([type="checkbox"]):not([type="radio"]),
+.theme-dark select,
+.theme-dark textarea {
+  background: #151d32 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.theme-dark .clean-input::placeholder,
+.theme-dark input::placeholder,
+.theme-dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+.theme-dark .quick-pill-tag:not(.active) {
+  background: #151d32 !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.theme-dark .quick-pill-tag:not(.active):hover {
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #0f766e !important;
+}
+
+.theme-dark .preview-chip {
+  background: #151d32 !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .city-search-box {
+  background: #0e1424 !important;
+  border-color: rgba(15, 118, 110, 0.5) !important;
+}
+
+.theme-dark .city-search-input {
+  color: #f8fafc !important;
+}
+
+.theme-dark .secondary-action {
+  background: #151d32 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.theme-dark .secondary-action:hover {
+  background: #1e293b !important;
+  color: #ffffff !important;
+}
+
+.theme-dark button:not([class]):not(.brand):not(.logo) {
+  background: #151d32 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-dark button:not([class]):not(.brand):not(.logo):hover {
+  background: #1e293b !important;
+  border-color: #0f766e !important;
+}
+
+.theme-dark .sih-modal-content {
+  background: #0e1424 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.theme-dark .sih-modal-content h2,
+.theme-dark .sih-modal-content h3,
+.theme-dark .sih-modal-content strong {
+  color: #f8fafc !important;
+}
