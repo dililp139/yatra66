@@ -11,7 +11,9 @@ import SihEnquiryModal from './components/SihEnquiryModal';
 import FloatingSafetyHelp from './components/FloatingSafetyHelp';
 import RentalServices from './components/RentalServices';
 import YatraAiChatbot from './components/YatraAiChatbot';
-import { FIVE_CITIES_MVP, TRANSLATIONS, SIH_STATS } from './services/sihData';
+import ExploreIndiaPassport from './components/ExploreIndiaPassport';
+import DiscoverIndiaAiEngine from './components/DiscoverIndiaAiEngine';
+import { FIVE_CITIES_MVP, TRANSLATIONS, SIH_STATS, UPCOMING_LIVE_EVENTS_DATA } from './services/sihData';
 
 function CreativeLogo({ size = 36 }) {
   return (
@@ -297,6 +299,15 @@ function App() {
     }
   });
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [passportOpen, setPassportOpen] = useState(false);
+  const [visitedStatesCount, setVisitedStatesCount] = useState(() => {
+    try {
+      const s = localStorage.getItem('yatra_visited_states');
+      return s ? JSON.parse(s).length : 4;
+    } catch {
+      return 4;
+    }
+  });
 
   // Hidden Cities & Hotels state
   const [hiddenCityIds, setHiddenCityIds] = useState(() => {
@@ -610,6 +621,8 @@ function App() {
     setLang,
     t,
     onOpenSafety: () => setSafetyModalOpen(true),
+    onOpenPassport: () => setPassportOpen(true),
+    visitedStatesCount,
     onOpenEnquiry: (biz) => setEnquiryModalBiz(biz),
   };
 
@@ -683,7 +696,7 @@ function App() {
   );
 }
 
-function Header({ currency, currencyData, lang = 'en', onOpenAuth, page, setCurrency, setLang, setPage, setTheme, theme, user }) {
+function Header({ currency, currencyData, lang = 'en', onOpenAuth, onOpenPassport, visitedStatesCount = 4, page, setCurrency, setLang, setPage, setTheme, theme, user }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const menuTimerRef = useRef(null);
@@ -839,6 +852,30 @@ function Header({ currency, currencyData, lang = 'en', onOpenAuth, page, setCurr
             {lang === 'en' ? '🇮🇳 हिन्दी' : '🇬🇧 EN'}
           </button>
         )}
+
+        {/* Explore India Passport Gamification Button */}
+        <button
+          type="button"
+          className="passport-btn-pill"
+          onClick={onOpenPassport}
+          title="Explore India Gamification Passport"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15))',
+            border: '1px solid #f59e0b',
+            color: 'var(--text-main)',
+            padding: '5px 12px',
+            borderRadius: '16px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          <span>🏆</span>
+          <span>Passport ({visitedStatesCount}/28)</span>
+        </button>
 
         {/* Side Theme Switcher */}
         <div
@@ -1858,6 +1895,15 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           </div>
         ))}
       </div>
+
+      {/* AI "DISCOVER INDIA" RECOMMENDATION ENGINE (SIH Innovation 2) */}
+      <DiscoverIndiaAiEngine
+        onPlanTrip={(cityName) => {
+          const matched = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+          if (matched) setSelectedId(matched.id);
+          setPage('planner');
+        }}
+      />
 
       {/* FEATURED DESTINATIONS PHOTO GRID (Optimized Top 8 for Fast Page Load) */}
       <div className="home-featured-section">

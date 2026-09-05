@@ -1,3 +1,4 @@
+import TourismBusinessDashboard from './TourismBusinessDashboard';
 import { useState, useMemo } from 'react';
 import { LOCAL_BUSINESSES_DATA, registerLocalBusiness, getCustomLocalBusinesses, getStoredBusinessEnquiries } from '../services/sihData';
 import yatraApi from '../services/yatraService';
@@ -30,6 +31,7 @@ export default function SihMarketplace({ onEnquire }) {
   const [activeTab, setActiveTab] = useState('browse');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map' // 'browse' | 'register' | 'enquiries'
   const [activeCategory, setActiveCategory] = useState('all');
+  const [hubSection, setHubSection] = useState('all'); // 'all' | 'buy' | 'eat' | 'experience'
   const [filterCity, setFilterCity] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -266,6 +268,14 @@ export default function SihMarketplace({ onEnquire }) {
           </button>
           <button
             type="button"
+            className={`secondary-action ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+          >
+            📈 Business Dashboard
+          </button>
+          <button
+            type="button"
             className={`secondary-action ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => setActiveTab('register')}
             style={{ padding: '8px 16px', fontSize: '0.85rem' }}
@@ -286,6 +296,65 @@ export default function SihMarketplace({ onEnquire }) {
       {/* VIEW: BROWSE MARKETPLACE */}
       {activeTab === 'browse' && (
         <>
+          {/* TRIPARTITE "SUPPORT LOCAL" PARTICIPATION HUB */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(234, 88, 12, 0.08))',
+              border: '1.5px solid #0f766e',
+              borderRadius: '20px',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '1.75rem',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  🛍️ Support Local Economic Participation Hub
+                </span>
+                <h3 style={{ margin: '0.15rem 0 0', fontSize: '1.2rem', color: 'var(--text-main)' }}>
+                  Buy Local, Eat Local, Experience Local
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                100% of payment goes directly to families & craftsmen
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+              {[
+                { id: 'all', label: '✨ All Community Providers', count: allBusinesses.length, desc: 'Browse all local categories' },
+                { id: 'buy', label: '🛒 Buy Local', count: allBusinesses.filter(b => b.category === 'Handicraft & Textile Cooperative').length, desc: 'Verified artisans, weavers & potters' },
+                { id: 'eat', label: '🍲 Eat Local', count: allBusinesses.filter(b => b.category === 'Culinary Walking Host').length, desc: 'Family dhabas & authentic thali hosts' },
+                { id: 'experience', label: '🎭 Experience Local', count: allBusinesses.filter(b => ['Heritage Walking Guide', 'Homestay & Havelis', 'Verified Local Transport'].includes(b.category)).length, desc: 'Village walks, storytellers & stays' },
+              ].map((sec) => (
+                <button
+                  key={sec.id}
+                  type="button"
+                  onClick={() => {
+                    setHubSection(sec.id);
+                    if (sec.id !== 'all') setActiveCategory('all');
+                  }}
+                  style={{
+                    background: hubSection === sec.id ? 'var(--brand-primary, #0f766e)' : 'var(--bg-surface, #ffffff)',
+                    color: hubSection === sec.id ? '#ffffff' : 'var(--text-main)',
+                    border: hubSection === sec.id ? '1.5px solid #0f766e' : '1px solid var(--border-color, #e2e8f0)',
+                    borderRadius: '14px',
+                    padding: '0.85rem 1rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    boxShadow: hubSection === sec.id ? '0 6px 18px rgba(15, 118, 110, 0.25)' : '0 2px 6px rgba(0,0,0,0.02)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <strong style={{ fontSize: '0.92rem' }}>{sec.label}</strong>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, opacity: 0.85 }}>({sec.count})</span>
+                  </div>
+                  <div style={{ fontSize: '0.725rem', opacity: 0.85 }}>{sec.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
           {/* SEARCH BAR & CITY CONTROLS */}
           <div className="market-filter-card">
             
@@ -629,6 +698,10 @@ export default function SihMarketplace({ onEnquire }) {
       )}
 
       {/* VIEW: REGISTER LOCAL BUSINESS */}
+      {activeTab === 'dashboard' && (
+        <TourismBusinessDashboard />
+      )}
+
       {activeTab === 'register' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
           {/* REGISTRATION FORM */}

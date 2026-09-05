@@ -3,7 +3,9 @@ import SihRouteMap from './SihRouteMap';
 import {
   FIVE_CITIES_MVP,
   calculateDetailedBudget,
-  optimizeRouteWaypoints
+  optimizeRouteWaypoints,
+  LOCAL_BUSINESSES_DATA,
+  rebalanceTripBudget
 } from '../services/sihData';
 
 const INTEREST_CHIPS = [
@@ -345,6 +347,36 @@ export default function SihTripPlanner({
   }, [cityChoice]);
 
   const [currentDayWaypoints, setCurrentDayWaypoints] = useState([]);
+  const [rebalanceTarget, setRebalanceTarget] = useState(null);
+  const [injectedBizIds, setInjectedBizIds] = useState([]);
+
+  const localBusinessesForCity = useMemo(() => {
+    const matched = LOCAL_BUSINESSES_DATA.filter((b) =>
+      (b.city || '').toLowerCase().includes(cityChoice.toLowerCase()) ||
+      cityChoice.toLowerCase().includes((b.city || '').toLowerCase())
+    );
+    return matched.length > 0 ? matched.slice(0, 4) : LOCAL_BUSINESSES_DATA.slice(0, 4);
+  }, [cityChoice]);
+
+  const handleInjectBusiness = (biz) => {
+    const newWp = {
+      id: 'injected-' + Date.now(),
+      name: `${biz.name} (${biz.category})`,
+      lat: (currentDayWaypoints[0]?.lat || 26.9124) + 0.003 * (currentDayWaypoints.length + 1),
+      lng: (currentDayWaypoints[0]?.lng || 75.7873) + 0.003 * (currentDayWaypoints.length + 1),
+      type: `Local Experience (${biz.category})`,
+      time: '02:30 PM',
+      slot: 'Afternoon',
+      distFromPrevKm: 2.5,
+      transitMinsFromPrev: 10,
+      isLocalInjected: true,
+      rate: biz.directRate,
+    };
+    setCurrentDayWaypoints((prev) => [...prev, newWp]);
+    setInjectedBizIds((prev) => [...prev, biz.id]);
+    setOptimizationNotice(`🤝 Injected verified local partner "${biz.name}" into Day ${activeDay} itinerary!`);
+    setTimeout(() => setOptimizationNotice(null), 6000);
+  };
 
   useEffect(() => {
     const currentDayData = multiDayPlan.find((p) => p.dayNumber === activeDay) || multiDayPlan[0];
@@ -388,6 +420,17 @@ export default function SihTripPlanner({
       activitiesCount: Math.min(durationDays, 4),
     });
   }, [totalTravellers, durationDays, budgetTier, cityChoice, customDailyBudget]);
+
+  const rebalancedCostData = useMemo(() => {
+    if (!rebalanceTarget) return null;
+    return rebalanceTripBudget({
+      originalTotal: budgetBreakdown.grandTotal,
+      targetTotal: rebalanceTarget,
+      days: durationDays,
+      travellers: totalTravellers,
+      city: cityChoice,
+    });
+  }, [rebalanceTarget, budgetBreakdown.grandTotal, durationDays, totalTravellers, cityChoice]);
 
   // Route optimizer
   const handleOptimizeRoute = () => {
@@ -1727,6 +1770,77 @@ export default function SihTripPlanner({
             </div>
           </div>
 
+          {/* LOCAL TOURISM MARKETPLACE DIRECT INJECTION */}
+          <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px', border: '1.5px solid #0f766e', background: 'var(--bg-surface, #ffffff)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <span className="card-tag" style={{ background: 'rgba(15, 118, 110, 0.12)', color: '#0f766e', fontWeight: 800 }}>
+                  🏨 Local Marketplace: Itinerary Injection
+                </span>
+                <h4 style={{ margin: '0.3rem 0 0', fontSize: '1.15rem', color: 'var(--text-main)' }}>
+                  Support Verified Local Businesses in {cityChoice} (Day {activeDay})
+                </h4>
+                <p style={{ margin: '0.2rem 0 0', fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+                  0% commission platform connecting you directly with verified havelis, licensed storytellers, dhabas, and artisans.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+              {localBusinessesForCity.map((biz) => {
+                const isInjected = injectedBizIds.includes(biz.id);
+                return (
+                  <div
+                    key={biz.id}
+                    style={{
+                      border: isInjected ? '1.5px solid #10b981' : '1px solid var(--border-color, #e2e8f0)',
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      background: isInjected ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-surface-elevated, #f8fafc)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <div style={{ position: 'relative', height: '120px', overflow: 'hidden' }}>
+                      <img
+                        src={biz.imageUrl}
+                        alt={biz.name}
+                        loading="lazy"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800'; }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(15,23,42,0.85)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '10px' }}>
+                        {biz.category}
+                      </span>
+                      <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#0f766e', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                        0% Commission
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '2px' }}>{biz.name}</strong>
+                      <div style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 700, marginBottom: '4px' }}>
+                        {biz.directRate}
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.35, margin: '0 0 0.75rem', flex: 1 }}>
+                        {biz.description}
+                      </p>
+
+                      <button
+                        type="button"
+                        className={isInjected ? 'secondary-action' : 'primary-action'}
+                        style={{ width: '100%', padding: '6px', fontSize: '0.78rem', borderRadius: '8px' }}
+                        onClick={() => handleInjectBusiness(biz)}
+                      >
+                        {isInjected ? '✓ Injected into Day ' + activeDay : '+ Inject into Day ' + activeDay}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* SMART PACKING CHECKLIST */}
           <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -1785,6 +1899,9 @@ export default function SihTripPlanner({
                 <h4 style={{ margin: '0.3rem 0 0', fontSize: '1.25rem', color: 'var(--text-main)' }}>
                   Expense Breakdown ({durationDays} Days • {totalTravellers} Travelers)
                 </h4>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Realistic Trip-Cost Calculator with Dynamic Budget Rebalancer
+                </div>
               </div>
 
               <div style={{ textAlign: 'right' }}>
@@ -1795,6 +1912,84 @@ export default function SihTripPlanner({
                   ({formatPrice(budgetBreakdown.perPersonCost)} / person)
                 </div>
               </div>
+            </div>
+
+            {/* INTERACTIVE REALISTIC COST REBALANCING WIDGET */}
+            <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '14px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                  💡 Too Expensive? Test Our "Reduce Cost" Dynamic Rebalancer:
+                </span>
+                {rebalanceTarget && (
+                  <button
+                    type="button"
+                    onClick={() => setRebalanceTarget(null)}
+                    style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    ✕ Reset to Original Budget
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                {[
+                  { label: 'Reduce to ₹8,000', amount: 8000 },
+                  { label: 'Reduce to ₹12,000', amount: 12000 },
+                  { label: 'Reduce to ₹16,000', amount: 16000 },
+                  { label: 'Economy Saver (-30%)', amount: Math.round(budgetBreakdown.grandTotal * 0.70) },
+                ].map((btn, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setRebalanceTarget(btn.amount)}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '12px',
+                      border: '1px solid',
+                      borderColor: rebalanceTarget === btn.amount ? '#0f766e' : 'var(--border-color, #cbd5e1)',
+                      background: rebalanceTarget === btn.amount ? '#0f766e' : 'var(--bg-surface, #ffffff)',
+                      color: rebalanceTarget === btn.amount ? '#ffffff' : 'var(--text-main)',
+                      fontSize: '0.78rem',
+                      fontWeight: rebalanceTarget === btn.amount ? 700 : 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+
+              {rebalancedCostData && (
+                <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(15, 118, 110, 0.08))', border: '1px dashed #10b981', borderRadius: '12px', padding: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <strong style={{ color: '#059669', fontSize: '0.85rem' }}>
+                      🎉 Successfully Rebalanced! Saved {formatPrice(rebalancedCostData.savings)} ({rebalancedCostData.percentSaved}% reduction)
+                    </strong>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f766e' }}>
+                      New Total: {formatPrice(rebalancedCostData.targetTotal)}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                    Smart Trade-offs Applied to Preserve Comfort & Quality:
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {rebalancedCostData.tradeOffs.map((to, toIdx) => (
+                      <div key={toIdx} style={{ fontSize: '0.75rem', display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                        <span>{to.icon}</span>
+                        <div>
+                          <strong style={{ color: 'var(--text-main)' }}>{to.action}</strong>
+                          <span style={{ color: '#059669', fontWeight: 700, marginLeft: '6px' }}>
+                            (Saves ~{formatPrice(to.savedAmount)})
+                          </span>
+                          <div style={{ color: 'var(--text-subtle)', fontSize: '0.7rem' }}>{to.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* PROGRESS STACK BAR */}
