@@ -1646,6 +1646,8 @@ export function calculateDetailedBudget({
   budgetLevel = 'comfort',
   city = 'Jaipur',
   activitiesCount = 2,
+  includeIntercity = false,
+  intercityMode = 'train', // 'train' | 'flight' | 'bus'
   customModifiers = {}
 }) {
   const tCount = Math.max(1, Number(travellers) || 2);
@@ -1655,55 +1657,142 @@ export function calculateDetailedBudget({
   const TIER_RATES = {
     budget: {
       stayPerRoomNight: 1200,
-      foodPerPersonDay: 500,
-      transitPerDay: 400,
-      sightseeingPerPersonDay: 250,
+      stayCategory: 'Boutique Hostels & Verified Homestays',
+      stayGstRate: 0.12,
+      foodBreakfast: 100,
+      foodLunch: 180,
+      foodDinner: 200,
+      foodChaiSnacks: 60,
+      foodDesc: 'Iconic street food hubs, local dhabas & authentic mithai shops',
+      dailyOlaUberCabs: 380,
+      transitDesc: 'Metro rail, shared e-rickshaws & budget Ola/Uber Auto',
+      airportTransferPerWay: 350,
+      monumentTicketPerDay: 180,
+      sightDesc: 'ASI monument passes, temple parikramas & stepwells',
+      guidePerDay: 800,
       activityPerPerson: 400,
+      actDesc: 'Artisan terracotta pottery & heritage walking groups',
+      shoppingPerPerson: 600,
+      shoppingDesc: 'Local bazaar handicrafts, block-print scarves & spices',
       miscRatio: 0.08,
-      label: 'Backpacker Budget',
-      stayDesc: 'Hostels, verified local guesthouses & boutique dorms',
-      transitDesc: 'Metro, shared autos, e-rickshaws & local city buses',
-      diningDesc: 'Iconic street food hubs, dhabas & authentic local eateries'
+      label: 'Backpacker Budget'
     },
     comfort: {
       stayPerRoomNight: 3400,
-      foodPerPersonDay: 1200,
-      transitPerDay: 1100,
-      sightseeingPerPersonDay: 550,
+      stayCategory: '3-Star Heritage Havelis & Boutique Hotels',
+      stayGstRate: 0.12,
+      foodBreakfast: 220,
+      foodLunch: 420,
+      foodDinner: 520,
+      foodChaiSnacks: 120,
+      foodDesc: 'Renowned heritage restaurants, rooftop cafes & regional thali houses',
+      dailyOlaUberCabs: 950,
+      transitDesc: 'Prepaid Ola Mini / Uber Go & AC point-to-point transfers',
+      airportTransferPerWay: 650,
+      monumentTicketPerDay: 400,
+      sightDesc: 'Fast-track monument passes, museum audio guides & palace entries',
+      guidePerDay: 1600,
       activityPerPerson: 850,
+      actDesc: 'Traditional block-printing masterclasses & sunset boat safaris',
+      shoppingPerPerson: 1800,
+      shoppingDesc: 'Authentic blue pottery, handloom textiles & artisan jewellery',
       miscRatio: 0.10,
-      label: 'Comfort Explorer',
-      stayDesc: '3-Star boutique hotels & heritage homestays',
-      transitDesc: 'Prepaid app cabs (Ola/Uber) & AC local transfers',
-      diningDesc: 'Renowned heritage restaurants, cafes & thali houses'
+      label: 'Comfort Explorer'
     },
     premium: {
       stayPerRoomNight: 8500,
-      foodPerPersonDay: 2800,
-      transitPerDay: 2500,
-      sightseeingPerPersonDay: 1200,
+      stayCategory: '5-Star Royal Palaces & Luxury Heritage Resorts',
+      stayGstRate: 0.18,
+      foodBreakfast: 550,
+      foodLunch: 950,
+      foodDinner: 1400,
+      foodChaiSnacks: 250,
+      foodDesc: 'Fine-dining royal Mewari/Mughlai kitchens, palace lawns & wine tastings',
+      dailyOlaUberCabs: 2200,
+      transitDesc: 'Dedicated chauffeur-driven AC Sedan / SUV (Ola Prime / Uber Premier)',
+      airportTransferPerWay: 1400,
+      monumentTicketPerDay: 850,
+      sightDesc: 'VIP palace access, private royal apartments & curator tours',
+      guidePerDay: 3000,
       activityPerPerson: 1800,
+      actDesc: 'Private royal historian walk, vintage car tours & desert champagne dunes',
+      shoppingPerPerson: 4500,
+      shoppingDesc: 'Fine pashminas, certified gemstones, brassware & royal antiques',
       miscRatio: 0.12,
-      label: 'Royal Luxury & Heritage',
-      stayDesc: '5-Star palaces, luxury havelis & 4-star heritage resorts',
-      transitDesc: 'Dedicated private AC chauffeur sedan / SUV',
-      diningDesc: 'Fine-dining royal cuisine, rooftop lounges & private tastings'
+      label: 'Royal Luxury & Heritage'
     }
   };
 
   const rate = TIER_RATES[budgetLevel] || TIER_RATES.comfort;
   const cityMultiplier = ['Mumbai', 'Delhi'].includes(city) ? 1.15 : (city === 'Agra' ? 0.92 : 1.0);
 
-  const stayCost = Math.round((customModifiers.stayRate || rate.stayPerRoomNight * cityMultiplier) * roomsNeeded * dCount);
-  const foodCost = Math.round((customModifiers.foodRate || rate.foodPerPersonDay * cityMultiplier) * tCount * dCount);
-  const transitCost = Math.round((customModifiers.transitRate || rate.transitPerDay) * dCount);
-  const sightCost = Math.round((customModifiers.sightRate || rate.sightseeingPerPersonDay) * tCount * dCount);
-  const activityCost = Math.round((customModifiers.actRate || rate.activityPerPerson) * activitiesCount * tCount);
+  // 1. Accommodation Attributes
+  const roomBasePerNight = Math.round((customModifiers.stayRate || rate.stayPerRoomNight) * cityMultiplier);
+  const stayBaseCost = roomBasePerNight * roomsNeeded * dCount;
+  const stayGstAmount = Math.round(stayBaseCost * rate.stayGstRate);
+  const stayTotalCost = stayBaseCost + stayGstAmount;
 
-  const subtotal = stayCost + foodCost + transitCost + sightCost + activityCost;
-  const miscCost = Math.round(subtotal * rate.miscRatio);
-  const grandTotal = subtotal + miscCost;
+  // 2. Food & Dining Attributes
+  const dailyFoodPerPerson = rate.foodBreakfast + rate.foodLunch + rate.foodDinner + rate.foodChaiSnacks;
+  const foodBaseCost = Math.round((customModifiers.foodRate || dailyFoodPerPerson * cityMultiplier) * tCount * dCount);
+  const foodGstAmount = Math.round(foodBaseCost * 0.05); // 5% GST on dining
+  const foodTotalCost = foodBaseCost + foodGstAmount;
+
+  // 3. Local Transit & Cab Attributes (Ola / Uber Rates)
+  const dailyTransitCost = Math.round((customModifiers.transitRate || rate.dailyOlaUberCabs) * dCount);
+  const airportTransferCost = rate.airportTransferPerWay * 2; // Airport arrival + departure
+  const transitTotalCost = dailyTransitCost + airportTransferCost;
+  const transitGstAmount = Math.round(transitTotalCost * 0.05); // 5% GST on app cabs
+
+  // 4. Intercity Travel (Optional)
+  const intercityRatePerPerson = intercityMode === 'flight' ? 3800 : (intercityMode === 'bus' ? 850 : 1450);
+  const intercityTotalCost = includeIntercity ? (intercityRatePerPerson * tCount) : 0;
+
+  // 5. Sightseeing & Monument Passes
+  const sightBaseCost = Math.round((customModifiers.sightRate || rate.monumentTicketPerDay) * tCount * dCount);
+
+  // 6. Certified Guides & Cultural Experiences
+  const guideDays = Math.min(dCount, 2);
+  const guideCost = rate.guidePerDay * guideDays;
+  const activityCost = Math.round((customModifiers.actRate || rate.activityPerPerson) * activitiesCount * tCount);
+  const experienceTotalCost = guideCost + activityCost;
+
+  // 7. Shopping & Traditional Bazaar Souvenirs
+  const shoppingCost = rate.shoppingPerPerson * tCount;
+
+  // 8. Subtotal, Buffer & Grand Total
+  const subtotalWithoutBuffer = stayTotalCost + foodTotalCost + transitTotalCost + intercityTotalCost + sightBaseCost + experienceTotalCost + shoppingCost;
+  const contingencyBufferCost = Math.round(subtotalWithoutBuffer * rate.miscRatio);
+  const totalGstPaid = stayGstAmount + foodGstAmount + transitGstAmount;
+  const grandTotal = subtotalWithoutBuffer + contingencyBufferCost;
   const perPersonCost = Math.round(grandTotal / tCount);
+  const dailyBurnRate = Math.round(grandTotal / dCount);
+
+  // 9. Day-by-Day Cost Timeline Projection
+  const dayByDayTimeline = Array.from({ length: dCount }, (_, idx) => {
+    const dayNum = idx + 1;
+    const isFirstDay = dayNum === 1;
+    const isLastDay = dayNum === dCount;
+    const dayStay = Math.round(stayTotalCost / dCount);
+    const dayFood = Math.round(foodTotalCost / dCount);
+    const dayTransit = Math.round(dailyTransitCost / dCount) + (isFirstDay ? rate.airportTransferPerWay : (isLastDay ? rate.airportTransferPerWay : 0));
+    const daySight = Math.round(sightBaseCost / dCount);
+    const dayExp = isFirstDay ? 0 : Math.round(experienceTotalCost / Math.max(1, dCount - 1));
+    const dayShop = isLastDay ? Math.round(shoppingCost * 0.7) : Math.round(shoppingCost * 0.3 / Math.max(1, dCount - 1));
+    const dayTotal = dayStay + dayFood + dayTransit + daySight + dayExp + dayShop;
+
+    return {
+      day: dayNum,
+      title: isFirstDay ? `Day 1: Arrival, Check-in & Evening Heritage Aarti` : (isLastDay ? `Day ${dayNum}: Bazaars, Souvenirs & Airport Departure` : `Day ${dayNum}: Monument Exploration & Artisan Workshops`),
+      totalAmount: dayTotal,
+      stayAmount: dayStay,
+      foodAmount: dayFood,
+      transitAmount: dayTransit,
+      sightAmount: daySight,
+      experienceAmount: dayExp,
+      shoppingAmount: dayShop
+    };
+  });
 
   return {
     budgetLevel,
@@ -1713,66 +1802,167 @@ export function calculateDetailedBudget({
     travellers: tCount,
     grandTotal,
     perPersonCost,
+    dailyBurnRate,
+    totalGstPaid,
+    includeIntercity,
+    intercityMode,
+    intercityTotalCost,
+    contingencyBufferCost,
+    breakdownAttributes: {
+      accommodation: {
+        category: rate.stayCategory,
+        roomRatePerNight: roomBasePerNight,
+        roomsNeeded,
+        nights: dCount,
+        stayBaseCost,
+        gstRatePercent: Math.round(rate.stayGstRate * 100),
+        stayGstAmount,
+        totalWithGst: stayTotalCost
+      },
+      dining: {
+        breakfastDaily: rate.foodBreakfast,
+        lunchDaily: rate.foodLunch,
+        dinnerDaily: rate.foodDinner,
+        chaiSnacksDaily: rate.foodChaiSnacks,
+        dailyPerPerson: dailyFoodPerPerson,
+        foodBaseCost,
+        foodGstAmount,
+        totalFoodCost: foodTotalCost
+      },
+      localCabs: {
+        dailyOlaUberRate: rate.dailyOlaUberCabs,
+        airportTransfersTotal: airportTransferCost,
+        estimatedTotalKm: dCount * 26,
+        transitTotalCost,
+        cabGstAmount: transitGstAmount
+      },
+      sightseeing: {
+        dailyTicketPerPerson: rate.monumentTicketPerDay,
+        totalCost: sightBaseCost
+      },
+      experiences: {
+        guideDays,
+        guideRatePerDay: rate.guidePerDay,
+        totalGuideCost: guideCost,
+        activitiesCount,
+        activityRatePerPerson: rate.activityPerPerson,
+        totalActivityCost: activityCost,
+        totalExperienceCost: experienceTotalCost
+      },
+      shopping: {
+        shoppingPerPerson: rate.shoppingPerPerson,
+        totalShoppingCost: shoppingCost
+      },
+      contingency: {
+        percentage: Math.round(rate.miscRatio * 100),
+        amount: contingencyBufferCost
+      }
+    },
+    dayByDayTimeline,
     items: [
       {
         category: 'Accommodation',
         icon: '🏨',
-        amount: stayCost,
-        percentage: Math.round((stayCost / grandTotal) * 100),
-        details: `${roomsNeeded} room(s) × ${dCount} nights`,
-        desc: rate.stayDesc,
-        color: '#3b82f6'
+        amount: stayTotalCost,
+        percentage: Math.round((stayTotalCost / grandTotal) * 100),
+        details: `${roomsNeeded} room(s) × ${dCount} nights (${rate.stayCategory})`,
+        desc: `₹${roomBasePerNight}/night + ${Math.round(rate.stayGstRate * 100)}% GST included`,
+        color: '#3b82f6',
+        attributes: [
+          `Rooms: ${roomsNeeded}`,
+          `Nights: ${dCount}`,
+          `Rate: ₹${roomBasePerNight}/night`,
+          `GST: ₹${stayGstAmount}`
+        ]
       },
       {
         category: 'Food & Dining',
         icon: '🍲',
-        amount: foodCost,
-        percentage: Math.round((foodCost / grandTotal) * 100),
-        details: `${tCount} travelers × ${dCount} days`,
-        desc: rate.diningDesc,
-        color: '#10b981'
+        amount: foodTotalCost,
+        percentage: Math.round((foodTotalCost / grandTotal) * 100),
+        details: `${tCount} travelers × ${dCount} days (₹${dailyFoodPerPerson}/day/person)`,
+        desc: rate.foodDesc,
+        color: '#10b981',
+        attributes: [
+          `Breakfast: ₹${rate.foodBreakfast}/day`,
+          `Lunch: ₹${rate.foodLunch}/day`,
+          `Dinner: ₹${rate.foodDinner}/day`,
+          `Street Food/Tea: ₹${rate.foodChaiSnacks}/day`
+        ]
       },
       {
-        category: 'Local Transport',
+        category: 'Local Transport (Ola/Uber)',
         icon: '🚕',
-        amount: transitCost,
-        percentage: Math.round((transitCost / grandTotal) * 100),
-        details: `${dCount} days of daily transit`,
+        amount: transitTotalCost,
+        percentage: Math.round((transitTotalCost / grandTotal) * 100),
+        details: `${dCount} days local cab rides + 2 airport/station transfers`,
         desc: rate.transitDesc,
-        color: '#8b5cf6'
+        color: '#8b5cf6',
+        attributes: [
+          `Daily City Rides: ₹${rate.dailyOlaUberCabs}/day`,
+          `Airport Transfers: ₹${airportTransferCost} (2 trips)`,
+          `Est. Travelled: ~${dCount * 26} km`,
+          `App GST Included: ₹${transitGstAmount}`
+        ]
       },
       {
-        category: 'Sightseeing & Entry',
+        category: 'Sightseeing & Entry Passes',
         icon: '🏛️',
-        amount: sightCost,
-        percentage: Math.round((sightCost / grandTotal) * 100),
-        details: 'ASI passes & monument entry tickets',
-        desc: 'Includes ASI heritage monument tickets and museum passes',
-        color: '#f59e0b'
+        amount: sightBaseCost,
+        percentage: Math.round((sightBaseCost / grandTotal) * 100),
+        details: `ASI passes & monument tickets for ${tCount} travelers`,
+        desc: rate.sightDesc,
+        color: '#f59e0b',
+        attributes: [
+          `Daily Passes: ₹${rate.monumentTicketPerDay}/person`,
+          `Covers Forts, UNESCO Wonders & Museums`
+        ]
       },
       {
-        category: 'Experiences & Activities',
+        category: 'Experiences & Guides',
         icon: '🎨',
-        amount: activityCost,
-        percentage: Math.round((activityCost / grandTotal) * 100),
-        details: `${activitiesCount} guided cultural experience(s)`,
-        desc: 'Artisan workshops, walking tours & heritage guides',
-        color: '#ec4899'
+        amount: experienceTotalCost,
+        percentage: Math.round((experienceTotalCost / grandTotal) * 100),
+        details: `${guideDays} day(s) ASI guide + ${activitiesCount} artisan workshop(s)`,
+        desc: rate.actDesc,
+        color: '#ec4899',
+        attributes: [
+          `Certified Guide: ₹${guideCost} (${guideDays} days)`,
+          `Workshops & Safaris: ₹${activityCost}`
+        ]
       },
       {
-        category: 'Shopping & Miscellaneous',
+        category: 'Shopping & Handicrafts',
         icon: '🛍️',
-        amount: miscCost,
-        percentage: Math.round((miscCost / grandTotal) * 100),
-        details: 'Handicrafts buffer, tips & emergency fund',
-        desc: 'Souvenirs, artisan textiles, emergency reserves and tips',
-        color: '#06b6d4'
+        amount: shoppingCost,
+        percentage: Math.round((shoppingCost / grandTotal) * 100),
+        details: `₹${rate.shoppingPerPerson} budget per traveler`,
+        desc: rate.shoppingDesc,
+        color: '#06b6d4',
+        attributes: [
+          `Traditional textiles, blue pottery & spices`,
+          `Supports 0% commission local artisan stalls`
+        ]
+      },
+      {
+        category: 'Contingency & Taxes Buffer',
+        icon: '🛡️',
+        amount: contingencyBufferCost,
+        percentage: Math.round((contingencyBufferCost / grandTotal) * 100),
+        details: `${Math.round(rate.miscRatio * 100)}% Emergency buffer for medicine, tips & delays`,
+        desc: 'Safety reserve ensuring you are never caught unprepared',
+        color: '#64748b',
+        attributes: [
+          `Reserve Margin: ${Math.round(rate.miscRatio * 100)}%`,
+          `Total GST Included: ₹${totalGstPaid}`
+        ]
       }
     ],
     savingsTips: [
       'Book ASI monuments directly via ASI-Pay online to save 10% on entry fees.',
-      'Use metro rail corridors in Delhi, Jaipur and Mumbai to avoid rush-hour traffic jams.',
-      'Purchase handicrafts directly from artisan workshops (e.g. Bagru or Agra inlay) to support local makers and get 30-40% better pricing.'
+      'Use the built-in Ola vs. Uber live price comparator to save ₹60-₹150 on every city cab transfer.',
+      'Purchase handicrafts directly from artisan workshops (e.g. Bagru or Agra inlay) to support local makers and get 30-40% better pricing.',
+      'Opt for lunch thalis at verified local dining dhabas for authentic regional taste at half the restaurant price.'
     ]
   };
 }

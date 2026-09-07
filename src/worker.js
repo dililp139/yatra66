@@ -5,6 +5,7 @@
 
 import * as db from './db/index.js';
 import { generateAiTripPlan, modifyAiItinerary, chatWithAi, generateAiHotels, generateAiLocals } from './gemini.js';
+import { googleConsentHtml } from './googleConsentPage.js';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

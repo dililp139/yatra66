@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import SihRouteMap from './SihRouteMap';
+import OlaUberCabComparator from './OlaUberCabComparator';
 import {
   FIVE_CITIES_MVP,
   calculateDetailedBudget,
@@ -564,6 +565,12 @@ export default function SihTripPlanner({
   // Packing list state
   const [checkedPacking, setCheckedPacking] = useState({});
 
+  // Cab modal & Cost calculator detailed view state
+  const [showCabModal, setShowCabModal] = useState(false);
+  const [costViewMode, setCostViewMode] = useState('overview'); // 'overview' | 'attributes' | 'timeline'
+  const [includeIntercity, setIncludeIntercity] = useState(false);
+  const [intercityMode, setIntercityMode] = useState('train'); // 'train' | 'flight' | 'bus'
+
   // Comprehensive list of ALL 32+ Indian destinations
   const allPlannerCities = useMemo(() => {
     const defaultList = [
@@ -859,8 +866,10 @@ export default function SihTripPlanner({
       budgetLevel: budgetTier,
       city: cityChoice,
       activitiesCount: Math.min(durationDays, 4),
+      includeIntercity,
+      intercityMode,
     });
-  }, [totalTravellers, durationDays, budgetTier, cityChoice, customDailyBudget]);
+  }, [totalTravellers, durationDays, budgetTier, cityChoice, customDailyBudget, includeIntercity, intercityMode]);
 
   const rebalancedCostData = useMemo(() => {
     if (!rebalanceTarget) return null;
@@ -1099,6 +1108,32 @@ export default function SihTripPlanner({
     });
     content += `\nTotal Estimated Trip Cost: ${formatPrice(budgetBreakdown.grandTotal)}\n`;
     content += `Per Person Cost: ${formatPrice(budgetBreakdown.perPersonCost)}\n\n`;
+
+    if (budgetBreakdown.breakdownAttributes) {
+      const attrs = budgetBreakdown.breakdownAttributes;
+      content += `-----------------------------------------------------\n`;
+      content += `ITEMIZED COST ATTRIBUTES & TAX BREAKDOWN\n`;
+      content += `-----------------------------------------------------\n`;
+      content += `• Accommodation: ` + attrs.accommodation.rooms + ` Room(s) x ` + attrs.accommodation.nights + ` Night(s) @ ` + formatPrice(attrs.accommodation.ratePerNight) + `/night + ` + attrs.accommodation.gstPercent + `% GST (` + formatPrice(attrs.accommodation.gstAmount) + `)\n`;
+      content += `• Dining Breakdown: ` + formatPrice(attrs.dining.dailyRatePerPerson) + `/person/day [Breakfast: ₹` + attrs.dining.breakdown.breakfast + `, Lunch: ₹` + attrs.dining.breakdown.lunch + `, Dinner: ₹` + attrs.dining.breakdown.dinner + `, Tea: ₹` + attrs.dining.breakdown.snacksTea + `]\n`;
+      content += `• Local Transit: ~` + attrs.localTransport.ridesPerDay + ` rides/day via ` + attrs.localTransport.mode + ` [Ola/Uber Est: ` + formatPrice(attrs.localTransport.olaUberEstimate) + `, Fuel/Toll Buffer: ` + formatPrice(attrs.localTransport.fuelTollParkingBuffer) + `]\n`;
+      content += `• Monument Entry & Guides: ` + attrs.activitiesSightseeing.attractionsCount + ` monuments/day (` + attrs.activitiesSightseeing.passType + `) + Certified Guide Allocation (` + formatPrice(attrs.activitiesSightseeing.certifiedGuideFee) + `)\n`;
+      content += `• Souvenirs & Crafts: ` + formatPrice(attrs.shoppingSouvenirs.budgetPerPerson) + `/person [Recommended Bazaars: ` + attrs.shoppingSouvenirs.recommendedBazaars.join(', ') + `]\n`;
+      if (attrs.intercityTransit && attrs.intercityTransit.included) {
+        content += `• Intercity Travel: ` + attrs.intercityTransit.mode.toUpperCase() + ` @ ` + formatPrice(attrs.intercityTransit.perPersonFare) + ` x ` + attrs.intercityTransit.travellers + ` travellers = ` + formatPrice(attrs.intercityTransit.totalIntercityCost) + `\n`;
+      }
+      content += `• Tax Summary: Total GST Paid: ` + formatPrice(attrs.taxSummary.totalGst) + ` [Stays GST: ` + formatPrice(attrs.taxSummary.gstAccommodations) + `, Dining/Services: ` + formatPrice(attrs.taxSummary.gstServicesDining) + `]\n\n`;
+    }
+
+    if (budgetBreakdown.dayByDayTimeline && budgetBreakdown.dayByDayTimeline.length > 0) {
+      content += `-----------------------------------------------------\n`;
+      content += `DAY-BY-DAY EXPENSE TIMELINE\n`;
+      content += `-----------------------------------------------------\n`;
+      budgetBreakdown.dayByDayTimeline.forEach((dayExp) => {
+        content += `Day ` + dayExp.day + ` (` + dayExp.title + `): Total ` + formatPrice(dayExp.dailyTotal) + ` [Stay: ` + formatPrice(dayExp.stay) + `, Meals: ` + formatPrice(dayExp.dining) + `, Cab: ` + formatPrice(dayExp.transit) + `, Sights: ` + formatPrice(dayExp.activities) + `, Buffer: ` + formatPrice(dayExp.shoppingBuffer) + `]\n`;
+      });
+      content += `\n`;
+    }
     content += `Generated on Yatra 66 (yatra66.in) • Have a safe and magical journey! 🇮🇳\n`;
 
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -2499,33 +2534,374 @@ export default function SihTripPlanner({
             </div>
           </div>
 
-          {/* DYNAMIC COST CALCULATOR */}
+          {/* DYNAMIC DETAILED COST CALCULATOR */}
           <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
               <div>
                 <span className="card-tag" style={{ background: 'rgba(234, 88, 12, 0.12)', color: '#ea580c', fontWeight: 800 }}>
-                  💰 Dynamic Cost Calculator
+                  💰 Dynamic Cost & Cab Intelligence
                 </span>
                 <h4 style={{ margin: '0.3rem 0 0', fontSize: '1.25rem', color: 'var(--text-main)' }}>
-                  Expense Breakdown ({durationDays} Days • {totalTravellers} Travelers)
+                  Detailed Expense Breakdown ({durationDays} Days • {totalTravellers} Travelers)
                 </h4>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Realistic Trip-Cost Calculator with Dynamic Budget Rebalancer
+                  Transparent attributes with GST, live Ola & Uber cab estimates, and day-by-day expense timeline
                 </div>
               </div>
 
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f766e' }}>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f766e' }}>
                   {formatPrice(budgetBreakdown.grandTotal)}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  ({formatPrice(budgetBreakdown.perPersonCost)} / person)
+                  ({formatPrice(budgetBreakdown.perPersonCost)} / person • {formatPrice(budgetBreakdown.perPersonPerDay)}/day)
                 </div>
+                {budgetBreakdown.totalGstPaid > 0 && (
+                  <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+                    Includes {formatPrice(budgetBreakdown.totalGstPaid)} GST & Taxes
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* INBOUND / OUTBOUND INTERCITY TRAVEL TOGGLE */}
+            <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                <input
+                  type="checkbox"
+                  checked={includeIntercity}
+                  onChange={(e) => setIncludeIntercity(e.target.checked)}
+                  style={{ width: '16px', height: '16px', accentColor: '#0f766e', cursor: 'pointer' }}
+                />
+                <span>Include Inbound/Outbound Travel to {cityChoice}</span>
+              </label>
+
+              {includeIntercity && (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {[
+                    { id: 'train', label: '🚂 Train (3AC/2AC)' },
+                    { id: 'flight', label: '✈️ Flight' },
+                    { id: 'bus', label: '🚌 Volvo Sleeper' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setIntercityMode(m.id)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '0.75rem',
+                        fontWeight: intercityMode === m.id ? 700 : 500,
+                        background: intercityMode === m.id ? '#0f766e' : 'var(--bg-surface, #fff)',
+                        color: intercityMode === m.id ? '#fff' : 'var(--text-main)',
+                        border: '1px solid ' + (intercityMode === m.id ? '#0f766e' : 'var(--border-color, #cbd5e1)'),
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* VIEW MODE TABS */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setCostViewMode('overview')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '0.82rem',
+                  fontWeight: costViewMode === 'overview' ? 700 : 500,
+                  background: costViewMode === 'overview' ? '#0f766e' : 'transparent',
+                  color: costViewMode === 'overview' ? '#fff' : 'var(--text-muted)',
+                  border: costViewMode === 'overview' ? 'none' : '1px solid var(--border-color, #cbd5e1)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>📊 Category Overview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCostViewMode('attributes')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '0.82rem',
+                  fontWeight: costViewMode === 'attributes' ? 700 : 500,
+                  background: costViewMode === 'attributes' ? '#0f766e' : 'transparent',
+                  color: costViewMode === 'attributes' ? '#fff' : 'var(--text-muted)',
+                  border: costViewMode === 'attributes' ? 'none' : '1px solid var(--border-color, #cbd5e1)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>📋 Itemized Attributes & GST (8 Attributes)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCostViewMode('timeline')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '0.82rem',
+                  fontWeight: costViewMode === 'timeline' ? 700 : 500,
+                  background: costViewMode === 'timeline' ? '#0f766e' : 'transparent',
+                  color: costViewMode === 'timeline' ? '#fff' : 'var(--text-muted)',
+                  border: costViewMode === 'timeline' ? 'none' : '1px solid var(--border-color, #cbd5e1)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>📅 Day-by-Day Expense Timeline</span>
+              </button>
+            </div>
+
+            {/* TAB 1: CATEGORY OVERVIEW */}
+            {costViewMode === 'overview' && (
+              <>
+                {/* PROGRESS STACK BAR */}
+                <div style={{ height: '10px', borderRadius: '5px', overflow: 'hidden', display: 'flex', marginBottom: '1.25rem' }}>
+                  {budgetBreakdown.items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      style={{ width: `${item.percentage}%`, background: item.color }}
+                      title={`${item.category}: ${item.percentage}% (${formatPrice(item.amount)})`}
+                    />
+                  ))}
+                </div>
+
+                {/* BREAKDOWN CARDS */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                  {budgetBreakdown.items.map((item, idx) => {
+                    const isTransit = item.category.toLowerCase().includes('transit') || item.category.toLowerCase().includes('cab');
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          background: 'var(--bg-surface-elevated, #f8fafc)',
+                          padding: '1rem',
+                          borderRadius: '12px',
+                          borderLeft: `4px solid ${item.color}`,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                              {item.icon} {item.category}
+                            </span>
+                            <strong style={{ fontSize: '0.95rem', color: item.color }}>
+                              {formatPrice(item.amount)}
+                            </strong>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            {item.details}
+                          </div>
+                          <div style={{ fontSize: '0.725rem', color: 'var(--text-subtle)', marginTop: '2px' }}>
+                            {item.desc}
+                          </div>
+                        </div>
+
+                        {isTransit && (
+                          <button
+                            type="button"
+                            onClick={() => setShowCabModal(true)}
+                            style={{
+                              marginTop: '10px',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid #3b82f6',
+                              background: 'rgba(59, 130, 246, 0.08)',
+                              color: '#2563eb',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <span>🚖 Compare Ola vs. Uber Fares ➔</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* TAB 2: ITEMIZED ATTRIBUTES & GST */}
+            {costViewMode === 'attributes' && budgetBreakdown.breakdownAttributes && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
+                {/* 1. ACCOMMODATION */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #0f766e' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#0f766e', fontWeight: 700 }}>🏨 Stay Attributes</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#0f766e' }}>{formatPrice(budgetBreakdown.breakdownAttributes.accommodation.totalStayCost)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Category: <strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.accommodation.categoryName}</strong></div>
+                    <div>• Allotment: <strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.accommodation.rooms} Room(s)</strong> for {budgetBreakdown.breakdownAttributes.accommodation.nights} Nights</div>
+                    <div>• Base Rate: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.accommodation.ratePerNight)}/night</strong></div>
+                    <div style={{ color: '#059669' }}>• GST ({budgetBreakdown.breakdownAttributes.accommodation.gstPercent}%): <strong style={{ color: '#059669' }}>{formatPrice(budgetBreakdown.breakdownAttributes.accommodation.gstAmount)}</strong></div>
+                  </div>
+                </div>
+
+                {/* 2. DINING BREAKDOWN */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #ea580c' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#ea580c', fontWeight: 700 }}>🍲 Meal Attributes</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#ea580c' }}>{formatPrice(budgetBreakdown.breakdownAttributes.dining.totalDiningCost)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Daily Rate: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.dining.dailyRatePerPerson)}/person/day</strong></div>
+                    <div>• Breakfast / Morning Chai: <strong style={{ color: 'var(--text-main)' }}>₹{budgetBreakdown.breakdownAttributes.dining.breakdown.breakfast}</strong></div>
+                    <div>• Royal Thali / Midday Lunch: <strong style={{ color: 'var(--text-main)' }}>₹{budgetBreakdown.breakdownAttributes.dining.breakdown.lunch}</strong></div>
+                    <div>• Dinner & Specialties: <strong style={{ color: 'var(--text-main)' }}>₹{budgetBreakdown.breakdownAttributes.dining.breakdown.dinner}</strong></div>
+                    <div>• Snacks & Refreshments: <strong style={{ color: 'var(--text-main)' }}>₹{budgetBreakdown.breakdownAttributes.dining.breakdown.snacksTea}</strong></div>
+                  </div>
+                </div>
+
+                {/* 3. LOCAL TRANSIT & OLA/UBER */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #3b82f6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#2563eb', fontWeight: 700 }}>🚖 Cab & Transit Attributes</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#2563eb' }}>{formatPrice(budgetBreakdown.breakdownAttributes.localTransport.totalCarCost)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Fleet Mode: <strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.localTransport.mode}</strong></div>
+                    <div>• Frequency: ~<strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.localTransport.ridesPerDay} rides/day</strong></div>
+                    <div>• Estimated Ola/Uber Fares: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.localTransport.olaUberEstimate)}</strong></div>
+                    <div>• Parking & Toll Cushion: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.localTransport.fuelTollParkingBuffer)}</strong></div>
+                    <button
+                      type="button"
+                      onClick={() => setShowCabModal(true)}
+                      style={{
+                        marginTop: '6px',
+                        padding: '5px 8px',
+                        borderRadius: '6px',
+                        background: '#2563eb',
+                        color: '#fff',
+                        border: 'none',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ Open Live Ola vs. Uber Comparator
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4. MONUMENT PASSES & GUIDES */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #10b981' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#059669', fontWeight: 700 }}>🎟️ Sightseeing & Guide Pass</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#059669' }}>{formatPrice(budgetBreakdown.breakdownAttributes.activitiesSightseeing.totalEntryCost)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Monuments Covered: <strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.activitiesSightseeing.attractionsCount} top attractions</strong></div>
+                    <div>• Pass Tier: <strong style={{ color: 'var(--text-main)' }}>{budgetBreakdown.breakdownAttributes.activitiesSightseeing.passType}</strong></div>
+                    <div>• Entry / Person: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.activitiesSightseeing.entryPerPerson)}</strong></div>
+                    <div>• Certified Guide Allotment: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.activitiesSightseeing.certifiedGuideFee)}</strong></div>
+                  </div>
+                </div>
+
+                {/* 5. SHOPPING & REGIONAL BAZAARS */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #8b5cf6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#7c3aed', fontWeight: 700 }}>🛍️ Souvenirs & Crafts</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#7c3aed' }}>{formatPrice(budgetBreakdown.breakdownAttributes.shoppingSouvenirs.totalShopping)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Shopping Allowance: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.shoppingSouvenirs.budgetPerPerson)}/person</strong></div>
+                    <div>• Recommended Bazaars:</div>
+                    <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>
+                      {budgetBreakdown.breakdownAttributes.shoppingSouvenirs.recommendedBazaars.join(' • ')}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. TAX & GST AUDIT */}
+                <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '12px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', borderTop: '4px solid #f59e0b' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <h5 style={{ margin: 0, fontSize: '0.9rem', color: '#d97706', fontWeight: 700 }}>🧾 GST & Compliance Tax</h5>
+                    <strong style={{ fontSize: '0.95rem', color: '#d97706' }}>{formatPrice(budgetBreakdown.breakdownAttributes.taxSummary.totalGst)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--text-muted)' }}>
+                    <div>• Hospitality GST: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.taxSummary.gstAccommodations)}</strong></div>
+                    <div>• Dining & Transit GST: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.taxSummary.gstServicesDining)}</strong></div>
+                    <div>• Cushion Reserve: <strong style={{ color: 'var(--text-main)' }}>{formatPrice(budgetBreakdown.breakdownAttributes.contingencyReserve.amount)} ({budgetBreakdown.breakdownAttributes.contingencyReserve.bufferPercent}%)</strong></div>
+                    <div style={{ fontSize: '0.7rem', color: '#059669' }}>✓ Fully compliant with Indian GST slab rules</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: DAY-BY-DAY EXPENSE TIMELINE */}
+            {costViewMode === 'timeline' && budgetBreakdown.dayByDayTimeline && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {budgetBreakdown.dayByDayTimeline.map((d) => (
+                  <div
+                    key={d.day}
+                    style={{
+                      background: 'var(--bg-surface-elevated, #f8fafc)',
+                      borderRadius: '12px',
+                      padding: '0.85rem 1.15rem',
+                      border: '1px solid var(--border-color, #e2e8f0)',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ background: '#0f766e', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>
+                          Day {d.day}
+                        </span>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{d.title}</strong>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <span>🏨 Stay: {formatPrice(d.stay)}</span>
+                        <span>🍲 Food: {formatPrice(d.dining)}</span>
+                        <span>🚖 Cab: {formatPrice(d.transit)}</span>
+                        <span>🎟️ Sights: {formatPrice(d.activities)}</span>
+                        <span>🛍️ Buffer: {formatPrice(d.shoppingBuffer)}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f766e' }}>
+                        {formatPrice(d.dailyTotal)}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>
+                        Day {d.day} Net
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* INTERACTIVE REALISTIC COST REBALANCING WIDGET */}
-            <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '14px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '1.25rem' }}>
+            <div style={{ background: 'var(--bg-surface-elevated, #f8fafc)', borderRadius: '14px', padding: '1rem', border: '1px solid var(--border-color, #e2e8f0)', marginTop: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
                   💡 Too Expensive? Test Our "Reduce Cost" Dynamic Rebalancer:
@@ -2601,47 +2977,6 @@ export default function SihTripPlanner({
                 </div>
               )}
             </div>
-
-            {/* PROGRESS STACK BAR */}
-            <div style={{ height: '10px', borderRadius: '5px', overflow: 'hidden', display: 'flex', marginBottom: '1.25rem' }}>
-              {budgetBreakdown.items.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{ width: `${item.percentage}%`, background: item.color }}
-                  title={`${item.category}: ${item.percentage}% (${formatPrice(item.amount)})`}
-                />
-              ))}
-            </div>
-
-            {/* BREAKDOWN CARDS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-              {budgetBreakdown.items.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: 'var(--bg-surface-elevated, #f8fafc)',
-                    padding: '0.85rem',
-                    borderRadius: '10px',
-                    borderLeft: `4px solid ${item.color}`,
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                      {item.icon} {item.category}
-                    </span>
-                    <strong style={{ fontSize: '0.9rem', color: item.color }}>
-                      {formatPrice(item.amount)}
-                    </strong>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    {item.details}
-                  </div>
-                  <div style={{ fontSize: '0.725rem', color: 'var(--text-subtle)', marginTop: '2px' }}>
-                    {item.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
             </>
           )}
@@ -2653,6 +2988,39 @@ export default function SihTripPlanner({
             <button type="button" className="primary-action" onClick={() => setCurrentStep(1)}>
               Plan Another Trip ➔
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* LIVE OLA VS. UBER COMPARATOR MODAL */}
+      {showCabModal && (
+        <div className="modal-backdrop" onClick={() => setShowCabModal(false)} style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.6)' }}>
+          <div
+            className="hotel-compare-modal-window"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '880px', width: '100%', maxHeight: '92vh', overflowY: 'auto', borderRadius: '18px', padding: '1.25rem', background: 'var(--bg-surface, #ffffff)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '0.75rem' }}>
+              <div>
+                <span style={{ color: '#0f766e', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>
+                  Trip Planner Transit Integration
+                </span>
+                <h3 style={{ margin: '4px 0 2px', fontSize: '1.25rem', color: 'var(--text-main)' }}>
+                  🚖 Ola vs. Uber Live Fare Estimator
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Compare real vehicle rates for {cityChoice} with direct 1-click booking
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCabModal(false)}
+                style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)', lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            </div>
+            <OlaUberCabComparator initialCity={cityChoice} />
           </div>
         </div>
       )}

@@ -1,3 +1,4 @@
+import OlaUberCabComparator from './OlaUberCabComparator';
 import { useState, useMemo } from 'react';
 
 export const LOCAL_RENTAL_OPERATORS = [
@@ -217,6 +218,7 @@ export default function RentalServices({
   const [serviceFilter, setServiceFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [enquirySuccessModal, setEnquirySuccessModal] = useState(null);
+  const [activeTab, setActiveTab] = useState('comparator');
 
   const cityList = useMemo(() => {
     const list = ['All'];
@@ -281,6 +283,52 @@ export default function RentalServices({
             </div>
           </div>
         </div>
+
+        {/* TOP TAB SWITCHER: LIVE CAB ENGINE VS LOCAL OPERATOR DIRECTORY */}
+        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className={`quick-pill-tag ${activeTab === 'comparator' ? 'active' : ''}`}
+            onClick={() => setActiveTab('comparator')}
+            style={{
+              padding: '10px 22px',
+              borderRadius: '12px',
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>🚖</span>
+            <span>Live Ola vs. Uber Fare Engine</span>
+          </button>
+          <button
+            type="button"
+            className={`quick-pill-tag ${activeTab === 'directory' ? 'active' : ''}`}
+            onClick={() => setActiveTab('directory')}
+            style={{
+              padding: '10px 22px',
+              borderRadius: '12px',
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>🚗</span>
+            <span>Local Operators (Self-Drive Cars, Bikes & Cabs)</span>
+          </button>
+        </div>
+
+        {activeTab === 'comparator' && (
+          <div style={{ marginTop: '1.25rem' }}>
+            <OlaUberCabComparator defaultCity={filterCity !== 'All' ? filterCity : 'Jaipur'} />
+          </div>
+        )}
 
         {/* QUICK CITY CHIPS & VEHICLE CATEGORY BAR */}
         <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
