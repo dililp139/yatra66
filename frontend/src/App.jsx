@@ -6243,9 +6243,11 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
     setErrorNotice('');
     setSuccessNotice('');
 
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (mode === 'login') {
-      if (!email.trim()) {
-        setErrorNotice('Please enter your email address.');
+      if (!email.trim() || !EMAIL_REGEX.test(email.trim())) {
+        setErrorNotice('Please enter a valid email address (e.g. name@domain.com).');
         return;
       }
       if (!password || !password.trim()) {
@@ -6257,11 +6259,10 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
       try {
         const loggedInUser = await yatraApi.login({ email: email.trim(), password });
         setUser(loggedInUser);
-        const tag = loggedInUser.isNewAccount ? 'New Account Created in Cloudflare D1' : 'Verified with Cloudflare D1';
-        setSuccessNotice(`Welcome, ${loggedInUser.name}! (${tag} • User #${loggedInUser.id})`);
+        setSuccessNotice(`Welcome back, ${loggedInUser.name}! (Verified with Cloudflare D1 • User #${loggedInUser.id})`);
         setTimeout(() => onClose(), 800);
       } catch (err) {
-        setErrorNotice(err.message || 'Incorrect email or password. Could not verify with Cloudflare D1.');
+        setErrorNotice(err.message || 'Incorrect email or password. Please verify your credentials and try again.');
       } finally {
         setLoading(false);
       }
@@ -6342,28 +6343,6 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
     onClose();
   };
 
-  const handleQuickDemoSignIn = async () => {
-    setLoading(true);
-    setErrorNotice('');
-    try {
-      const demoUser = await yatraApi.signIn({
-        name: 'Aarav Sharma',
-        email: 'aarav.sharma@yatra.in',
-        password: 'demoPassword123',
-        authProvider: 'email',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format',
-        city: 'Jaipur',
-        interest: 'Heritage & Royal Forts'
-      });
-      setUser(demoUser);
-      setSuccessNotice(`Signed in as ${demoUser.name}! (Saved to Cloudflare D1 User #${demoUser.id || 19})`);
-      setTimeout(() => onClose(), 800);
-    } catch (err) {
-      setErrorNotice(err.message || 'Could not connect demo user to database.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const modalContent = (
     <div className="auth-modal-window" style={isInlinePage ? { maxWidth: '440px', width: '100%', margin: '0 auto', boxShadow: '0 12px 40px rgba(0,0,0,0.1)' } : {}} onClick={(e) => e.stopPropagation()}>
@@ -6604,31 +6583,6 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
                   </button>
                 </div>
 
-                {/* 1-Click Instant Demo Sign In for effortless testing */}
-                <button
-                  type="button"
-                  onClick={handleQuickDemoSignIn}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.6rem',
-                    width: '100%',
-                    padding: '0.8rem 1rem',
-                    borderRadius: '10px',
-                    border: '1.5px solid #10b981',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    color: '#059669',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    margin: '0.5rem 0 0.85rem',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <span style={{ fontSize: '1.1rem' }}>⚡</span>
-                  <span>Instant 1-Click Sign In (Demo Access)</span>
-                </button>
 
                 {/* Real Google Sign-In Button Opening Real Google Popup Window */}
                 <button

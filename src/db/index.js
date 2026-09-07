@@ -347,26 +347,23 @@ export async function getAuthDbStatus(db) {
 
 export async function verifyUserLogin(db, email, password) {
   if (!email || !email.trim()) {
-    return { success: false, error: 'Email address is required' };
+    return { success: false, error: 'Email address is required.' };
   }
   const cleanEmail = email.trim().toLowerCase();
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!EMAIL_REGEX.test(cleanEmail)) {
+    return { success: false, error: 'Please enter a valid email address (e.g. name@domain.com).' };
+  }
 
   const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = ?').bind(cleanEmail);
   const row = await stmt.first();
 
-  // If user does not exist yet: AUTOMATICALLY CREATE AND PERSIST IN CLOUDFLARE D1!
+  // If user does not exist in D1 database: strictly reject
   if (!row) {
-    if (!password || !password.trim()) {
-      return { success: false, error: 'Password is required to sign in.' };
-    }
-    const cleanName = cleanEmail.split('@')[0];
-    const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-    await db.prepare(`
-      INSERT INTO users (email, name, password, auth_provider, city, interest, last_login_at)
-      VALUES (?, ?, ?, 'email', 'Jaipur', 'Heritage', CURRENT_TIMESTAMP)
-    `).bind(cleanEmail, formattedName, password).run();
-    const newUser = await getUserByEmail(db, cleanEmail);
-    return { success: true, user: newUser, isNewAccount: true };
+    return {
+      success: false,
+      error: 'No account found with this email. Please check your email or click Create Account to register.'
+    };
   }
 
   // Password is required
@@ -374,18 +371,23 @@ export async function verifyUserLogin(db, email, password) {
     return { success: false, error: 'Password is required to sign in.' };
   }
 
-  // If user account was created without a password or via Google, update and set password now
-  if (!row.password) {
-    await db.prepare('UPDATE users SET password = ?, last_login_at = CURRENT_TIMESTAMP WHERE id = ?').bind(password, row.id).run();
-    const updated = await getUserByEmail(db, cleanEmail);
-    return { success: true, user: updated };
+  // If user account was created via Google without a password
+  if (row.auth_provider === 'google' && !row.password) {
+    return {
+      success: false,
+      error: 'This account was registered with Google. Please click "Continue with Google" to sign in.'
+    };
   }
 
-  // If account has password, it MUST match
+  // If account has password, it MUST strictly match
   if (row.password !== password) {
-    return { success: false, error: 'Incorrect password for this account. Please verify your password and try again.' };
+    return {
+      success: false,
+      error: 'Incorrect password. Please verify your credentials and try again.'
+    };
   }
 
+  // Authentication succeeded: update login timestamp
   await db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').bind(row.id).run();
   const updated = await getUserByEmail(db, cleanEmail);
   return { success: true, user: updated };
