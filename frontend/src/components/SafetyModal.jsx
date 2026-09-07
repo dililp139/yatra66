@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TOURIST_EMERGENCY_DATA } from '../services/sihData';
+import { TOURIST_EMERGENCY_DATA } from '../services/yatraData';
 
-export default function SihSafetyModal({ onClose, defaultCity = 'Jaipur' }) {
+export default function SafetyModal({ onClose, defaultCity = 'Jaipur' }) {
   const [selectedCity, setSelectedCity] = useState(defaultCity);
   const cities = Object.keys(TOURIST_EMERGENCY_DATA.cities);
   const currentCityData = TOURIST_EMERGENCY_DATA.cities[selectedCity] || TOURIST_EMERGENCY_DATA.cities.Jaipur;

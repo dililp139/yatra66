@@ -2,20 +2,20 @@ import React, { Component, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import './App.css';
 import yatraApi from './services/yatraService';
-import SihTripPlanner from './components/SihTripPlanner';
-import SihHiddenGems from './components/SihHiddenGems';
-import SihExperiences from './components/SihExperiences';
-import SihMarketplace from './components/SihMarketplace';
+import TripPlanner from './components/TripPlanner';
+import HiddenGems from './components/HiddenGems';
+import Experiences from './components/Experiences';
+import Marketplace from './components/Marketplace';
 import BusinessPartnerPortal from './components/BusinessPartnerPortal';
-import SihSafetyModal from './components/SihSafetyModal';
-import SihEnquiryModal from './components/SihEnquiryModal';
+import SafetyModal from './components/SafetyModal';
+import EnquiryModal from './components/EnquiryModal';
 import FloatingSafetyHelp from './components/FloatingSafetyHelp';
 import RentalServices from './components/RentalServices';
 import OlaUberCabComparator from './components/OlaUberCabComparator';
 import YatraAiChatbot from './components/YatraAiChatbot';
 import ExploreIndiaPassport from './components/ExploreIndiaPassport';
 import DiscoverIndiaAiEngine from './components/DiscoverIndiaAiEngine';
-import { FIVE_CITIES_MVP, TRANSLATIONS, SIH_STATS, UPCOMING_LIVE_EVENTS_DATA } from './services/sihData';
+import { FIVE_CITIES_MVP, TRANSLATIONS, PLATFORM_STATS, UPCOMING_LIVE_EVENTS_DATA } from './services/yatraData';
 
 function CreativeLogo({ size = 36 }) {
   return (
@@ -760,14 +760,14 @@ function App() {
       {page === 'business' && <BusinessPortalPage {...appState} />}
 
       {safetyModalOpen && (
-        <SihSafetyModal
+        <SafetyModal
           onClose={() => setSafetyModalOpen(false)}
           defaultCity={selectedMarker?.name || 'Jaipur'}
         />
       )}
 
       {enquiryModalBiz && (
-        <SihEnquiryModal
+        <EnquiryModal
           business={enquiryModalBiz}
           onClose={() => setEnquiryModalBiz(null)}
           onSuccess={() => setBookingNotice(`Direct enquiry dispatched to ${enquiryModalBiz.name}! 🤝`)}
@@ -2187,58 +2187,58 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           </div>
 
           {/* QUICK ACTION LAUNCHPAD */}
-          <div className="sih-quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-            <div className="sih-action-card" onClick={() => setPage('planner')}>
-              <span className="sih-action-icon">✨</span>
-              <div className="sih-action-title">
+          <div className="quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+            <div className="action-card" onClick={() => setPage('planner')}>
+              <span className="action-icon">✨</span>
+              <div className="action-title">
                 <span>{lang === 'hi' ? 'स्मार्ट प्लानर' : 'Plan My Trip'}</span>
                 <span>➔</span>
               </div>
-              <p className="sih-action-desc">
+              <p className="action-desc">
                 {lang === 'hi' ? 'बजट और रुचि अनुसार व्यक्तिगत योजना' : 'Multi-day itineraries & route optimization'}
               </p>
             </div>
 
-            <div className="sih-action-card" onClick={() => setPage('destinations')}>
-              <span className="sih-action-icon">🏛️</span>
-              <div className="sih-action-title">
+            <div className="action-card" onClick={() => setPage('destinations')}>
+              <span className="action-icon">🏛️</span>
+              <div className="action-title">
                 <span>{lang === 'hi' ? 'गंतव्य खोजें' : 'Explore Destinations'}</span>
                 <span>➔</span>
               </div>
-              <p className="sih-action-desc">
+              <p className="action-desc">
                 {lang === 'hi' ? 'विरासत, पहाड़, समुद्र तट और पावन तीर्थ' : 'Royal forts, hill stations & beaches'}
               </p>
             </div>
 
-            <div className="sih-action-card" onClick={() => setPage('rentals')}>
-              <span className="sih-action-icon">🚗</span>
-              <div className="sih-action-title">
+            <div className="action-card" onClick={() => setPage('rentals')}>
+              <span className="action-icon">🚗</span>
+              <div className="action-title">
                 <span>{lang === 'hi' ? 'वाहन रेंटल' : 'Rentals Fleet'}</span>
                 <span>➔</span>
               </div>
-              <p className="sih-action-desc">
+              <p className="action-desc">
                 {lang === 'hi' ? 'कार, बाइक, स्कूटर और ईवी रेंटल' : 'Self-drive cars, Royal Enfields & EVs'}
               </p>
             </div>
 
-            <div className="sih-action-card" onClick={() => setPage('gems')}>
-              <span className="sih-action-icon">🌿</span>
-              <div className="sih-action-title">
+            <div className="action-card" onClick={() => setPage('gems')}>
+              <span className="action-icon">🌿</span>
+              <div className="action-title">
                 <span>{lang === 'hi' ? 'छिपे हुए रत्न' : 'Hidden Gems'}</span>
                 <span>➔</span>
               </div>
-              <p className="sih-action-desc">
+              <p className="action-desc">
                 {lang === 'hi' ? 'शांत व ऐतिहासिक धरोहरें' : 'Offbeat stepwells & craft villages'}
               </p>
             </div>
 
-            <div className="sih-action-card" onClick={() => setPage('marketplace')}>
-              <span className="sih-action-icon">🤝</span>
-              <div className="sih-action-title">
+            <div className="action-card" onClick={() => setPage('marketplace')}>
+              <span className="action-icon">🤝</span>
+              <div className="action-title">
                 <span>{lang === 'hi' ? 'स्थानीय व्यापार' : 'Support Local'}</span>
                 <span>➔</span>
               </div>
-              <p className="sih-action-desc">
+              <p className="action-desc">
                 {lang === 'hi' ? 'होमस्टे व गाइड से सीधा संपर्क' : 'Homestays, guides & artisans (0% fee)'}
               </p>
             </div>
@@ -2270,7 +2270,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
 
     {/* HERO YATRA LIVE IMPACT BENCHMARK STRIP */}
     <div className="hero-stats-strip">
-      {SIH_STATS.map((stat, i) => (
+      {PLATFORM_STATS.map((stat, i) => (
         <div key={i} className="hero-stat-box">
           <span className="hero-stat-icon">{stat.icon}</span>
           <div>
@@ -2416,9 +2416,9 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
       </div>
 
       {/* STARTUP & TOURISM ECOSYSTEM FOOTER */}
-      <footer className="sih-startup-footer">
-        <div className="sih-footer-inner">
-          <div className="sih-footer-brand">
+      <footer className="startup-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
             <h3>
               <span className="brand-mark" style={{ width: '28px', height: '28px', fontSize: '14px' }}>Y</span>
               <span>Yatra 66</span>
@@ -2439,7 +2439,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </div>
           </div>
 
-          <div className="sih-footer-col">
+          <div className="footer-col">
             <h4>Explore</h4>
             <ul>
               <li><button type="button" onClick={() => setPage('destinations')}>Top Destinations</button></li>
@@ -2451,7 +2451,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </ul>
           </div>
 
-          <div className="sih-footer-col">
+          <div className="footer-col">
             <h4>For Businesses & Local</h4>
             <ul>
               <li><button type="button" onClick={() => setPage('business')} style={{ color: '#ea580c', fontWeight: 700 }}>🏢 Partner Login / Portal</button></li>
@@ -2462,7 +2462,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
             </ul>
           </div>
 
-          <div className="sih-footer-col">
+          <div className="footer-col">
             <h4>Safety & Helplines</h4>
             <ul>
               <li><a href="tel:112" style={{ color: '#e11d48', fontWeight: 700, textDecoration: 'none' }}>🚨 National Emergency: 112</a></li>
@@ -2474,7 +2474,7 @@ function HomePage({ cities, city, _filteredCities, formatPrice, hiddenCityIds = 
           </div>
         </div>
 
-        <div className="sih-footer-bottom">
+        <div className="footer-bottom">
           <div>&copy; 2026 Yatra 66 (yatra66.in) • National Tourism Platform</div>
           <div>Bridging travelers and local businesses with 0% commission</div>
         </div>
@@ -5434,7 +5434,7 @@ function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpen
         text="Experience intelligent 6-step personalized itinerary planning, smart nearest-neighbor route distance minimization, live Leaflet waypoint mapping, and detailed expense calculations."
       />
 
-      <SihTripPlanner
+      <TripPlanner
         cities={cities}
         selectedCity={chosenCity}
         formatPrice={formatPrice}
@@ -5448,7 +5448,7 @@ function PlannerPage({ cities, city, formatPrice, handleAddMilestone, handleOpen
 function GemsPage({ cities, setPage, setSelectedId }) {
   return (
     <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <SihHiddenGems
+      <HiddenGems
         onPlanForCity={(cityName) => {
           const matched = (cities || []).find((c) => c.name.toLowerCase() === cityName.toLowerCase());
           if (matched) setSelectedId(matched.id);
@@ -5462,7 +5462,7 @@ function GemsPage({ cities, setPage, setSelectedId }) {
 function ExperiencesPage({ formatPrice, handleOpenBooking, onOpenEnquiry, setPage, setSelectedId }) {
   return (
     <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <SihExperiences
+      <Experiences
         onEnquire={onOpenEnquiry}
         onOpenBooking={handleOpenBooking}
         formatPrice={formatPrice}
@@ -5476,7 +5476,7 @@ function ExperiencesPage({ formatPrice, handleOpenBooking, onOpenEnquiry, setPag
 function MarketplacePage({ onOpenEnquiry, setPage }) {
   return (
     <section className="page" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <SihMarketplace onEnquire={onOpenEnquiry} setPage={setPage} />
+      <Marketplace onEnquire={onOpenEnquiry} setPage={setPage} />
     </section>
   );
 }

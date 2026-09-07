@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import SihRouteMap from './SihRouteMap';
+import RouteMap from './RouteMap';
 import OlaUberCabComparator from './OlaUberCabComparator';
 import {
   FIVE_CITIES_MVP,
@@ -7,7 +7,7 @@ import {
   optimizeRouteWaypoints,
   LOCAL_BUSINESSES_DATA,
   rebalanceTripBudget
-} from '../services/sihData';
+} from '../services/yatraData';
 
 const INTEREST_CHIPS = [
   { id: 'heritage', label: 'Forts & Palaces', icon: '🏛️' },
@@ -511,7 +511,7 @@ function getCityItineraryTemplate(cityName, allCities) {
   ];
 }
 
-export default function SihTripPlanner({
+export default function TripPlanner({
   cities = [],
   selectedCity = 'Jaipur',
   formatPrice = (p) => `₹${p.toLocaleString('en-IN')}`,
@@ -1211,7 +1211,7 @@ export default function SihTripPlanner({
   }, [budgetTier]);
 
   return (
-    <div className="sih-trip-planner-component">
+    <div className="trip-planner-component">
       {toastNotice && (
         <div className="global-toast">
           <span>🎉</span>
@@ -2354,7 +2354,7 @@ export default function SihTripPlanner({
               </div>
             )}
 
-            <SihRouteMap
+            <RouteMap
               waypoints={currentDayWaypoints}
               cityName={cityChoice}
               height="380px"

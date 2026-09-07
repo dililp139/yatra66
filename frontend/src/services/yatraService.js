@@ -10,7 +10,7 @@ import {
   LOCAL_BUSINESSES_DATA,
   TOURIST_EMERGENCY_DATA,
   TRANSLATIONS,
-  SIH_STATS,
+  PLATFORM_STATS,
   getHaversineDistanceKm,
   optimizeRouteWaypoints,
   calculateDetailedBudget,
@@ -18,7 +18,7 @@ import {
   getStoredBusinessEnquiries,
   registerLocalBusiness,
   getCustomLocalBusinesses
-} from './sihData.js';
+} from './yatraData.js';
 
 export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371.0;
@@ -3818,7 +3818,7 @@ export const yatraApi = {
   },
 
   // ============================================================================
-  // SMART INDIA HACKATHON (SIH) INTELLIGENT TOURISM SERVICE METHODS
+  // INTELLIGENT TOURISM SERVICE METHODS
   // ============================================================================
 
   getFiveCitiesMVP() {
@@ -3882,7 +3882,7 @@ export {
   LOCAL_BUSINESSES_DATA,
   TOURIST_EMERGENCY_DATA,
   TRANSLATIONS,
-  SIH_STATS,
+  PLATFORM_STATS,
   getHaversineDistanceKm,
   optimizeRouteWaypoints,
   calculateDetailedBudget,

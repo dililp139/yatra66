@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { LOCAL_BUSINESSES_DATA, registerLocalBusiness, getCustomLocalBusinesses, getStoredBusinessEnquiries } from '../services/sihData';
+import { LOCAL_BUSINESSES_DATA, registerLocalBusiness, getCustomLocalBusinesses, getStoredBusinessEnquiries } from '../services/yatraData';
 import yatraApi from '../services/yatraService';
-import SihRouteMap from './SihRouteMap';
+import RouteMap from './RouteMap';
 
 const POPULAR_CITIES = [
   'Jaipur', 'Agra', 'Varanasi', 'Goa', 'Manali', 'Udaipur', 'Kochi', 'Rishikesh',
@@ -26,7 +26,7 @@ const CATEGORIES = [
   { id: 'Culinary Walking Host', label: 'Food & Culinary', icon: '🍲' },
 ];
 
-export default function SihMarketplace({ onEnquire, setPage }) {
+export default function Marketplace({ onEnquire, setPage }) {
   const [activeTab, setActiveTab] = useState('browse');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map' // 'browse' | 'register' | 'enquiries'
   const [activeCategory, setActiveCategory] = useState('all');
@@ -233,7 +233,7 @@ export default function SihMarketplace({ onEnquire, setPage }) {
   };
 
   return (
-    <div className="sih-marketplace-section">
+    <div className="marketplace-section">
       {/* HEADER ROW */}
       <div className="section-header-row" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -509,7 +509,7 @@ export default function SihMarketplace({ onEnquire, setPage }) {
                   Switch to Grid View ➔
                 </button>
               </div>
-              <SihRouteMap
+              <RouteMap
                 waypoints={mapWaypoints}
                 cityName={filterCity === 'all' ? 'Jaipur' : filterCity}
                 height="460px"

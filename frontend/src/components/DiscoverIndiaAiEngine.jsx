@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { DESTINATION_OPPORTUNITY_DATA, HIDDEN_GEMS_DATA } from '../services/sihData';
+import { DESTINATION_OPPORTUNITY_DATA, HIDDEN_GEMS_DATA } from '../services/yatraData';
 
 export default function DiscoverIndiaAiEngine({ onSelectDestination, onPlanTrip }) {
   // Input State

@@ -1,5 +1,5 @@
 // ============================================================================
-// YATRA 66 — SMART INDIA HACKATHON (SIH) INTELLIGENT TOURISM DATASET
+// YATRA 66 — INTELLIGENT TOURISM DATASET
 // Solving: Tourist Discovery, Local Business Visibility & Destination Decongestion
 // ============================================================================
 
@@ -646,7 +646,7 @@ export const LOCAL_EXPERIENCES_DATA = [
 ];
 
 // ============================================================================
-// LOCAL TOURISM MARKETPLACE ("Support Local"): SIH Core Value
+// LOCAL TOURISM MARKETPLACE ("Support Local")
 // ============================================================================
 export const LOCAL_BUSINESSES_DATA = [
   {
@@ -1436,9 +1436,9 @@ export const TOURIST_EMERGENCY_DATA = {
 };
 
 // ============================================================================
-// SIH IMPACT METRICS & BENCHMARKS
+// PLATFORM IMPACT METRICS & BENCHMARKS
 // ============================================================================
-export const SIH_STATS = [
+export const PLATFORM_STATS = [
   { value: '24+', label: 'Heritage & Cultural Cities', icon: '🏛️' },
   { value: '0%', label: 'Commission on Local Stays', icon: '🤝' },
   { value: '42%', label: 'Average Travel Time Saved', icon: '⚡' },

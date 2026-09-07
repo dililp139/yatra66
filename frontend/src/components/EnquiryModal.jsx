@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { submitBusinessEnquiry } from '../services/sihData';
+import { submitBusinessEnquiry } from '../services/yatraData';
 
-export default function SihEnquiryModal({ business, onClose, onSuccess }) {
+export default function EnquiryModal({ business, onClose, onSuccess }) {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [date, setDate] = useState('');
@@ -156,7 +156,7 @@ export default function SihEnquiryModal({ business, onClose, onSuccess }) {
               />
             </label>
 
-            <div className="sih-enquiry-guarantee">
+            <div className="enquiry-guarantee">
               <span className="guarantee-icon">🛡️</span>
               <span><strong>Direct Booking Guarantee:</strong> Yatra 66 charges 0% commission. 100% of your payment goes directly to the local host.</span>
             </div>

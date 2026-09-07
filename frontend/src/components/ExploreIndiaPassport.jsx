@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { GAMIFICATION_DATA } from '../services/sihData';
+import { GAMIFICATION_DATA } from '../services/yatraData';
 
 export default function ExploreIndiaPassport({ isOpen, onClose, onPlanForState }) {
   const [visitedStates, setVisitedStates] = useState(() => {
@@ -109,7 +109,7 @@ export default function ExploreIndiaPassport({ isOpen, onClose, onPlanForState }
 
   return (
     <div
-      className="sih-modal-backdrop"
+      className="modal-backdrop"
       style={{
         position: 'fixed',
         inset: 0,

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { LOCAL_EXPERIENCES_DATA } from '../services/sihData';
+import { LOCAL_EXPERIENCES_DATA } from '../services/yatraData';
 
 const EXP_CATEGORIES = [
   { id: 'all', label: 'All Experiences', icon: '✨' },
@@ -11,7 +11,7 @@ const EXP_CATEGORIES = [
   { id: 'Nature & Agriculture', label: 'Spice Trails & Nature', icon: '🌿' },
 ];
 
-export default function SihExperiences({
+export default function Experiences({
   onEnquire,
   onOpenBooking,
   formatPrice = (p) => `₹${Number(p).toLocaleString('en-IN')}`,
@@ -48,7 +48,7 @@ export default function SihExperiences({
   }, [filterCity, filterCategory, searchQuery]);
 
   return (
-    <div className="sih-experiences-section" style={{ paddingBottom: '3rem' }}>
+    <div className="experiences-section" style={{ paddingBottom: '3rem' }}>
       {/* HEADER BANNER */}
       <div className="glass-panel" style={{ padding: '1.75rem', borderRadius: '18px', marginBottom: '1.75rem', borderLeft: '5px solid #ea580c' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>

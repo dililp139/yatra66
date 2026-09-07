@@ -4319,7 +4319,7 @@ body {
 }
 
 /* ============================================================================
-   SMART INDIA HACKATHON (SIH) WORLD-CLASS DESIGN SYSTEM ENHANCEMENTS
+   WORLD-CLASS DESIGN SYSTEM ENHANCEMENTS
    ============================================================================ */
 
 .safety-pill-btn {
@@ -4360,14 +4360,14 @@ body {
   color: var(--primary) !important;
 }
 
-.sih-quick-actions-grid {
+.quick-actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.25rem;
   margin: 2rem 0;
 }
 
-.sih-action-card {
+.action-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -4382,7 +4382,7 @@ body {
   overflow: hidden;
 }
 
-.sih-action-card::before {
+.action-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -4394,23 +4394,23 @@ body {
   transition: opacity 0.25s ease;
 }
 
-.sih-action-card:hover {
+.action-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary);
 }
 
-.sih-action-card:hover::before {
+.action-card:hover::before {
   opacity: 1;
 }
 
-.sih-action-icon {
+.action-icon {
   font-size: 2rem;
   margin-bottom: 0.75rem;
   display: inline-block;
 }
 
-.sih-action-title {
+.action-title {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--text-main);
@@ -4420,7 +4420,7 @@ body {
   justify-content: space-between;
 }
 
-.sih-action-desc {
+.action-desc {
   font-size: 0.825rem;
   color: var(--text-muted);
   line-height: 1.45;
@@ -4428,18 +4428,18 @@ body {
 }
 
 /* 5-CITY PREMIER MVP SPOTLIGHT */
-.sih-mvp-section {
+.mvp-section {
   margin: 3.5rem 0 2.5rem;
 }
 
-.sih-mvp-grid {
+.mvp-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
 
-.sih-mvp-card {
+.mvp-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 18px;
@@ -4450,29 +4450,29 @@ body {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
-.sih-mvp-card:hover {
+.mvp-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
 }
 
-.sih-mvp-img-wrap {
+.mvp-img-wrap {
   position: relative;
   height: 200px;
   overflow: hidden;
 }
 
-.sih-mvp-img-wrap img {
+.mvp-img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
 }
 
-.sih-mvp-card:hover .sih-mvp-img-wrap img {
+.mvp-card:hover .mvp-img-wrap img {
   transform: scale(1.05);
 }
 
-.sih-mvp-content {
+.mvp-content {
   padding: 1.35rem;
   display: flex;
   flex-direction: column;
@@ -4480,7 +4480,7 @@ body {
 }
 
 /* WHY YATRA 66 COMPARISON SECTION */
-.sih-why-section {
+.why-section {
   margin: 4rem 0 3rem;
   padding: 2.5rem;
   border-radius: 24px;
@@ -4489,14 +4489,14 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-.sih-why-grid {
+.why-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
 
-.sih-why-card {
+.why-card {
   background: var(--bg-surface-elevated, #f8fafc);
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -4505,33 +4505,33 @@ body {
   flex-direction: column;
 }
 
-.sih-why-icon {
+.why-icon {
   font-size: 2.25rem;
   margin-bottom: 0.75rem;
 }
 
-.sih-why-title {
+.why-title {
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-main);
   margin-bottom: 0.5rem;
 }
 
-.sih-why-text {
+.why-text {
   font-size: 0.875rem;
   color: var(--text-muted);
   line-height: 1.55;
 }
 
 /* FOOTER */
-.sih-startup-footer {
+.startup-footer {
   margin-top: 5rem;
   background: var(--bg-surface);
   border-top: 1px solid var(--border-color);
   padding: 3.5rem 1.5rem 2rem;
 }
 
-.sih-footer-inner {
+.footer-inner {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
@@ -4539,7 +4539,7 @@ body {
   gap: 2.5rem;
 }
 
-.sih-footer-brand h3 {
+.footer-brand h3 {
   font-size: 1.4rem;
   margin: 0 0 0.5rem;
   color: var(--text-main);
@@ -4548,14 +4548,14 @@ body {
   gap: 8px;
 }
 
-.sih-footer-brand p {
+.footer-brand p {
   font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.55;
   margin: 0 0 1rem;
 }
 
-.sih-footer-col h4 {
+.footer-col h4 {
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-main);
@@ -4564,7 +4564,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-.sih-footer-col ul {
+.footer-col ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -4573,7 +4573,7 @@ body {
   gap: 0.5rem;
 }
 
-.sih-footer-col button {
+.footer-col button {
   background: none;
   border: none;
   color: var(--text-muted);
@@ -4584,11 +4584,11 @@ body {
   transition: color 0.2s ease;
 }
 
-.sih-footer-col button:hover {
+.footer-col button:hover {
   color: var(--primary);
 }
 
-.sih-footer-bottom {
+.footer-bottom {
   max-width: 1200px;
   margin: 2.5rem auto 0;
   padding-top: 1.5rem;
@@ -4603,16 +4603,16 @@ body {
 }
 
 @media (max-width: 992px) {
-  .sih-footer-inner {
+  .footer-inner {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .sih-footer-inner {
+  .footer-inner {
     grid-template-columns: 1fr;
   }
-  .sih-why-section {
+  .why-section {
     padding: 1.5rem;
   }
 }
@@ -6243,8 +6243,6 @@ button:not([class]):active {
 }
 
 /* Footer links button styling */
-.sih-footer-col ul button,
-.sih-footer-col li button,
 footer button,
 .footer-col button,
 .footer-links button {
@@ -6260,8 +6258,6 @@ footer button,
   transition: color 0.15s ease, transform 0.15s ease;
 }
 
-.sih-footer-col ul button:hover,
-.sih-footer-col li button:hover,
 footer button:hover,
 .footer-col button:hover,
 .footer-links button:hover {
@@ -6323,8 +6319,8 @@ footer button:hover,
 .theme-dark .hotel-card,
 .theme-dark .fact-item,
 .theme-dark .metric-box,
-.theme-dark .sih-action-card,
-.theme-dark .sih-why-card {
+.theme-dark .action-card,
+.theme-dark .why-card {
   background: #0e1424 !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
@@ -6400,15 +6396,15 @@ footer button:hover,
   border-color: #0f766e !important;
 }
 
-.theme-dark .sih-modal-content {
+.theme-dark .modal-content {
   background: #0e1424 !important;
   color: #f8fafc !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
-.theme-dark .sih-modal-content h2,
-.theme-dark .sih-modal-content h3,
-.theme-dark .sih-modal-content strong {
+.theme-dark .modal-content h2,
+.theme-dark .modal-content h3,
+.theme-dark .modal-content strong {
   color: #f8fafc !important;
 }
 
@@ -7012,7 +7008,7 @@ body {
 
 
 /* ==========================================================================
-   AI TRIP PLANNER: ANIMATED SEARCH & LIVE SUGGESTIONS (SIH INNOVATION)
+   AI TRIP PLANNER: ANIMATED SEARCH & LIVE SUGGESTIONS
    ========================================================================== */
 .planner-search-container {
   position: relative;
@@ -7320,7 +7316,7 @@ img {
 
   /* Touch-friendly horizontal swiping for pills */
   .quick-explore-pills,
-  .sih-quick-actions-grid {
+  .quick-actions-grid {
     display: flex !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
@@ -7330,11 +7326,11 @@ img {
   }
 
   .quick-explore-pills::-webkit-scrollbar,
-  .sih-quick-actions-grid::-webkit-scrollbar {
+  .quick-actions-grid::-webkit-scrollbar {
     display: none;
   }
 
-  .sih-action-card {
+  .action-card {
     flex: 0 0 200px !important;
     min-width: 200px !important;
   }
@@ -7369,8 +7365,7 @@ img {
 
   /* Modals Responsive on Phone Screens */
   .auth-modal-window,
-  .modal-content,
-  .sih-modal-content {
+  .modal-content {
     width: 95vw !important;
     max-width: 95vw !important;
     padding: 1.25rem !important;
@@ -8534,7 +8529,7 @@ img {
   font-weight: 700 !important;
 }
 
-.editorial-hero-banner .sih-action-card {
+.editorial-hero-banner .action-card {
   background: rgba(15, 23, 42, 0.68) !important;
   backdrop-filter: blur(16px) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -8543,18 +8538,18 @@ img {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.editorial-hero-banner .sih-action-card:hover {
+.editorial-hero-banner .action-card:hover {
   background: rgba(15, 23, 42, 0.88) !important;
   border-color: rgba(245, 158, 11, 0.5) !important;
   transform: translateY(-3px) !important;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45) !important;
 }
 
-.editorial-hero-banner .sih-action-title {
+.editorial-hero-banner .action-title {
   color: #ffffff !important;
 }
 
-.editorial-hero-banner .sih-action-desc {
+.editorial-hero-banner .action-desc {
   color: rgba(255, 255, 255, 0.78) !important;
 }
 

@@ -595,8 +595,8 @@ export default function RentalServices({
 
       {/* Enquiry Success Modal */}
       {enquirySuccessModal && (
-        <div className="sih-modal-backdrop" onClick={() => setEnquirySuccessModal(null)}>
-          <div className="sih-modal-content animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+        <div className="modal-backdrop" onClick={() => setEnquirySuccessModal(null)}>
+          <div className="modal-content animate-scale-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
             <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
               <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📞</div>
               <h3 style={{ margin: '0 0 0.25rem', color: 'var(--text-main)' }}>Direct Contact Confirmed!</h3>

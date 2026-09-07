@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import TourismBusinessDashboard from './TourismBusinessDashboard';
-import { getStoredBusinessEnquiries, registerLocalBusiness } from '../services/sihData';
+import { getStoredBusinessEnquiries, registerLocalBusiness } from '../services/yatraData';
 
 // Known demo partner credentials (used for password validation and profile lookups)
 const REGISTERED_PARTNERS = [

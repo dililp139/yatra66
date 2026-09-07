@@ -1,8 +1,8 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-export default function SihRouteMap({
+export default function RouteMap({
   waypoints = [],
   polylineCoords = [],
   cityName = 'Jaipur',
@@ -70,7 +70,7 @@ export default function SihRouteMap({
       `;
 
       const markerIcon = L.divIcon({
-        className: 'sih-route-marker',
+        className: 'route-marker',
         html: customHtml,
         iconSize: [32, 32],
         iconAnchor: [16, 16],
@@ -124,7 +124,7 @@ export default function SihRouteMap({
   }, []);
 
   return (
-    <div className="sih-route-map-wrapper" style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
+    <div className="route-map-wrapper" style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
       <div
         ref={mapContainerRef}
         style={{

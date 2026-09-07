@@ -3,9 +3,9 @@ import {
   HIDDEN_GEMS_DATA,
   DESTINATION_OPPORTUNITY_DATA,
   CROWD_DECONGESTION_DATA,
-} from '../services/sihData';
+} from '../services/yatraData';
 
-export default function SihHiddenGems({ onPlanForCity }) {
+export default function HiddenGems({ onPlanForCity }) {
   const [activeTab, setActiveTab] = useState('gems'); // 'gems' | 'boost' | 'crowd'
   const [filterCity, setFilterCity] = useState('all');
   const [activeTheme, setActiveTheme] = useState('all');
@@ -32,7 +32,7 @@ export default function SihHiddenGems({ onPlanForCity }) {
   }, [selectedCongestionCity]);
 
   return (
-    <div className="sih-hidden-gems-section">
+    <div className="hidden-gems-section">
       {/* SECTION BANNER */}
       <div className="section-header-row" style={{ marginBottom: '1.5rem' }}>
         <div>
