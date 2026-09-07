@@ -326,6 +326,25 @@ export async function getUserByEmail(db, email) {
   return formatUser(row);
 }
 
+export async function getAuthDbStatus(db) {
+  try {
+    const row = await db.prepare('SELECT COUNT(*) as count FROM users').first();
+    return {
+      connected: true,
+      database: 'Cloudflare D1 (yatra-db)',
+      totalUsers: row?.count || 0,
+      timestamp: new Date().toISOString()
+    };
+  } catch (err) {
+    return {
+      connected: false,
+      database: 'Cloudflare D1 (yatra-db)',
+      error: err.message,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
 export async function verifyUserLogin(db, email, password) {
   if (!email || !email.trim()) {
     return { success: false, error: 'Email address is required' };
@@ -334,16 +353,20 @@ export async function verifyUserLogin(db, email, password) {
 
   const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = ?').bind(cleanEmail);
   const row = await stmt.first();
-  if (!row) {
-    return { success: false, error: 'No account found with this email. Please click Create Account.' };
-  }
 
-  // If user account was created via Google without password
-  if (row.auth_provider === 'google' && !row.password) {
-    return {
-      success: false,
-      error: 'This account was created with Google. Please click "Continue with Google" below.'
-    };
+  // If user does not exist yet: AUTOMATICALLY CREATE AND PERSIST IN CLOUDFLARE D1!
+  if (!row) {
+    if (!password || !password.trim()) {
+      return { success: false, error: 'Password is required to sign in.' };
+    }
+    const cleanName = cleanEmail.split('@')[0];
+    const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    await db.prepare(`
+      INSERT INTO users (email, name, password, auth_provider, city, interest, last_login_at)
+      VALUES (?, ?, ?, 'email', 'Jaipur', 'Heritage', CURRENT_TIMESTAMP)
+    `).bind(cleanEmail, formattedName, password).run();
+    const newUser = await getUserByEmail(db, cleanEmail);
+    return { success: true, user: newUser, isNewAccount: true };
   }
 
   // Password is required
@@ -351,18 +374,21 @@ export async function verifyUserLogin(db, email, password) {
     return { success: false, error: 'Password is required to sign in.' };
   }
 
+  // If user account was created without a password or via Google, update and set password now
+  if (!row.password) {
+    await db.prepare('UPDATE users SET password = ?, last_login_at = CURRENT_TIMESTAMP WHERE id = ?').bind(password, row.id).run();
+    const updated = await getUserByEmail(db, cleanEmail);
+    return { success: true, user: updated };
+  }
+
   // If account has password, it MUST match
-  if (row.password) {
-    if (row.password !== password) {
-      return { success: false, error: 'Incorrect password. Please verify your password and try again.' };
-    }
-  } else {
-    // If account was created without a password, set their password now
-    await db.prepare('UPDATE users SET password = ? WHERE id = ?').bind(password, row.id).run();
+  if (row.password !== password) {
+    return { success: false, error: 'Incorrect password for this account. Please verify your password and try again.' };
   }
 
   await db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').bind(row.id).run();
-  return { success: true, user: formatUser(row) };
+  const updated = await getUserByEmail(db, cleanEmail);
+  return { success: true, user: updated };
 }
 
 export async function saveGoogleUser(db, { email, name, avatarUrl = null, city = 'Jaipur', interest = 'Heritage' } = {}) {

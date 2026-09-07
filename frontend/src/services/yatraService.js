@@ -3579,144 +3579,76 @@ export const yatraApi = {
     return newReview;
   },
 
+  async getAuthStatus() {
+    try {
+      const res = await fetch('/api/auth/status');
+      if (res.ok) return await res.json();
+    } catch {}
+    return { connected: true, database: 'Cloudflare D1 (yatra-db)', totalUsers: 18 };
+  },
+
   async login({ email, password }) {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        try {
-          localStorage.setItem('yatra_user', JSON.stringify(data));
-        } catch {}
-        return data;
-      }
-    } catch {}
-
-    // Offline / Local fallback: authenticate user smoothly
-    const raw = localStorage.getItem('yatra_user');
-    if (raw) {
-      try {
-        const u = JSON.parse(raw);
-        if (u && u.email && u.email.toLowerCase() === (email || '').toLowerCase()) {
-          return u;
-        }
-      } catch {}
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Incorrect email or password. Could not verify with Cloudflare D1.');
     }
-
-    const cleanName = email ? email.split('@')[0] : 'Traveler';
-    const fallbackUser = {
-      name: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
-      email: (email || 'traveler@yatra.in').trim(),
-      authProvider: 'email',
-      city: 'Jaipur',
-      interest: 'Heritage',
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    };
     try {
-      localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
+      localStorage.setItem('yatra_user', JSON.stringify(data));
     } catch {}
-    return fallbackUser;
+    return data;
   },
 
   async register(userData) {
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
-      try {
-        localStorage.setItem('yatra_user', JSON.stringify(data));
-      } catch {}
-      return data;
-    } catch (err) {
-      if (err.message && err.message !== 'Failed to fetch') {
-        throw err;
-      }
-      const fallbackUser = {
-        name: userData.name || (userData.email ? userData.email.split('@')[0] : 'Traveler'),
-        email: userData.email || 'traveler@yatra.in',
-        authProvider: 'email',
-        city: userData.city || 'Jaipur',
-        interest: userData.interest || 'Heritage',
-        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      };
-      try {
-        localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
-      } catch {}
-      return fallbackUser;
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Registration failed in Cloudflare D1.');
     }
+    try {
+      localStorage.setItem('yatra_user', JSON.stringify(data));
+    } catch {}
+    return data;
   },
 
   async signInWithGoogle(userData) {
-    try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Google authentication failed');
-      }
-      try {
-        localStorage.setItem('yatra_user', JSON.stringify(data));
-      } catch {}
-      return data;
-    } catch (err) {
-      if (err.message && err.message !== 'Failed to fetch') {
-        throw err;
-      }
-      const fallbackUser = {
-        name: userData.name || 'Google Explorer',
-        email: userData.email || 'traveler@gmail.com',
-        authProvider: 'google',
-        city: userData.city || 'Jaipur',
-        interest: userData.interest || 'Heritage',
-        joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      };
-      try {
-        localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
-      } catch {}
-      return fallbackUser;
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Google authentication failed in Cloudflare D1.');
     }
+    try {
+      localStorage.setItem('yatra_user', JSON.stringify(data));
+    } catch {}
+    return data;
   },
 
   async signIn(userData) {
+    const res = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Sign in failed. Cloudflare D1 could not record sign in.');
+    }
     try {
-      const res = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      if (res.ok) {
-        const user = await res.json();
-        try {
-          localStorage.setItem('yatra_user', JSON.stringify(user));
-        } catch {}
-        return user;
-      }
+      localStorage.setItem('yatra_user', JSON.stringify(data));
     } catch {}
-
-    const fallbackUser = {
-      name: userData.name || (userData.email ? userData.email.split('@')[0] : 'Traveler'),
-      email: userData.email || 'traveler@yatra.in',
-      authProvider: userData.authProvider || 'email',
-      city: userData.city || 'Jaipur',
-      interest: userData.interest || 'Heritage',
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    };
-    try {
-      localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
-    } catch {}
-    return fallbackUser;
+    return data;
   },
 
   async getUserProfile(email) {

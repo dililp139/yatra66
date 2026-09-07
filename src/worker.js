@@ -233,6 +233,12 @@ export default {
         }
 
         // --- AUTH & SIGN-IN API ---
+        // GET /api/auth/status
+        if (pathname === '/api/auth/status' && method === 'GET') {
+          const stats = await db.getAuthDbStatus(env.DB);
+          return jsonResponse(stats);
+        }
+
         // POST /api/auth/login
         if (pathname === '/api/auth/login' && method === 'POST') {
           const body = await request.json();

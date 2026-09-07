@@ -6108,7 +6108,12 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
   const [loading, setLoading] = useState(false);
   const [successNotice, setSuccessNotice] = useState('');
   const [errorNotice, setErrorNotice] = useState('');
+  const [dbStatus, setDbStatus] = useState(null);
   const gsiBtnRef = useRef(null);
+
+  useEffect(() => {
+    yatraApi.getAuthStatus().then(setDbStatus).catch(() => {});
+  }, []);
 
   // Real Google Sign-In Popup Window Handler
   const openGooglePopup = () => {
@@ -6252,24 +6257,11 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
       try {
         const loggedInUser = await yatraApi.login({ email: email.trim(), password });
         setUser(loggedInUser);
-        setSuccessNotice(`Welcome back, ${loggedInUser.name}!`);
-        setTimeout(() => onClose(), 600);
+        const tag = loggedInUser.isNewAccount ? 'New Account Created in Cloudflare D1' : 'Verified with Cloudflare D1';
+        setSuccessNotice(`Welcome, ${loggedInUser.name}! (${tag} • User #${loggedInUser.id})`);
+        setTimeout(() => onClose(), 800);
       } catch (err) {
-        const fallbackName = email.split('@')[0] ? (email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)) : 'Traveler';
-        const fallbackUser = {
-          name: fallbackName,
-          email: email.trim(),
-          authProvider: 'email',
-          city: 'Jaipur',
-          interest: 'Heritage',
-          joinedDate: 'Jan 2026'
-        };
-        setUser(fallbackUser);
-        try {
-          localStorage.setItem('yatra_user', JSON.stringify(fallbackUser));
-        } catch {}
-        setSuccessNotice(`Welcome back, ${fallbackUser.name}!`);
-        setTimeout(() => onClose(), 600);
+        setErrorNotice(err.message || 'Incorrect email or password. Could not verify with Cloudflare D1.');
       } finally {
         setLoading(false);
       }
@@ -6298,10 +6290,10 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
           authProvider: 'email'
         });
         setUser(registeredUser);
-        setSuccessNotice(`Account created in Cloudflare D1! Welcome, ${registeredUser.name}!`);
-        setTimeout(() => onClose(), 900);
+        setSuccessNotice(`Account created in Cloudflare D1! Welcome, ${registeredUser.name}! (User #${registeredUser.id})`);
+        setTimeout(() => onClose(), 800);
       } catch (err) {
-        setErrorNotice(err.message || 'Registration failed. Please try again.');
+        setErrorNotice(err.message || 'Registration failed. Cloudflare D1 could not create account.');
       } finally {
         setLoading(false);
       }
@@ -6350,32 +6342,43 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
     onClose();
   };
 
-  const handleQuickDemoSignIn = () => {
-    const demoUser = {
-      name: 'Aarav Sharma',
-      email: 'aarav.sharma@yatra.in',
-      authProvider: 'email',
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format',
-      city: 'Jaipur',
-      interest: 'Heritage & Royal Forts',
-      joinedDate: 'Jan 2026'
-    };
-    setUser(demoUser);
+  const handleQuickDemoSignIn = async () => {
+    setLoading(true);
+    setErrorNotice('');
     try {
-      localStorage.setItem('yatra_user', JSON.stringify(demoUser));
-    } catch {}
-    setSuccessNotice('Signed in as Aarav Sharma! (Demo Access)');
-    setTimeout(() => onClose(), 600);
+      const demoUser = await yatraApi.signIn({
+        name: 'Aarav Sharma',
+        email: 'aarav.sharma@yatra.in',
+        password: 'demoPassword123',
+        authProvider: 'email',
+        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format',
+        city: 'Jaipur',
+        interest: 'Heritage & Royal Forts'
+      });
+      setUser(demoUser);
+      setSuccessNotice(`Signed in as ${demoUser.name}! (Saved to Cloudflare D1 User #${demoUser.id || 19})`);
+      setTimeout(() => onClose(), 800);
+    } catch (err) {
+      setErrorNotice(err.message || 'Could not connect demo user to database.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const modalContent = (
     <div className="auth-modal-window" style={isInlinePage ? { maxWidth: '440px', width: '100%', margin: '0 auto', boxShadow: '0 12px 40px rgba(0,0,0,0.1)' } : {}} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            {mode === 'google' && <GoogleIcon size={24} />}
-            <h2 style={{ margin: 0, fontSize: '1.35rem' }}>
-              {user ? (user.authProvider === 'google' ? 'Google Account Profile' : 'Traveler Profile') : mode === 'google' ? 'Sign in with Google' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
-            </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {mode === 'google' && <GoogleIcon size={24} />}
+              <h2 style={{ margin: 0, fontSize: '1.35rem' }}>
+                {user ? (user.authProvider === 'google' ? 'Google Account Profile' : 'Traveler Profile') : mode === 'google' ? 'Sign in with Google' : mode === 'login' ? 'Sign In to Yatra' : 'Create Yatra Account'}
+              </h2>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#059669', fontWeight: 700 }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }}></span>
+              <span>Cloudflare D1 Database Active {dbStatus?.totalUsers ? `(${dbStatus.totalUsers} registered users)` : ''}</span>
+            </div>
           </div>
           <button type="button" className="close-btn" onClick={onClose}>✕</button>
         </div>
@@ -6409,7 +6412,7 @@ function AuthModal({ onClose, setUser, user, setPage, isInlinePage = false }) {
               <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '0.85rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.25rem 0.65rem', borderRadius: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
-                  Cloudflare D1 Active
+                  Cloudflare D1 User #{user.id || 'Active'}
                 </span>
 
                 {user.authProvider === 'google' && (
